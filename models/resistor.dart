@@ -90,21 +90,33 @@ class ResistorModel extends SparkModel {
     
     // define the conductor patches
     for (int i=0; i<worldWidth; i++) {
-      Patch patch;
+      //Patch patch;
       int px = i + minPatchX;
       int py = -1 * diameter;
       
       // define the lead wire
-      if (i < start - 1 || i > (worldWidth - 3)) { 
+      if (i > (worldWidth - 3)) { 
         for (int j = -2; j < diameter + 2; j++) {
-          setupConductorPatch(px, py + j, -90.0, "bottom");
+          setupConductorPatch(px, py + j, -90.0, "lead");
         }
-      }  
-      else if (i == start - 1) { 
+      } 
+      else if (i <= start - 1) { 
         for (int j = 0; j < diameter; j++) {
-          setupConductorPatch(px, py + j, -90.0, "bottom");
+          setupConductorPatch(px, py + j, -90.0, "lead");
         }
-      }    
+        if (i < start - 1) {
+          setupConductorPatch(px, py - 2, 0.0, "up");
+          setupConductorPatch(px, py - 1, 0.0, "up");
+          setupConductorPatch(px, py + diameter, 180.0, "down");
+          setupConductorPatch(px, py + diameter + 1, 180.0, "down");          
+        }
+      } 
+      
+//      else if (i == start - 1) { 
+//        for (int j = 0; j < diameter; j++) {
+//          setupConductorPatch(px, py + j, -90.0, "lead");
+//        }
+//      }    
         
       // define the up wires and part of top wire
       else if ((i - start) % period >= 0 && (i - start) % period < diameter) {

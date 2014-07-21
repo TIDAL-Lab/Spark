@@ -45,8 +45,9 @@ class Electron extends Turtle {
     Ion i = ionHere();
     if (i == null) { /* no collision, continue */
       Patch p = model.patchAt(x, y);
-      vx += p.forceX;
-      vy += p.forceY;
+      // v(t+1) = v(t) + a, but don't exceed a maximum value for speed.
+      if (vx < sparkModel.voltage * 20) vx += p.forceX;
+      if (vy < sparkModel.voltage * 20) vy += p.forceY;
     }
     else { /* if collision occurs */
       i.energy += sparkModel.incE;
@@ -90,8 +91,8 @@ class Electron extends Turtle {
     for (Ion i in (model as SparkModel).ions) {
         num dist = (i.x - x) * (i.x - x) + (i.y - y) * (i.y - y);
         num r = (i.size / 2) + (size / 2);
-        //r += size / 2; // to repulse before touching the ion
-        if (dist <= r * r) {
+        //r += i.size / 2; // to repulse before touching the ion
+        if ( dist <= r * r) {
           return i;
         }
     }

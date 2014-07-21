@@ -22,6 +22,9 @@ part of Spark;
 /**
  * SparkModel extends the Model class in NetTango 
  * which specifies properties for the electrical conduction model
+ * 
+ * voltage (v input * 10) is transformed to forceX and forceY for each conductor patch,
+ * which specifies the force and accelaration on each electron in the conductor.
  */
 abstract class SparkModel extends Model { 
   
@@ -72,7 +75,27 @@ abstract class SparkModel extends Model {
     patch.forceX = this.voltage * cos ( heading + PI / 2 );
     patch.forceY = this.voltage * sin ( heading + PI / 2 );
     patch.color.setColor(212, 212, 212, 50);
+/*    
+    //test the patches with different colors
     
+    switch (patch.region) {
+      case 'up':
+        patch.color.setColor(0, 0, 212, 50);
+        break;
+      case 'top':
+        patch.color.setColor(0, 212, 0, 50);
+        break;
+      case 'down':
+        patch.color.setColor(212, 212, 0, 50);
+        break;
+      case 'bottom':
+        patch.color.setColor(212, 212, 212, 50);
+        break;
+      case 'lead':
+        patch.color.setColor(0, 212, 212, 50);
+        break;
+    }
+*/    
     // sprout electrons 
     for (int i=0; i < 2; i++) {
       if (Model.rnd.nextDouble() > 0.7) {

@@ -40,7 +40,7 @@ class Ion extends Turtle {
   void draw(CanvasRenderingContext2D ctx) {
     int c = (energy * 1000).toInt();
     //ctx.fillStyle = "rgba($c, 50, 50, 255)";
-    ctx.fillStyle = "rgba(255, 50, 50, 255)";
+    ctx.fillStyle = "rgba(125, 50, 50, 255)";
     ctx.beginPath();
     ctx.arc(0, 0, size / 2, 0, PI * 2, true);
     ctx.fill();
