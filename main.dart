@@ -70,9 +70,7 @@ void initiate() {
   InputElement slider = document.querySelector("#generic-slider");
   if (slider != null) {
     slider.onTouchMove.listen((e) => genericSliderTouch(e));
-    //slider.onMouseMove.listen((e) => genericSliderTouch(e));
     slider.onTouchEnd.listen((e) => genericChangeValue(double.parse(slider.value)));
-    //slider.onMouseUp..listen((e) => genericChangeValue(double.parse(slider.value)));
   }
 }
 

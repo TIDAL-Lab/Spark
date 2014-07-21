@@ -133,15 +133,11 @@ class Circuit {
          'frameID': c.ARTag,
          'resistance': c.resistance.toString(),
          'current': c.current.toString(),
-         'voltageDrop': c.voltageDrop.toString(),
-         'start.x': c.start.x.toString(),
-         'start.y': c.start.y.toString(),
-         'end.x': c.end.x.toString(),
-         'end.y': c.end.y.toString(),         
+         'voltageDrop': c.voltageDrop.toString()
         };
         obj.add(s);
     }
-    print(JSON.encode(obj));
+    //print(JSON.encode(obj));
     sendJSONData(JSON.encode(obj));
   }
 /* ------------------------

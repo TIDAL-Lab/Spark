@@ -43,7 +43,7 @@ class Toolbar {
     if (button != null) {
       CssRect rect = button.borderEdge;
       button.onMouseDown.listen((evt) => createComponent(rect, "Battery"));
-      //button.onTouchStart.listen((evt) => createComponent(rect, "Battery"));
+      button.onTouchStart.listen((evt) => createComponent(rect, "Battery"));
       
     }
   
@@ -51,21 +51,21 @@ class Toolbar {
     if (button != null) {
       CssRect rect = button.borderEdge;
       button.onMouseDown.listen((evt) => createComponent(rect, "Wire"));
-      //button.onTouchStart.listen((evt) => createComponent(rect, "Wire"));
+      button.onTouchStart.listen((evt) => createComponent(rect, "Wire"));
     }
     
     button = document.querySelector("$id #resistor-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
       button.onMouseDown.listen((evt) => createComponent(rect, "Resistor"));
-      //button.onTouchStart.listen((evt) => createComponent(rect, "Resistor"));
+      button.onTouchStart.listen((evt) => createComponent(rect, "Resistor"));
     }
     
     button = document.querySelector("$id #bulb-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
       button.onMouseDown.listen((evt) => createComponent(rect, "Bulb"));
-      //button.onTouchStart.listen((evt) => createComponent(rect, "Bulb"));
+      button.onTouchStart.listen((evt) => createComponent(rect, "Bulb"));
     }
       
     button = document.querySelector("$id #reset-button");
