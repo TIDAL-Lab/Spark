@@ -46,65 +46,7 @@ var FSHADER_SOURCE =
   
   '} \n';
 
-//var numComps;
-//var Circuit = [];
 
-
-
-    /*for (var i = 0; i < objIDlist.length; i++) {
-      var self = 0;
-      var compType, current, compRes, compVolt, startx, starty, endx, endy, direction;
-      query.equalTo("objectId", objIDlist[i]);
-      var promise0 = query.first();
-      var promise1 = promise0.then(
-        function(result) {
-          console.log("lookupXByID.promise0.success");
-          if (typeof result === "undefined") {
-            return utilMod.promiseerror(100004, "no matching X ID");
-          }
-          else {
-            compType = result.get("type");
-            compVolt = result.get("voltageDrop");
-            current = result.get("current");
-            compRes = result.get("resistance");
-            startx = result.get("startX");
-            starty = result.get("startY");
-            endx = result.get("endX");
-            endy = result.get("endY");
-            direction = result.get("wallType");
-
-            console.log('compType:', compType);
-            console.log('voltageDrop:', compVolt);
-            console.log('current:', current);
-            console.log('resistance:', compRes);
-            Circuit[i] = new CircuitComponent(compType, current, compRes, compVolt, startx, starty, endx, endy, direction);
-            for (var j = 0; j < i; j++){
-                console.log(" Component Type[" + j + "] = " + Circuit[j].compType);
-                console.log(" Current[" + j + "] = "+ Circuit[j].curr);
-                console.log(" Resistance [" + j + "] = "+ Circuit[j].resistance);
-                console.log(" Voltage[" + j + "] = " + Circuit[j].voltage);
-                console.log(" Endp1[" + j + "] = " + Circuit[j].endp1 );
-                console.log(" Endp2[" + j + "] = " + Circuit[j].endp2 );
-                console.log(" innerwall [" + j + "] = " +Circuit[j].innerwall);
-
-            }
-
-            calcResistance(Circuit);
-            main(Circuit);
-            return result;
-          }
-        });
-      console.log("lookupXbyID.exit");
-
-    }
-
-
-    console.log('check to see if Circuit array got filled:');
-    for (var i = 0; i < Circuit.length; i++) {
-      console.log("Element", i, ":", Circuit[i]);
-    }
-
-}*/
 
 
 
@@ -142,7 +84,7 @@ function Constraint (type, size, xloc, yloc, zloc, height, endptArray1, endptArr
 
 
 
-  var DRAG_CONST = 0.975;
+  var DRAG_CONST = 0.99;
   //var VOLTAGE = 100.0;
 
 
@@ -173,12 +115,41 @@ const P_CRED = 11;
 const P_CGRN = 12;
 const P_CBLU = 13;
 const P_TPRT = 14;
+const P_WALL = 15; // The wall the prticle initializes in
+//const P_
 
+function reset(Circuit){
+    currentConst = 10; // multiplied with calculated current to create "realistic" looking flows
+    IonNumConst = 10; // multiplied with calculated number of ions in circuit component so wires aren't empty
+    PartEleCount = 16; // number of fields per particle in the state array
+    numIons = 200; // total number of ions in circuit
+    numWalls = 0;// = numComps*2;
+    circWidth = 0.2 // globally defined circuit width
+    f = [ ];// = new Array(numComps); // array used to hold forces
+    numParticles = 50;//200; // number of electrons
+    ionSize = 10; // size of each ion
+    g_EyeRadius = 4.0, g_EyeZrot = 50.0, g_EyeXrot = 90; // vars used for camera perspective
+    isPart = true; // T/F value used to tell the shader if rendering particles or other shapes (lines, triangles)
+    circOn = 1, dragOn = 1;
+    Solver = 0; // 0 for Euler
+    WallsOn = 1;  
+    FSIZE = s.BYTES_PER_ELEMENT;
+    timeStep = 1.0/30.0;
+    g_last = Date.now();
+    RenderMode = 0; // 0 -> circuit, 1-> unstable spring/mass, 2-> stable spring/mass, 3-> fire, 4-> boids, 5 -> atom
+    numComps = Circuit.length;
 
+    s = new Float32Array(numParticles*PartEleCount);
+
+    resistanceTotal = 0;
+    constraints = [ ];
+    current = 0;
+    circWalls = new Float32Array(12*numComps*PartEleCount);
+}
 
 var currentConst = 10; // multiplied with calculated current to create "realistic" looking flows
 var IonNumConst = 10; // multiplied with calculated number of ions in circuit component so wires aren't empty
-var PartEleCount = 15; // number of fields per particle in the state array
+var PartEleCount = 16; // number of fields per particle in the state array
 var numIons = 200; // total number of ions in circuit
 var numWalls;// = numComps*2;
 var circWidth = 0.2 // globally defined circuit width
@@ -189,36 +160,9 @@ var g_EyeRadius = 4.0, g_EyeZrot = 50.0, g_EyeXrot = 90; // vars used for camera
 var isPart = true; // T/F value used to tell the shader if rendering particles or other shapes (lines, triangles)
 var circOn = 1, dragOn = 1;
 var Solver = 0; // 0 for Euler
-var WallsOn = 0;
+var WallsOn = 1;
 
 
-/*
-// left wall 
-Circuit[0] = new CircuitComponent("Wire", // type 
-                                  1.0, // resistance
-                                  1.0, // voltage
-                                  -2, // startx
-                                  -2, // start y
-                                  -2, // end x
-                                  2, // end y
-                                  0); // inner wall on right side
-// top wall
-Circuit[1] = new CircuitComponent("Bulb", 1.0, 1.0, -2, 2, 2, 2, 3);
-// right wall
-Circuit[2] = new CircuitComponent("Resistor", 3.0, 1.0, 2, 2, 2, -2, 1);
-// bottom wall
-Circuit[3] = new CircuitComponent("Battery", 1.0, 1.0, 2, -2, -2, -2, 2); 
-*/
-
-//variables for camera lookat
-/*var centerx, centery, centerz = 0;
-for (n = 0; n < Circuit.length; n++) {
-  //console.log('endp1:', Circuit[n].voltage);
-  centerx += Circuit[n].endp1[0] + Circuit[n].endp2[0];
-  centery += Circuit[n].endp1[1] + Circuit[n].endp2[1];
-}
-centerx = centerx / (Circuit.length*2);
-centery = centery / (Circuit.length*2);*/
 
 var resistanceTotal = 0;
 var constraints;
@@ -229,10 +173,6 @@ function calcResistance(Circuit){
     console.log('res total:', resistanceTotal);
     resistanceTotal += parseFloat(Circuit[i].resistance);
   }
-/*  console.log('res, numions numwalls', " ",resistanceTotal," " ,IonNumConst, " ",numWalls);
-  constraints = new Array(Math.ceil(resistanceTotal*IonNumConst)+10*numComps+numWalls);
-  console.log('constraints length:', constraints.length);
-  current = Circuit[0].curr;*/
 
 }
 
@@ -256,7 +196,7 @@ function initParticles(Circuit) {
     s[offset+P_SIZE] = 4;
     if (circOn) {
       var randDist = Math.random();
-      s[offset+P_POSX] = Circuit[compStart].endp1[0] + randDist*(Circuit[compStart].endp2[0]-Circuit[compStart].endp1[0]); // +- [0.9 - 1.0]
+      s[offset+P_POSX] = Circuit[compStart].endp1[0] + randDist*(Circuit[compStart].endp2[0]-Circuit[compStart].endp1[0]) ; // +- [0.9 - 1.0]
       s[offset+P_POSY] = Circuit[compStart].endp1[1] + randDist*(Circuit[compStart].endp2[1]-Circuit[compStart].endp1[1]);
       s[offset+P_POSZ] = 0.1*Math.random() - 0.1*Math.random();
     }
@@ -265,8 +205,8 @@ function initParticles(Circuit) {
       s[offset+P_POSY] = -0.3*Math.random() + 0.3*Math.random();
       s[offset+P_POSZ] = Math.random() - Math.random();  
     }
-    s[offset+P_VELX] = -0.2*Math.random() + 0.2*Math.random();
-    s[offset+P_VELY] = -0.2*Math.random() + 0.2*Math.random();
+    s[offset+P_VELX] = -0.002*Math.random() + 0.002*Math.random();
+    s[offset+P_VELY] = -0.002*Math.random() + 0.002*Math.random();
     s[offset+P_VELZ] = 0;
     s[offset+P_FORX] = 0;
     s[offset+P_FORY] = 0;
@@ -275,6 +215,11 @@ function initParticles(Circuit) {
     s[offset+P_CBLU] = 0.5;
     s[offset+P_CGRN] = 0.5;
     s[offset+P_TPRT] = 1.0;
+    s[offset+P_WALL] = compStart;
+    
+    //if (Circuit[compStart].compType == 'Battery'){
+      //s[offset+P_TPRT] = 0.0;
+    //}
   }
 }
 
@@ -342,7 +287,7 @@ function main(Circuit) {
   document.onkeydown = function(ev){ keydown(ev, gl, u_ViewMatrix, viewMatrix); };
 
 
-  projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100); // this never changes
+  projMatrix.setPerspective(30, 1/*canvas.width/canvas.height*/, 1, 100); // this never changes
   // set the GLSL u_ProjMatrix to the value I have set
   gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
@@ -386,19 +331,24 @@ function draw(gl, n, timeStep, u_ViewMatrix, viewMatrix) {
   if (RenderMode != 5) {
     applyConstraints();
   }
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  //gl.clear(gl.COLOR_BUFFER_BIT);
   // update state space
   calcForces();
   applyForces(0, timeStep); // 0 for Euler
 
-  var xpos, ypos, zpos;
+  var xpos =0, ypos =0, zpos = 0;
   xpos = g_EyeRadius * Math.cos(g_EyeZrot/2);
   ypos = g_EyeRadius * Math.cos(g_EyeXrot/2) + g_EyeRadius * Math.sin(g_EyeZrot/2);
   zpos = g_EyeRadius * Math.sin(g_EyeXrot/2);
-  viewMatrix.setLookAt(xpos, ypos, zpos,  // eye position
+  console.log(" g_EyeRadius: " + g_EyeRadius);
+  console.log("ypos " + ypos);
+  console.log("zpos " + zpos);
+
+  viewMatrix.setLookAt(0, -3, -7.5,  // eye position
+  //viewMatrix.setLookAt(xpos, ypos, zpos,  // eye position
                           0, 0, 0,                // look-at point (origin)
                           0, 0, 1);               // up vector (+z)
-  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+  //gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
 
 
   Render(gl, n, u_ViewMatrix, viewMatrix);
@@ -420,7 +370,63 @@ function calcForces() {
       
       // find out if point within force field
       var x = s[offset+P_POSX], y = s[offset+P_POSY];
-      if (f[j].strt[0] == f[j].end[0]) { // if a y-force field
+      var y1 = f[j].strt[1];
+      var x1 = f[j].strt[0];
+
+      var y2 = f[j].end[1];
+      var x2 = f[j].end[0];
+      var tangent;
+      if (y2 - y1 == 0){
+          tangent = 0;
+      }else if(x2 - x1 == 0){
+          tangent = 1
+      }else{
+          tangent = (y2 - y1)/(x2 - x1);
+      }
+      
+
+      //arcTangent in radians
+      var arcTangent = Math.atan(tangent);
+      //fytot = 1;
+      //fxtot = 1;
+      //x contibution
+
+      if ((f[j].end[0] - f[j].strt[0] == 0) || Math.abs((f[j].end[1] -f[j].strt[1])/(f[j].end[0] - f[j].strt[0])) > 1){ // if a y-force field
+        if ((x < f[j].strt[0] + f[j].wid/2 && x > f[j].end[0] - f[j].wid/2) && // within x range AND
+            (y < f[j].strt[1] && y > f[j].end[1] || y > f[j].strt[1] && y < f[j].end[1])) { // within y range
+          if (f[j].strt[1] > f[j].end[1]) { // if the right side, force goes down
+            fytot *= current * f[j].voltage * Math.sin(arcTangent);
+            fxtot *= current * f[j].voltage * Math.cos(arcTangent);
+            //document.getElementById("force").value = current;
+            //fytot -= current * f[j].voltage;
+            //fxtot += current * f[j].voltage;
+          } else { // otherwise, force goes up
+            //fytot += current * f[j].voltage;
+            //fxtot += current * f[j].voltage;
+            fytot *= current * f[j].voltage * Math.sin(arcTangent);
+            fxtot *= current * f[j].voltage * Math.cos(arcTangent);
+          }
+        }
+
+      }else if( (f[j].end[1] - f[j].strt[1] == 0) || Math.abs((f[j].end[1] -f[j].strt[1])/(f[j].end[0] - f[j].strt[0])) < 1 ){ //if an x-force field
+        if ((x < f[j].strt[0] && x > f[j].end[0] || x > f[j].strt[0] && x < f[j].end[0]) && // within x range AND
+            (y < f[j].strt[1] + f[j].wid/2 && y > f[j].end[1] - f[j].wid/2)) { // within y range
+          if (f[j].strt[0] < f[j].end[0]) { // if on top, force goes right
+            //fytot -= current * f[j].voltage;
+            //fxtot += current * f[j].voltage;
+            fytot *= current * f[j].voltage * Math.sin(arcTangent);
+            fxtot *= current * f[j].voltage * Math.cos(arcTangent);
+          } else { // else, force goes left
+            //fytot -= current * f[j].voltage;
+            //fxtot -= current * f[j].voltage;
+            fytot *= current * f[j].voltage * Math.sin(arcTangent);
+            fxtot *= current * f[j].voltage * Math.cos(arcTangent);
+          }
+        }
+
+      }
+
+/*      if (f[j].end[0] - f[j].strt[0] < Math.abs(0.01)) { // if a y-force field
         if ((x < f[j].strt[0] + f[j].wid/2 && x > f[j].end[0] - f[j].wid/2) && // within x range AND
             (y < f[j].strt[1] && y > f[j].end[1] || y > f[j].strt[1] && y < f[j].end[1])) { // within y range
           if (f[j].strt[1] > f[j].end[1]) { // if the right side, force goes down
@@ -429,7 +435,7 @@ function calcForces() {
             fytot += current * f[j].voltage;
           }
         }
-      } else if (f[j].strt[1] == f[j].end[1]) { // if an x-force field
+      } else if ( f[j].end[1] -f[j].strt[1] < Math.abs(0.01)) { // if an x-force field
         if ((x < f[j].strt[0] && x > f[j].end[0] || x > f[j].strt[0] && x < f[j].end[0]) && // within x range AND
             (y < f[j].strt[1] + f[j].wid/2 && y > f[j].end[1] - f[j].wid/2)) { // within y range
           if (f[j].strt[0] < f[j].end[0]) { // if on top, force goes right
@@ -438,7 +444,7 @@ function calcForces() {
             fxtot -= current * f[j].voltage;
           }
         }
-      }
+      }*/
     }
     // set the state var force values to the calculated totals
     s[offset+P_FORX] = fxtot;
@@ -455,21 +461,26 @@ function applyForces(solvertype, timeStep) {
         var offset = i*PartEleCount;
         // apply velocities
         //console.log('previous positions: ', s[offset+P_POSX], s[offset+P_POSY], s[offset+P_POSZ]);
-        s[offset+P_POSX] += s[offset+P_VELX]*timeStep;
+        /*s[offset+P_POSX] += s[offset+P_VELX]*timeStep;
         s[offset+P_POSY] += s[offset+P_VELY]*timeStep;
-        s[offset+P_POSZ] += s[offset+P_VELZ]*timeStep;
+        s[offset+P_POSZ] += s[offset+P_VELZ]*timeStep;*/
+
 
         // apply changes in velocities due to forces - careful of div by 0!
-        s[offset+P_VELX] += (s[offset+P_FORX] * timeStep) / s[offset+P_MASS];
+        /*s[offset+P_VELX] += (s[offset+P_FORX] * timeStep) / s[offset+P_MASS];
         s[offset+P_VELY] += (s[offset+P_FORY] * timeStep) / s[offset+P_MASS];
-        s[offset+P_VELZ] += (s[offset+P_FORZ] * timeStep) / s[offset+P_MASS];
+        s[offset+P_VELZ] += (s[offset+P_FORZ] * timeStep) / s[offset+P_MASS];*/
         
         // apply changes in velocities due to drag
-        if (dragOn) {
+        /*if (dragOn) {
           s[offset+P_VELX] *= DRAG_CONST;
           s[offset+P_VELY] *= DRAG_CONST;
           s[offset+P_VELZ] *= DRAG_CONST;
-        }
+        }*/
+        s[offset+P_POSX] += s[offset+P_VELX];
+        s[offset+P_POSY] += s[offset+P_VELY];
+        s[offset+P_POSZ] += s[offset+P_VELZ];
+
       }
       break;
       default:
@@ -492,27 +503,10 @@ function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
   mygl.drawArrays(mygl.POINTS, 0, n); // draws electrons
   
 
-  //mygl.bufferSubData(mygl.ARRAY_BUFFER, s.length, circVerts);
-  /*
-  myPartID = mygl.getAttribLocation(mygl.program, 'u_isPart');
-  if (!myPartID) {
-    console.log('shit is whack yo');
-  }
-  */
-  //mygl.uniform1i(isPartID, false);
-
-  mygl.drawArrays(mygl.POINTS,             // use this drawing primitive, and
+  /*mygl.drawArrays(mygl.POINTS,             // use this drawing primitive, and
                   s.length/PartEleCount, // start at this vertex number, and
-                  (circVerts.length)/PartEleCount);   // draw this many vertices
-  /*if (WallsOn == 1) {
-    mygl.drawArrays(mygl.TRIANGLES,
-                    (s.length+circVerts.length)/PartEleCount, // beginning of the circuit walls
-                    (circWalls.length)/PartEleCount);
-  }*/
+                  (circVerts.length)/PartEleCount);   // draw this many vertices*/
   
- // now try to draw something else
- // vertexBufferID2 = gl.createBuffer();
-  //mygl.uniform1i(isPartID, true);
 }
 
 function animate() {
@@ -554,31 +548,36 @@ function applyConstraints() {
           // if there is an intersection, flip all velocities.
           // 
           //var Ioffset = (Coffset / Cfields) * PartEleCount;
-          circVerts[j*PartEleCount + P_CBLU] += 0.1;
+          //circVerts[j*PartEleCount + P_CBLU] += 0.1;
           //s[offset+P_CGRN] = 1.0;
-          s[offset+P_VELX] = -s[offset+P_VELX] + 0.1*Math.random() - 0.1*Math.random();
-          s[offset+P_VELY] = -s[offset+P_VELY] + 0.1*Math.random() - 0.1*Math.random();
+          s[offset+P_VELX] = -s[offset+P_VELX]; //+ 0.1*Math.random() - 0.1*Math.random();
+          s[offset+P_VELY] = -s[offset+P_VELY]; //+ 0.1*Math.random() - 0.1*Math.random();
           s[offset+P_VELZ] = -s[offset+P_VELZ];
         }
       }
       else if (constraints[j].Ctype == 1) { // if it's a wall constraint
         var wBuffer = 0.01; // distance from a wall before a collision is detected
-        var isCollision = DetectCollision(constraints[j], offset, wBuffer);
+        var isCollision;
+      
+            isCollision = DetectCollision(constraints[j], offset, wBuffer);
+        
+
+        document.getElementById("force").value = isCollision;
         if (isCollision == 1) {
           // collision with x-constant wall
           if (s[offset+P_VELX] > 0) {
-            s[offset+P_POSX] = constraints[j].strt[0] - wBuffer; // put particle on right side of wall
+            /*s[offset+P_POSX] = constraints[j].strt[0] - wBuffer; // put particle on right side of wall
           } else {
-            s[offset+P_POSX] = constraints[j].strt[0] + wBuffer;
+            s[offset+P_POSX] = constraints[j].strt[0] + wBuffer;*/
           }
-          s[offset+P_VELX] = -s[offset+P_VELX] + 0.2*Math.random() - 0.2*Math.random();
+          //s[offset+P_VELX] = -s[offset+P_VELX] + 0.2*Math.random() - 0.2*Math.random();
         } else if (isCollision == 2) {
           if (s[offset+P_VELY] > 0) {
-            s[offset+P_POSY] = constraints[j].strt[1] - wBuffer; // put particle on right side of wall
+          /*  s[offset+P_POSY] = constraints[j].strt[1] - wBuffer; // put particle on right side of wall
           } else {
-            s[offset+P_POSY] = constraints[j].strt[1] + wBuffer;
-          }
-          s[offset+P_VELY] = -s[offset+P_VELY] + 0.2*Math.random() - 0.2*Math.random();
+            s[offset+P_POSY] = constraints[j].strt[1] + wBuffer;*/
+          }else if (isCollision == 3) { }
+          //s[offset+P_VELY] = -s[offset+P_VELY] + 0.2*Math.random() - 0.2*Math.random();
         } 
       }
     }
@@ -589,27 +588,49 @@ function applyConstraints() {
 
 
 
-
 // returns 1 for collisions with constant-x walls, 2 for constant-y walls, and 0 otherwise
 function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in state array for particle, buffer = distance from wall before collision occurs
   var colWindow = buffer;
-  if (wall.strt[0] == wall.end[0]) { // it's a constant-x wall
-    if (Math.abs(s[sOffset + P_POSX] - wall.strt[0]) < colWindow && // it's in close contact with the wall plane, and...
-        (s[sOffset+P_POSY] > wall.strt[1] && s[sOffset+P_POSY] < wall.end[1] || // actually by the wall
-         s[sOffset+P_POSY] < wall.strt[1] && s[sOffset+P_POSY] > wall.end[1])) { // collision! 
+
+//they are all 0.2 but I named them for readability
+  var bufferAbove = 0.2;
+  var bufferBeneath = 0.2;
+  var bufferRight = 0.2;
+  var bufferLeft = 0.2;
+  
+  if (s[sOffset+P_WALL] != wall.Csize ) return; //every particle is initialized in a wall 
+                                                //check which wall it is and define the constraints
+  if (Math.abs(wall.strt[0] - wall.end[0]) < Math.abs(wall.strt[1] - wall.end[1])) { // it's a constant-x wall
+          if( s[sOffset+P_POSX] >= (wall.strt[0] + bufferRight) && s[sOffset+P_VELX] > 0.0 || //0.2 for a little space above the line 
+              s[sOffset+P_POSX] <= (wall.strt[0] - bufferLeft)  && s[sOffset+P_VELX] < 0.0){ //and some space below the line to make a wall
+              s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];            
+          }
+          if (s[sOffset+P_POSY] <= (wall.strt[1] + bufferAbove) && s[sOffset+P_VELY] < 0.0 ||
+              s[sOffset+P_POSY] >= (wall.end[1] - bufferBeneath) && s[sOffset+P_VELY] > 0.0){ // collision! 
+              s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
+          } 
       return 1; 
-    }
-  }
-  else if (wall.strt[1] == wall.end[1]) {
-    if (Math.abs(s[sOffset + P_POSY] - wall.strt[1]) < colWindow &&
-        (s[sOffset+P_POSX] > wall.strt[0] && s[sOffset+P_POSX] < wall.end[0] || 
-         s[sOffset+P_POSX] < wall.strt[0] && s[sOffset+P_POSX] > wall.end[0])) { // collision! 
+
+  }else if (Math.abs(wall.strt[0] - wall.end[0]) > Math.abs(wall.strt[1] - wall.end[1])) {
+
+          if( s[sOffset+P_POSY] >= (wall.strt[1] + bufferAbove) && s[sOffset+P_VELY] > 0.0 ||
+              s[sOffset+P_POSY] <= (wall.strt[1] - bufferBeneath)  && s[sOffset+P_VELY] < 0.0){
+              s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];            
+          }
+          if (s[sOffset+P_POSX] <= (wall.strt[0] - bufferLeft) && s[sOffset+P_VELX] < 0.0 ||
+              s[sOffset+P_POSX] >= (wall.end[0] + bufferRight)&& s[sOffset+P_VELX] > 0.0){ // collision! 
+              s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+          } 
+
       return 2;
-    }
   }
   else {
     return 0;
   }
+  /*}*/
+
+
+
 }
 
 
@@ -647,20 +668,20 @@ function makeCircuit(Circuit) {
   //      create the ions based on the segment's resistance
 
   var totIons = 0;
-  for (n = 0; n < Circuit.length; n++) {
+  for (var n = 0; n < Circuit.length; n++) {
     totIons += Math.ceil(Circuit[n].resistance*IonNumConst)+10*numComps;
   }
   circVerts = new Float32Array(totIons*PartEleCount); // initialize the array to hold the ion info
   // may need to define constraints array here
   var IonsDone = 0; // used to track array indices, since each component doesn't have the same number of ions
-  for (n = 0; n < Circuit.length; n++) {
-    // add relevant vertex shit to render ions
+  for (var n = 0; n < Circuit.length; n++) {
+    // add relevant vertex information to render ions
     var startx = Circuit[n].endp1[0], starty = Circuit[n].endp1[1];
     var endx = Circuit[n].endp2[0], endy = Circuit[n].endp2[1];
     var IonsInComp = 10+Math.ceil(Circuit[n].resistance*IonNumConst); // number of ions for this component
     var xspacing = (endx - startx)/IonsInComp;
     var yspacing = (endy - starty)/IonsInComp;
-    for (i = 0; i < IonsInComp; i++) {
+    for (var i = 0; i < IonsInComp; i++) {
       var offset = i*PartEleCount+IonsDone;
       circVerts[offset+P_MASS] = 10000000;
       circVerts[offset+P_SIZE] = ionSize;
@@ -676,6 +697,7 @@ function makeCircuit(Circuit) {
         circVerts[offset+P_CRED] = 1.0;
         circVerts[offset+P_CGRN] = 0.0;
         circVerts[offset+P_CBLU] = 0.0;
+        console.log("CirVerts color " + circVerts[offset+P_CRED])
 
       if (Circuit[n].compType == "Battery") {
         circVerts[offset+P_CRED] = 0.5;
@@ -713,6 +735,7 @@ function makeCircuit(Circuit) {
   var wallstart = constraints.length-numWalls;
   // left outer wall
   for (n = 0; n < Circuit.length; n++) {
+
     switch(Circuit[n].innerwall){
       case 0:
         // left wall
@@ -721,7 +744,7 @@ function makeCircuit(Circuit) {
         // figure out which endpoint is which
           // outer wall first
         constraints[wallstart+2*n] = new Constraint(1, // wall type 
-                                                    0, // size not relevant for walls
+                                                    n, // size not relevant for walls // I'll save identification for the walls in this size container
                                                     -1.0, // x coord (of wall center. Not used, but still included)
                                                     0.0, // y
                                                     0.0, // z
@@ -733,7 +756,8 @@ function makeCircuit(Circuit) {
                                                      Circuit[n].endp2[1]-neg*circWidth/2,
                                                      0.0]); // end point
           // inner wall next'
-        constraints[wallstart+2*n+1] = new Constraint(1, 0, 0, 0, 0, 0.4,
+        constraints[wallstart+2*n+1] = new Constraint(1, n, // identification
+                                                       0, 0, 0, 0.4,
                                                       [Circuit[n].endp1[0]+circWidth/2,
                                                        Circuit[n].endp1[1]-neg*circWidth/2, 0.0], // start point
                                                       [Circuit[n].endp2[0]+circWidth/2,
@@ -749,13 +773,17 @@ function makeCircuit(Circuit) {
         var neg;
         if (Circuit[n].endp1[1]>Circuit[n].endp2[1]) { neg = 1; } else { neg = -1; } // used to put circ width offsets on right sides
           // outer wall first
-        constraints[wallstart+2*n] = new Constraint(1, 0, -1.0, 0.0, 0.0, 0.4,
+        constraints[wallstart+2*n] = new Constraint(1, 0,
+                                                    n, // identification
+                                                     -1.0, 0.0, 0.0, 0.4,
                                                     [Circuit[n].endp1[0]+circWidth/2,
                                                      Circuit[n].endp1[1]+neg*circWidth/2, 0.0], // start point
                                                     [Circuit[n].endp2[0]+circWidth/2,
                                                      Circuit[n].endp2[1]-neg*circWidth/2, 0.0]); // end point
           // inner wall next
-        constraints[wallstart+2*n+1] = new Constraint(1, 0, 0, 0, 0, 0.4,
+        constraints[wallstart+2*n+1] = new Constraint(1, 
+                                                      n, // identification
+                                                      0, 0, 0, 0.4,
                                                       [Circuit[n].endp1[0]-circWidth/2,
                                                        Circuit[n].endp1[1]-neg*circWidth/2, 0.0], // start point
                                                       [Circuit[n].endp2[0]-circWidth/2,
@@ -771,13 +799,16 @@ function makeCircuit(Circuit) {
         var neg;
         if (Circuit[n].endp1[0]>Circuit[n].endp2[0]) { neg = 1; } else { neg = -1; } // used to put circ width offsets on right sides
           // outer wall first
-        constraints[wallstart+2*n] = new Constraint(1, 0, -1.0, 0.0, 0.0, 0.4,
+        constraints[wallstart+2*n] = new Constraint(1, n, // identification
+                                                     -1.0, 0.0, 0.0, 0.4,
                                                     [Circuit[n].endp1[0]+neg*circWidth/2,
                                                      Circuit[n].endp1[1]-circWidth/2, 0.0], // start point
                                                     [Circuit[n].endp2[0]-neg*circWidth/2,
                                                      Circuit[n].endp2[1]-circWidth/2, 0.0]); // end point
           // inner wall next
-        constraints[wallstart+2*n+1] = new Constraint(1, 0, 0, 0, 0, 0.4,
+        constraints[wallstart+2*n+1] = new Constraint(1,
+                                                      n, // identification
+                                                      0, 0, 0, 0.4,
                                                       [Circuit[n].endp1[0]-neg*circWidth/2,
                                                        Circuit[n].endp1[1]+circWidth/2, 0.0], // start point
                                                       [Circuit[n].endp2[0]+neg*circWidth/2,
@@ -794,13 +825,15 @@ function makeCircuit(Circuit) {
         var neg;
         if (Circuit[n].endp1[0]>Circuit[n].endp2[0]) { neg = 1; } else { neg = -1; } // used to put circ width offsets on right sides
           // outer wall first
-        constraints[wallstart+2*n] = new Constraint(1, 0, -1.0, 0.0, 0.0, 0.4,
+        constraints[wallstart+2*n] = new Constraint(1, n, // identification
+                                                    -1.0, 0.0, 0.0, 0.4,
                                                     [Circuit[n].endp1[0]+neg*circWidth/2,
                                                      Circuit[n].endp1[1]+circWidth/2, 0.0], // start point
                                                     [Circuit[n].endp2[0]-neg*circWidth/2,
                                                      Circuit[n].endp2[1]+circWidth/2, 0.0]); // end point
           // inner wall next
-        constraints[wallstart+2*n+1] = new Constraint(1, 0, 0, 0, 0, 0.4,
+        constraints[wallstart+2*n+1] = new Constraint(1,n, // identification
+                                                       0, 0, 0, 0.4,
                                                       [Circuit[n].endp1[0]-neg*circWidth/2,
                                                        Circuit[n].endp1[1]-circWidth/2, 0.0], // start point
                                                       [Circuit[n].endp2[0]+neg*circWidth/2,
@@ -819,13 +852,15 @@ function makeCircuit(Circuit) {
         if (Circuit[n].endp1[1]>Circuit[n].endp2[1]) { neg = 1; } else { neg = -1; } // used to put circ width offsets on right sides
         // figure out which endpoint is which
           // outer wall first
-        constraints[wallstart+2*n] = new Constraint(1, 0, 0, 0, 0, 0.4,
+        constraints[wallstart+2*n] = new Constraint(1, n, // identification
+                                                       0, 0, 0, 0.4,
                                                       [Circuit[n].endp1[0]+circWidth/2,
                                                        Circuit[n].endp1[1]-neg*circWidth/2, 0.0], // start point
                                                       [Circuit[n].endp2[0]+circWidth/2,
                                                        Circuit[n].endp2[1]+neg*circWidth/2, 0.0]); // end point
           // inner wall next'
-        constraints[wallstart+2*n+1] = new Constraint(1, 0, 0, 0, 0, 0.4,
+        constraints[wallstart+2*n+1] = new Constraint(1, n, // identification
+                                                      0, 0, 0, 0.4,
                                                       [Circuit[n].endp1[0]+circWidth/2,
                                                        Circuit[n].endp1[1]-neg*circWidth/2, 0.0], // start point
                                                       [Circuit[n].endp2[0]+circWidth/2,
@@ -838,30 +873,7 @@ function makeCircuit(Circuit) {
         console.log('something went wrong.');
     }
   }
-  /*
-  constraints[wallstart] = new Constraint(1, // wall type 
-                                          0, // size not relevant for walls
-                                          -1.0, // x coord (of wall center. Not used, but still included)
-                                          0.0, // y
-                                          0.0, // z
-                                          0.4, // height
-                                          [-1.0, -1.0, 0.0],
-                                          [-1.0,  1.0, 0.0]);
-  // top outer wall
-  constraints[wallstart+1] = new Constraint(1, 0, 0.0, 1.0, 0.0, 0.4, [-1.0, 1.0, 0.0], [1.0,  1.0, 0.0]);
-  // right outer wall
-  constraints[wallstart+2] = new Constraint(1, 0, 1.0, 0.0, 0.0, 0.4, [1.0, 1.0, 0.0], [1.0, -1.0, 0.0]);
-  // bottom outer wall
-  constraints[wallstart+3] = new Constraint(1, 0, 0.0, -1.0, 0.0, 0.4, [1.0, -1.0, 0.0], [-1.0, -1.0, 0.0]);
-  // left inner wall
-  constraints[wallstart+4] = new Constraint(1, 0, -0.8, 0.0, 0.0, 0.4, [-0.8, -0.8, 0.0], [-0.8, 0.8, 0.0]);
-  // top inner wall
-  constraints[wallstart+5] = new Constraint(1, 0, 0.0, 0.8, 0.0, 0.4, [-0.8, 0.8, 0.0], [0.8, 0.8, 0.0]);
-  // right inner wall
-  constraints[wallstart+6] = new Constraint(1, 0, 0.8, 0.0, 0.0, 0.4, [0.8, 0.8, 0.0], [0.8, -0.8, 0.0]);
-  // bottom inner wall
-  constraints[wallstart+7] = new Constraint(1, 0, 0.0, -0.8, 0.0, 0.4, [0.8, -0.8, 0.0], [-0.8, -0.8, 0.0]);                                            
-  */
+  
 }
 
 function makeCircuitWalls(Circuit) {
@@ -887,222 +899,7 @@ function makeCircuitWalls(Circuit) {
   }
   var manOffset = 0;
   var wallBuffer = 0.03; // if walls are at the exact corners, some electrons bleed through
-  /*
-  switch(Circuit[n].compType) {
-    case 0:
-      // left wall
-      var newOffset = n*12*PartEleCount;
-      var neg;
-      if (Circuit[n].endp1[1]>Circuit[n].endp2[1]) { neg = 1; } else { neg = -1; } // used to put circ width offsets on right sides
-        // outer wall
-      circWalls[newOffset+P_POSX] = Circuit[n].endp1[0]-circWidth/2-wallBuffer,
-      circWalls[newOffset+P_POSY] = Circuit[n].endp1[1]+neg*(circWidth/2+wallBuffer),
-      circWalls[newOffset+P_POSZ] = 0.2;
-      newOffset+= PartEleCount;
-      circWalls[newOffset+P_POSX] = Circuit[n].endp1[0]-circWidth/2-wallBuffer,
-      circWalls[newOffset+P_POSY] = Circuit[n].endp1[1]+neg*(circWidth/2+wallBuffer),
-      circWalls[newOffset+P_POSZ] = 0.2;
-      newOffset+= PartEleCount;
-      circWalls[newOffset+P_POSX] = Circuit[n].endp1[0]-circWidth/2-wallBuffer,
-      circWalls[newOffset+P_POSY] = Circuit[n].endp1[1]+neg*(circWidth/2+wallBuffer),
-      circWalls[newOffset+P_POSZ] = 0.2;
-      newOffset+= PartEleCount;
-      circWalls[newOffset+P_POSX] = Circuit[n].endp1[0]-circWidth/2-wallBuffer,
-      circWalls[newOffset+P_POSY] = Circuit[n].endp1[1]+neg*(circWidth/2+wallBuffer),
-      circWalls[newOffset+P_POSZ] = 0.2;
-      newOffset+= PartEleCount;
-      circWalls[newOffset+P_POSX] = Circuit[n].endp1[0]-circWidth/2-wallBuffer,
-      circWalls[newOffset+P_POSY] = Circuit[n].endp1[1]+neg*(circWidth/2+wallBuffer),
-      circWalls[newOffset+P_POSZ] = 0.2;
-      newOffset+= PartEleCount;
-      circWalls[newOffset+P_POSX] = Circuit[n].endp1[0]-circWidth/2-wallBuffer,
-      circWalls[newOffset+P_POSY] = Circuit[n].endp1[1]+neg*(circWidth/2+wallBuffer),
-      circWalls[newOffset+P_POSZ] = 0.2;
-      newOffset+= PartEleCount;
 
-        // inner wall
-      break;
-    case 1:
-      // right wall
-      break;
-    case 2:
-      // bottom wall
-      break;
-    case 3:
-      // top wall
-      break;
-    default:
-      console.log('makeCircuitWalls, something is wrong.');
-  }
-  */
-  //  =====================================     OUTER WALLS    ===========================================
-// left wall ---------------------------------------------------------------------------------------  
-  // triangle 1
-  // bottom left top (y, x, z)
-  /*circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top left top
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top left bottom
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-//
-//triangle 2
-  // bottom left top (y, x, z)
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;  
-  // bottom left bottom
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // top left bottom
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// top wall ---------------------------------------------------------------------------------------
-  // top left top
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top right top
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top right bottom
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// triangle 2
-  // top left top
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top left bottom
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // top right bottom
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// right wall --------------------------------------------------------------------------------------
-  // top right top
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom right top
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom right bottom
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// triangle 2
-  // top right top
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top right bottom
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = 1 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // bottom right bottom
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// bottom wall -------------------------------------------------------------------------------------
-  // bottom right top
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom left top (y, x, z)
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom left bottom
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// triangle 2
-  // bottom right top
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom right bottom
-  circWalls[manOffset+P_POSX] = 1 + wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // bottom left bottom
-  circWalls[manOffset+P_POSX] = -1 - wallBuffer, circWalls[manOffset+P_POSY] = -1 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-//
-//
-  // ==========================================        INNER WALLS        =============================================
-// left wall ---------------------------------------------------------------------------------------  
-  // triangle 1
-  // bottom left top (y, x, z)
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top left top
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top left bottom
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-//
-//triangle 2
-  // bottom left top (y, x, z)
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;  
-  // bottom left bottom
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // top left bottom
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// top wall ---------------------------------------------------------------------------------------
-  // top left top
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top right top
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top right bottom
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// triangle 2
-  // top left top
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top left bottom
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // top right bottom
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// right wall --------------------------------------------------------------------------------------
-  // top right top
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom right top
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom right bottom
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// triangle 2
-  // top right top
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // top right bottom
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = 0.8 - wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // bottom right bottom
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// bottom wall -------------------------------------------------------------------------------------
-  // bottom right top
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom left top (y, x, z)
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom left bottom
-  circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-// triangle 2
-  // bottom right top
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = 0.2;
-  manOffset += PartEleCount;
-  // bottom right bottom
-  circWalls[manOffset+P_POSX] = 0.8 - wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  manOffset += PartEleCount;
-  // bottom left bottom
-  //circWalls[manOffset+P_POSX] = -0.8 + wallBuffer, circWalls[manOffset+P_POSY] = -0.8 + wallBuffer, circWalls[manOffset+P_POSZ] = -0.2;
-  //manOffset += PartEleCount;  */
 
 }
 
