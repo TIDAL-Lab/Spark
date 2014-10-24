@@ -123,8 +123,13 @@ class Circuit {
   void sendDataToServer() {
     var obj = [];
     var deleteParse = new JsObject(context['deleteParse']);
-    deleteParse.callMethod('doDeleteParse');  
+    deleteParse.callMethod('doDeleteParse'); 
+    var j = 1;
+    //added to access canvas element
+    CanvasElement canvas = 
+          document.querySelector('#foreground');
     
+    var move = 100;
     for (Edge e in this.edges) {
       
       Component c = e.component;
@@ -140,13 +145,13 @@ class Circuit {
   
         };
         obj.add(s);
-//        var setParse = new JsObject(context['setParse'],[c.type,c.voltageDrop ,c.current ,c.resistance ,0.5 ,0.5 ,0.5 ,2, 1]);        
-        var setParse = new JsObject(context['setParse'],[c.type,c.voltageDrop ,c.current ,c.resistance ,
-                                                         ((c.start.y-window.innerHeight/2)/window.innerHeight/2)* 10 ,
-                                                         ((c.start.x -window.innerWidth/2)/window.innerWidth/2)*10 ,
-                                                         ((c.end.y - window.innerHeight/2)/window.innerHeight/2)*10,        
-                                                         
-                                                         ((c.end.x - window.innerWidth/2)/window.innerWidth/2)*10, 1]);
+//        var setParse = new JsObject(context['setParse'],[c.type,c.voltageDrop ,c.current + 1 ,c.resistance + 1 ,0.5 ,0.5 ,0.5 ,2, 1]);        
+        var setParse = new JsObject(context['setParse'],[c.type,(c.voltageDrop +5),c.current+1 ,0  ,
+                                                         (((c.start.x -canvas.width/2)/canvas.width/2) + 0.2)*10 ,
+                                                         ((c.start.y-canvas.height/2)/canvas.height/2)* 10 ,
+                                                         (((c.end.x - canvas.width/2)/canvas.width/2) + 0.2)*10,
+                                                         ((c.end.y - canvas.height/2)/canvas.height/2)*10,
+                                                         returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)]);
         setParse.callMethod('doParse');  
     }
     //print(JSON.encode(obj));
@@ -178,6 +183,33 @@ class Circuit {
     n2.adjacents.add(n1);
     sendDataToServer();
   }
+  
+  int returnDirection(double x0,double x1,double y0,double y1){
+      var n = 0;
+      var grad = 0;
+      var deltaY = y1-y0;
+      var deltaX = x1-x0;
+      if (deltaX == 0){
+        n = 1;
+      }else{
+        grad = deltaY/deltaX;
+      }
+      if ( grad.abs() < 1){
+        if (grad < 0){
+          n = 3;
+        }else{
+          n = 2;
+        }
+      }else if(grad.abs() > 1){
+        if (grad < 0){
+          n = 1;
+        }else{
+          n = 0;
+        }
+      }
+      
+      return n;
+    }
   
   /** remove a branch. For now, a branch can be removed only when it is disconnected.
   @param b    branch to be removed
