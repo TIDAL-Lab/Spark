@@ -75,8 +75,8 @@ class Circuit {
     }
     
     updateComponents();
-    theApp.model1.updateModel();
-    //sendDataToServer();
+    theApp.model1.updateModel();     
+    sendDataToServer();
   }
 
 
@@ -121,24 +121,32 @@ class Circuit {
   /** create JSON data and send the string to the server
    */
   void sendDataToServer() {
-    var obj = [];
+    var myObj = new JsArray();
+    //added to access canvas element
+    CanvasElement canvas = 
+          document.querySelector('#foreground');
+    
     for (Edge e in this.edges) {
       
       Component c = e.component;
-      var i = new NumberFormat("#0.0#").format(c.current);
-      var v = new NumberFormat("#0.0#").format(c.voltageDrop);
-      var r = new NumberFormat("#0.0#").format(c.resistance);
-        var s = {
-         'type': c.type,
-         'frameID': c.ARTag,
-         'resistance': c.resistance.toString(),
-         'current': c.current.toString(),
-         'voltageDrop': c.voltageDrop.toString()
-        };
-        obj.add(s);
+        var anObj = new JsObject.jsify({'type': c.type,
+                                          'voltageDrop': c.voltageDrop,
+                                          'current': c.current,
+                                          'resistance': c.resistance,
+                                          'startX': (((c.start.x -canvas.width/2)/canvas.width/2) + 0.1)*10,
+                                          'startY':((c.start.y-canvas.height/2)/canvas.height/2)* 10 ,
+                                          'endX': (((c.end.x - canvas.width/2)/canvas.width/2) + 0.1)*10,//shifted it by 0.1 so that it's visble on webgl scene
+                                          'endY': ((c.end.y - canvas.height/2)/canvas.height/2)*10,
+                                          'innerWall':1 //returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)
+                                          });
+        myObj.add(anObj);
+
+
     }
-    //print(JSON.encode(obj));
-    sendJSONData(JSON.encode(obj));
+
+    var deleteParse = new JsObject(context['deleteParse'],[myObj]);
+    deleteParse.callMethod('doDeleteParse'); 
+
   }
 /* ------------------------
   Reflecting the touch changes into the circuit graph representation
@@ -164,6 +172,33 @@ class Circuit {
     n2.adjacents.add(n1);
     sendDataToServer();
   }
+  
+  /*int returnDirection(double x0,double x1,double y0,double y1){
+      var n = 0;
+      var grad = 0;
+      var deltaY = y1-y0;
+      var deltaX = x1-x0;
+      if (deltaX == 0){
+        n = 1;
+      }else{
+        grad = deltaY/deltaX;
+      }
+      if ( grad.abs() < 1){
+        if (grad < 0){
+          n = 3;
+        }else{
+          n = 2;
+        }
+      }else if(grad.abs() > 1){
+        if (grad < 0){
+          n = 0;
+        }else{
+          n = 1;
+        }
+      }
+      
+      return n;
+    }*/
   
   /** remove a branch. For now, a branch can be removed only when it is disconnected.
   @param b    branch to be removed
