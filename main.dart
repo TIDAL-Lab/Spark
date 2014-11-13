@@ -27,6 +27,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'package:intl/intl.dart'; /* this was used for number format for the AR tags */
 import 'dart:web_audio';
+import 'dart:js';
 //import "package:json_object/json_object.dart";
 
 part 'darts/Touch.dart';

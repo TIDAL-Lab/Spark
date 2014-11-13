@@ -10,6 +10,77 @@
    <link rel="stylesheet" href="css/default.css" />
 </head>
 <body>
+  <script src="http://cdn.pubnub.com/pubnub.min.js"></script> 
+  <script src="http://cdn.pubnub.com/pubnub.min.js"></script>    
+  <script src="packages/browser/dart.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
+  <script src="underscore.js"></script>
+    <script>
+      var pubnub = PUBNUB.init({
+         publish_key: 'demo',
+         subscribe_key: 'demo'
+     });
+      
+      Parse.initialize("uZ0TtnQurG54qadTjIGtTURs9OUjAG1kE0JMlj0z", "2Jfv3AJdIUTWg0Sk5JQa9CnDJClThleFA0wbbQ76");
+
+      var deleteParse = function(myObj){
+        
+        this.doDeleteParse = function(){
+          var parseCircuit = Parse.Object.extend("Circuit");
+          var a_Circuit = new Parse.Query(parseCircuit);
+          a_Circuit.exists("type");
+
+          
+            a_Circuit.find().then(function(Circuits){
+              var promise = Parse.Promise.as(); //can hold an array of promises, one for each Circuit in Circuits
+              _.each(Circuits, function(Circuit){ //iterate through every Circuit in Circuits
+                promise = promise.then(function(){
+                  return Circuit.destroy();
+                  
+                });
+                
+              });
+                
+                return promise;
+              }).then(function(Circuit){
+                  
+                  var promise = Parse.Promise.as();
+                  _.each(myObj, function(anObj){
+                    promise = promise.then(function(){
+                      var parseCircuit = Parse.Object.extend("Circuit");
+                      var a_Circuit = new parseCircuit();
+                      a_Circuit.set("type", anObj.type);
+                      a_Circuit.set("voltageDrop", anObj.voltageDrop);
+                      a_Circuit.set("current", anObj.current);
+                      a_Circuit.set("resistance", anObj.resistance);
+                      a_Circuit.set("startX", anObj.startX);
+                      a_Circuit.set("startY", anObj.startY);
+                      a_Circuit.set("endX", anObj.endX);
+                      a_Circuit.set("endY", anObj.endY);
+                      a_Circuit.set("innerwall", anObj.innerWall);
+                      return a_Circuit.save();
+                     
+                    });
+                    
+                  });
+                  return promise;
+              
+            }).then(function(Circuit){
+                pubnub.publish({
+                  channel: 'mma',
+                  message: '1'
+               });
+              
+            });
+              
+
+         
+        } 
+      }
+      
+     
+      </script>
+
    <div id="selection-toolbar" class="toolbar">
      <button id="battery-button">
      <button id="resistor-button" />
@@ -18,7 +89,7 @@
    </div>
    
    <div id="content">
-      <canvas id="foreground" style="position: absolute;"></canvas>
+      <canvas id="foreground" style="position: absolute;" ></canvas>
    </div>
    
    <div id="sliders" class="component-slider">
@@ -33,6 +104,7 @@
 -->
    <div id="model1" style="display: none;">
       <iframe id="model-frame"></iframe>
+      <p>Checking</p>
       <button class="close-button"></button>
       <button class = "help-button"></button>
    </div>
