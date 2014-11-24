@@ -123,7 +123,7 @@ function CircuitComponent(type, current, res, volt, startx, starty, endx, endy, 
   //Side is either "L","R","B" or "T" 
   // L - for left, R - for right, B - for bottom, and T for Top representing the open sides
   //of the end of the components
-  //this.IDS, I - for ID, P for position and S for side
+  //this.IPS, I - for ID, P for position and S for side
   this.IPS = [];
 }
 
@@ -151,6 +151,11 @@ const P_NOMX = 17;
 const P_NOMY = 18;
 const P_NOMZ = 19;
 
+//curr vel to manipulate in different walls
+const P_ACCX = 20;
+const P_ACCY = 21;
+const P_ACCZ = 22;
+
 const IPS_SIZE = 3;
 const IPS_IDEN = 0;
 const IPS_POSN = 1;
@@ -159,7 +164,7 @@ const IPS_SIDE = 2;
 function reset(Circuit1){
     currentConst = 10; // multiplied with calculated current to create "realistic" looking flows
     IonNumConst = 3; // multiplied with calculated number of ions in circuit component so wires aren't empty
-    PartEleCount = 20; // number of fields per particle in the state array
+    PartEleCount = 23; // number of fields per particle in the state array
     numIons = 200; // total number of ions in circuit
     numWalls = 0;// = numComps*2;
     circWidth = 0.2 // globally defined circuit width
@@ -195,13 +200,13 @@ var g_lookAtZ = 0;
 }
 
 var currentConst = 10; // multiplied with calculated current to create "realistic" looking flows
-var IonNumConst = 3; // multiplied with calculated number of ions in circuit component so wires aren't empty
-var PartEleCount = 20; // number of fields per particle in the state array
+var IonNumConst = 1; // multiplied with calculated number of ions in circuit component so wires aren't empty
+var PartEleCount = 23; // number of fields per particle in the state array
 var numIons = 200; // total number of ions in circuit
 var numWalls;// = numComps*2;
 var circWidth = 0.2 // globally defined circuit width
 var f;// = new Array(numComps); // array used to hold forces
-var numParticles = 200;//50;//200; // number of electrons
+var numParticles = 200;// number of electrons will be calculated based on the number of components; no longer a constant number
 var ionSize = 15; // size of each ion
 var isPart = true; // T/F value used to tell the shader if rendering particles or other shapes (lines, triangles)
 var circOn = 1, dragOn = 1;
@@ -232,7 +237,7 @@ var modelMatrix1 = new Matrix4();
   }
 
 }*/
-dspacing = 2;
+dspacing = 0.914;
 function calcResistance(){
   var resistanceTotal = 0;
   for (var n = 0; n < Circuit.length; n++) {
@@ -242,14 +247,14 @@ function calcResistance(){
     var endx = Circuit[n].endp2[0], endy = Circuit[n].endp2[1];
     //var IonsInComp = 5+Math.ceil(Circuit[n].resistance*IonNumConst); // number of ions for this component
 //resistanceTotal*IonNumConst)+10*numComps+numWalls
-    var dx = (endx - startx); 
-    var dy = (endy - starty);
+    var dx = Math.abs(endx - startx); 
+    var dy = Math.abs(endy - starty);
     //var dspacing = 0.1;
     if (Circuit[n].compType == "Wire") { //constant number of ions for wire
       if ((dx)> (dy)){
-        resistanceTotal +=(dx/dspacing);
+        resistanceTotal +=(dx /dspacing);
       }else{
-        resistanceTotal += (dy/dspacing);
+        resistanceTotal += (dy /dspacing);
 
       }
     }else{
@@ -276,27 +281,24 @@ function initParticles() {
     var offset = i*PartEleCount;
     s[offset+P_MASS] = 10;
     s[offset+P_SIZE] = 4;
-  //  if (circOn) {
+
       var randDist = Math.random();
       s[offset+P_POSX] = Circuit[compStart].endp1[0] + randDist*(Circuit[compStart].endp2[0]-Circuit[compStart].endp1[0]) ; // +- [0.9 - 1.0]
       s[offset+P_POSY] = Circuit[compStart].endp1[1] + randDist*(Circuit[compStart].endp2[1]-Circuit[compStart].endp1[1]);
-      s[offset+P_POSZ] = 0.1*Math.random() - 0.1*Math.random();
-//    }
-/*    else {
-      s[offset+P_POSX] = -0.3*Math.random() + 0.3*Math.random();
-      s[offset+P_POSY] = -0.3*Math.random() + 0.3*Math.random();
-      s[offset+P_POSZ] = Math.random() - Math.random();  
-    }*/
-    if (circOn){
-      s[offset+P_VELX] = 0.002*Math.random();
-      s[offset+P_VELY] = 0.002*Math.random();
-      s[offset+P_VELZ] = 0.002*Math.random();
+//      s[offset+P_POSZ] = 0.1*Math.random() - 0.1*Math.random();
+      s[offset+P_POSZ] = 0;
 
-    }else{
-      s[offset+P_VELX] = -0.002*Math.random() + 0.002*Math.random();
-      s[offset+P_VELY] = -0.002*Math.random() + 0.002*Math.random();
-      s[offset+P_VELZ] = -0.002*Math.random() + 0.002*Math.random();      
-    }
+
+      s[offset+P_VELX] = -0.001*Math.random() + 0.001*Math.random();
+      s[offset+P_VELY] = -0.001*Math.random() + 0.001*Math.random();
+//      s[offset+P_VELZ] = -0.001*Math.random() + 0.001*Math.random();      
+      s[offset+P_VELZ] = 0;      
+
+      //init acceleration
+      s[offset+P_ACCX] = -0.001*Math.random() + 0.001*Math.random();
+      s[offset+P_ACCY] = -0.001*Math.random() + 0.001*Math.random();
+      s[offset+P_ACCZ] = 0;      
+
     s[offset+P_FORX] = 0;
     s[offset+P_FORY] = 0;
     s[offset+P_FORZ] = 0;
@@ -328,7 +330,7 @@ function main() {
   numWalls = numComps;
   f = new Array(numComps);
  console.log('res, numions numwalls', " ",resistanceTotal," " ,IonNumConst, " ",numWalls);
-  constraints = new Array(Math.ceil(resistanceTotal*IonNumConst)+5*numComps+numWalls);
+  constraints = new Array(Math.ceil(resistanceTotal*IonNumConst)+1*numComps+numWalls);
   console.log('constraints length:', constraints.length);
   current = Circuit[0].curr;
   // Get the rendering context for WebGL
@@ -442,7 +444,7 @@ var g_lookAtZ = 0;
 
 function draw(gl, n, timeStep, u_ViewMatrix, viewMatrix) {
 //==============================================================================  // Set the rotation matrix
- // apply constraints and impose drag
+ //find out connections in the circuit
     connected(Circuit);
   
 
@@ -451,7 +453,7 @@ function draw(gl, n, timeStep, u_ViewMatrix, viewMatrix) {
   //gl.clear(gl.COLOR_BUFFER_BIT);
   // update state space
   calcForces();
-  applyForces(0, timeStep); // 0 for Euler
+  //applyForces(0, timeStep); // 0 for Euler
     applyConstraints(Circuit);
   
 
@@ -471,7 +473,7 @@ function calcForces() {
 
 
      fxtot =fytot =fztot = 1; // position forces
-    fmass = 0; // mass-changing force
+
     PI = 3.14159
  
    for (var i = 0; i < numParticles; i++) {
@@ -479,20 +481,70 @@ function calcForces() {
 
       for (var j = 0; j< f.length; j++){
         if(s[offset+P_WALL] == f[j].identification){ //if the electron belongs to a particular forcefield
+           //make particles experience resistance 
+           /*switch (f[j].forceType) {
+            case "Bulb":
+              s[offset+P_CVEX] = s[offset+P_VELX]/2;
+              s[offset+P_CVEY] = s[offset+P_VELY]/2;
+              s[offset+P_CVEZ] = s[offset+P_VELZ]/2;
+            break;
+            default:
+              s[offset+P_CVEX] = s[offset+P_VELX];
+              s[offset+P_CVEY] = s[offset+P_VELY];
+              s[offset+P_CVEZ] = s[offset+P_VELZ];
+         }
+         if (f[j].forceType != "Bulb"){
+              s[offset+P_CVEX] = s[offset+P_VELX]/2;
+              s[offset+P_CVEY] = s[offset+P_VELY]/2;
+              s[offset+P_CVEZ] = s[offset+P_VELZ]/2;          
+         }else{
+              s[offset+P_CVEX] = s[offset+P_VELX];
+              s[offset+P_CVEY] = s[offset+P_VELY];
+              s[offset+P_CVEZ] = s[offset+P_VELZ];          
+
+         }*/
           if (f[j].voltage != 0){ //is the circuit on or off
             if (Math.abs(f[j].strt[0] - f[j].end[0]) < Math.abs(f[j].strt[1] - f[j].end[1])) {
-              fxtot = Math.cos(PI/6);
+/*              fxtot = Math.cos(PI/6);
               fytot = 2;
-              fztot =1;
+              fztot =1;*/
+/*              if(f[j].strt[1] < f[j].end[1]){
+                if(s[offset+P_POSY] > f[j].strt[1] && s[offset+P_POSY] < f[j].end[1])
+                  if (s[offset+P_CVEY] < 0 )s[offset+P_CVEY] = s[offset+P_CVEY] * -1;
+              }else{
+                if(s[offset+P_POSY] < f[j].strt[1] && s[offset+P_POSY] > f[j].end[1])
+                  if (s[offset+P_CVEY] > 0 )s[offset+P_CVEY] = s[offset+P_CVEY] * -1;
+              }*/
+
+              s[offset+P_POSX] += s[offset+P_VELX];
+              s[offset+P_POSY] += s[offset+P_VELY];              
+              //s[offset+P_POSZ] += s[offset+P_CVEZ];
+
             }else{
-              fxtot =2;
-              fytot = Math.sin(PI/3);
-              fztot =1;
+              /*There was a leak of particles from the sides as a result of the forces changing the direction
+              * of the voltage
+              *Here I stop the effect of the force just before it reaches the additional 0.18 space(buffer)
+              * I check to see if the start point is greater then the end point or vice versa so that I define the 
+              * forces within the appropriate box
+              */
+              /*if(f[j].strt[0] < f[j].end[0]){
+                if(s[offset+P_POSX] > f[j].strt[0] && s[offset+P_POSX] < f[j].end[0])
+                  if (s[offset+P_CVEX] < 0 )s[offset+P_CVEX] = s[offset+P_CVEX] * -1 ;
+              }else{
+                if(s[offset+P_POSX] < f[j].strt[0] && s[offset+P_POSX] > f[j].end[0])
+                  if (s[offset+P_CVEX] > 0 )s[offset+P_CVEX] = s[offset+P_CVEX] * -1 ;                
+              }*/
+              s[offset+P_POSX] += s[offset+P_VELX];
+              s[offset+P_POSY] += s[offset+P_VELY];              
+             // s[offset+P_POSZ] += s[offset+P_CVEZ];
 
             }
 
           }else{
-             fxtot =fytot =fztot = 1; // position forces
+             //fxtot =fytot =fztot = 1; // position forces
+              s[offset+P_POSX] += s[offset+P_VELX];
+              s[offset+P_POSY] += s[offset+P_VELY];              
+              //s[offset+P_POSZ] += s[offset+P_CVEZ];
           }
 
         }
@@ -502,12 +554,12 @@ function calcForces() {
     s[offset+P_FORX] = fxtot;
     s[offset+P_FORY] = fytot;
     s[offset+P_FORZ] = fztot;
-  }
+ }
 
 
 }
 
-function applyForces(solvertype, timeStep) {
+/*function applyForces(solvertype, timeStep) {
   switch(solvertype) {
     case 0:
       // basic Euler solver
@@ -527,7 +579,7 @@ function applyForces(solvertype, timeStep) {
       default:
         console.log('error in solver! invalid solvertype');
   }
-}
+}*/
 
 
 function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
@@ -585,7 +637,7 @@ function applyConstraints() {
         // true if intersects in the x-direction AND intersects in the y-direction AND intersects in the z-direction
           // for each axis-direction, the particle can overlap in one of two ways
         var pRad = (s[offset+P_SIZE])/canvas.width; // radius for each particle
-        var iRad = (constraints[j].Csize/2)/canvas.width; // radius for each ion
+        var iRad = (constraints[j].Csize)/canvas.width; // radius for each ion
         if ((s[offset+P_POSX] - pRad < constraints[j].xpos + iRad && // X-intersection (check both sides)
              s[offset+P_POSX] - pRad > constraints[j].xpos - iRad || 
              s[offset+P_POSX] + pRad < constraints[j].xpos + iRad &&
@@ -593,11 +645,11 @@ function applyConstraints() {
             (s[offset+P_POSY] - pRad < constraints[j].ypos + iRad && // Y-intersection (check both sides)
              s[offset+P_POSY] - pRad > constraints[j].ypos - iRad || 
              s[offset+P_POSY] + pRad < constraints[j].ypos + iRad &&
-             s[offset+P_POSY] + pRad > constraints[j].ypos - iRad) &&
-            (s[offset+P_POSZ] - pRad < constraints[j].zpos + iRad && // Z-intersection (check both sides)
+             s[offset+P_POSY] + pRad > constraints[j].ypos - iRad) /*&&
+            /*(s[offset+P_POSZ] - pRad < constraints[j].zpos + iRad && // Z-intersection (check both sides)
              s[offset+P_POSZ] - pRad > constraints[j].zpos - iRad || 
              s[offset+P_POSZ] + pRad < constraints[j].zpos + iRad &&
-             s[offset+P_POSZ] + pRad > constraints[j].zpos - iRad))
+             s[offset+P_POSZ] + pRad > constraints[j].zpos - iRad)*/)
           {
           // if there is an intersection, flip all velocities.
           // 
@@ -606,7 +658,7 @@ function applyConstraints() {
           //s[offset+P_CGRN] = 1.0;
           s[offset+P_VELX] = -s[offset+P_VELX]; //+ 0.1*Math.random() - 0.1*Math.random();
           s[offset+P_VELY] = -s[offset+P_VELY]; //+ 0.1*Math.random() - 0.1*Math.random();
-          s[offset+P_VELZ] = -s[offset+P_VELZ];
+          //s[offset+P_CVEZ] = -s[offset+P_CVEZ];
         }
       }
       else if (constraints[j].Ctype == 1) { // if it's a wall constraint
@@ -623,10 +675,10 @@ function applyConstraints() {
 
 
 //they are all 0.12 but I named them for readability
-  var bufferAbove = 0.18;
-  var bufferBeneath = 0.18;
-  var bufferRight = 0.18;
-  var bufferLeft = 0.18;
+  var bufferAbove = 0.19;
+  var bufferBeneath = 0.19;
+  var bufferRight = 0.19;
+  var bufferLeft = 0.19;
 // returns 1 for collisions with constant-x walls, 2 for constant-y walls, and 0 otherwise
 function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in state array for particle, buffer = distance from wall before collision occurs
   var colWindow = buffer;
@@ -640,6 +692,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
   
   if (s[sOffset+P_WALL] != wall.Csize ) return; //every particle is initialized in a wall 
                                                 //check which wall it is and define the constraints
+                                                //wall.Csize contains the identification for the wall
 
   
   if (Math.abs(wall.strt[0] - wall.end[0]) < Math.abs(wall.strt[1] - wall.end[1])) { // it's a constant-x wall
@@ -699,8 +752,11 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
 
             //very verbose, I can think of many ways to simplify this code but ...
             if (wall.strt[0] < wall.end[0]){
+                  if(wall.voltage != 0){
+
+                  }
                   if (s[sOffset+P_POSX] <= (wall.strt[0] - bufferLeft) && s[sOffset+P_VELX] < 0.0){ 
-                      var wall_Id= bumpedInto(wall, "0" ,Circuit);//"S" for start
+                      var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                       }else{
@@ -708,7 +764,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
                   } else if(s[sOffset+P_POSX] >= (wall.end[0] + bufferRight)&& s[sOffset+P_VELX] > 0.0){ // collision! 
-                      var wall_Id= bumpedInto(wall, "1",Circuit);//"E for end"
+                      var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                       }else{
@@ -721,7 +777,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
 
             } else{ // start and end are reveresed sometimes
                   if (s[sOffset+P_POSX] >= (wall.strt[0] + bufferLeft) && s[sOffset+P_VELX] > 0.0){ 
-                      var wall_Id= bumpedInto(wall, "0" ,Circuit);//"S" for start
+                      var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                       }else{
@@ -729,7 +785,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
                   } else if(s[sOffset+P_POSX] <= (wall.end[0] - bufferRight)&& s[sOffset+P_VELX] < 0.0){ // collision! 
-                      var wall_Id= bumpedInto(wall, "1",Circuit);//"E for end"
+                      var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                       }else{
@@ -750,10 +806,10 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
 
 
   }
-            if( s[sOffset+P_POSZ] >= (0.05) && s[sOffset+P_VELZ] > 0.0 || //0.2 for a little space above the line 
-              s[sOffset+P_POSZ] <= (-0.05)  && s[sOffset+P_VELZ] < 0.0){ //and some space below the line to make a wall
-                s[sOffset+P_VELZ] = -1 * s[sOffset+P_VELZ];
-          }
+/*            if( s[sOffset+P_POSZ] >= (0.05) && s[sOffset+P_CVEZ] > 0.0 || //0.2 for a little space above the line 
+              s[sOffset+P_POSZ] <= (-0.05)  && s[sOffset+P_CVEZ] < 0.0){ //and some space below the line to make a wall
+                s[sOffset+P_CVEZ] = -1 * s[sOffset+P_CVEZ];
+          }*/
 
 
 }
@@ -914,18 +970,18 @@ function makeCircuit() {
     var endx = Circuit[n].endp2[0], endy = Circuit[n].endp2[1];
     //var IonsInComp = 5+Math.ceil(Circuit[n].resistance*IonNumConst); // number of ions for this component
 
-    var xspacing = (endx - startx); 
-    var yspacing = (endy - starty);
+    var dx = Math.abs(endx - startx); 
+    var dy = Math.abs(endy - starty);
     //var dspacing = 0.1;
     if (Circuit[n].compType == "Wire") { //constant number of ions for wire
       if ((xspacing)> (yspacing)){
-        totIons += Math.ceil((xspacing/dspacing)*IonNumConst)+5*numComps;
+        totIons += Math.ceil((dx/dspacing)*IonNumConst)+1*numComps;
       }else{
-        totIons += Math.ceil((yspacing/dspacing)*IonNumConst)+5*numComps;
+        totIons += Math.ceil((dy/dspacing)*IonNumConst)+1*numComps;
 
       }
     }else{
-        totIons += Math.ceil(Circuit[n].resistance*IonNumConst)+5*numComps;      
+        totIons += Math.ceil(Circuit[n].resistance*IonNumConst)+1*numComps;      
     }
 
   }
@@ -936,33 +992,44 @@ function makeCircuit() {
     // add relevant vertex information to render ions
     var startx = Circuit[n].endp1[0], starty = Circuit[n].endp1[1];
     var endx = Circuit[n].endp2[0], endy = Circuit[n].endp2[1];
-    var IonsInComp = 5+Math.ceil(Circuit[n].resistance*IonNumConst); // number of ions for this component
+    var IonsInComp; //= 1+Math.ceil(Circuit[n].resistance*IonNumConst); // number of ions for this component
 
-    var xspacing = (endx - startx)/IonsInComp; 
-    var yspacing = (endy - starty)/IonsInComp;
-    var dx =  endx - startx;
-    var dy = endy - starty;
-    //var dspacing = 0.1;
+    var dx =  Math.abs(endx - startx);
+    var dy = Math.abs(endy - starty);
+    
     if (Circuit[n].compType == "Wire") { //constant number of ions for wire
-      if ((xspacing)> (yspacing)){
-        IonsInComp = 5+Math.ceil((dx/dspacing)*IonNumConst);        
+      if (dx> dy){
+        IonsInComp = 1+Math.ceil((dx /dspacing)*IonNumConst);        
       }else{
-        IonsInComp = 5+Math.ceil((dy/dspacing)*IonNumConst);        
+        IonsInComp = 1+Math.ceil((dy /dspacing)*IonNumConst);        
 
       }
-      xspacing = (endx - startx)/IonsInComp;
-      yspacing = (endy - starty)/IonsInComp;
+
+    }else{
+        IonsInComp = 1+Math.ceil(Circuit[n].resistance*IonNumConst); // number of ions for this component
 
     }
+
+    var xspacing = (endx - startx)/IonsInComp;
+    var yspacing = (endy - starty)/IonsInComp;
 
 
     for (var i = 0; i < IonsInComp; i++) {
       var offset = i*PartEleCount+IonsDone;
       circVerts[offset+P_MASS] = 10000000;
       circVerts[offset+P_SIZE] = ionSize;
-      circVerts[offset+P_POSX] = startx + i*xspacing - 0.1 + 0.1*((i+1)%3);
-      circVerts[offset+P_POSY] = starty + i*yspacing - 0.1 + 0.1*((i+2)%3);
-      circVerts[offset+P_POSZ] = -0.1 + 0.1*(i%3);  
+      if (xspacing < 0){
+        circVerts[offset+P_POSX] = startx + i*xspacing + 0.08 + (-0.08)*((i + 1)%3);
+      }else{
+        circVerts[offset+P_POSX] = startx + i*xspacing - 0.08 + (0.08)*((i + 1)%3);        
+      } 
+      if (yspacing < 0){
+        circVerts[offset+P_POSY] = starty + i*yspacing  + 0.08 + (- 0.08)*((i +1)%3);
+      }else{
+        circVerts[offset+P_POSY] = starty + i*yspacing  - 0.08 + (0.08)*((i +1)%3);
+      }
+//      circVerts[offset+P_POSZ] = -0.1 + 0.1*(i%3);  
+      circVerts[offset+P_POSZ] = 0;  
       circVerts[offset+P_VELX] = 0;
       circVerts[offset+P_VELY] = 0;
       circVerts[offset+P_VELZ] = 0;
@@ -1016,7 +1083,7 @@ function makeCircuit() {
   }
       
   // add wall constraints to constraints array
-  var wallstart = constraints.length-numWalls;
+  var wallstart = constraints.length;
   // left outer wall
   for (n = 0; n < Circuit.length; n++) {
 
@@ -1035,7 +1102,7 @@ function makeCircuit() {
                                                     ,0.0],
                                                      Circuit[n].voltage); // end point
 
-        f[n] = new Force(0, // force type, start point, end point, width
+        f[n] = new Force(Circuit[n].compType, // force type, start point, end point, width
                          [Circuit[n].endp1[0], Circuit[n].endp1[1] /*- circWidth/2*/],
                          [Circuit[n].endp2[0], Circuit[n].endp2[1] /*- circWidth/2*/], circWidth, Circuit[n].voltage, n);
         //identify Circuit Component

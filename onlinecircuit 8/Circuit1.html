@@ -31,6 +31,11 @@ var pubnub = PUBNUB.init({
     channel: 'mma',
     message: function(m){
       if (m == '1'){
+        doParse();
+      }
+    }
+ });
+function doParse(){
        var numComps;
         var Circuit = [];
         var tCircuit;
@@ -68,15 +73,9 @@ var pubnub = PUBNUB.init({
             main();
            
           });  
+
+
 }
-
-
-
- 
-
-      }
-
- });
     console.log("for some reason I'm back here");
 
     </script>
