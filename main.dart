@@ -228,6 +228,7 @@ class App extends TouchManager {
      theApp.addTouchable(theApp.lens);
      /* redraw the components of app*/
      theApp.draw();
+     theApp.circuit.sendDataToServer();
    }
    
 }
