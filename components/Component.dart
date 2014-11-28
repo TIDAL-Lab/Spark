@@ -378,6 +378,7 @@ class Component implements Touchable {
       }
     }
     App.repaint();
+    theApp.circuit.sendDataToServer();
   }
 
   void touchDrag(Contact event) {
