@@ -137,6 +137,7 @@ class Circuit {
                                           'startY':((c.start.y-canvas.height/2)/canvas.height/2)* 10 ,
                                           'endX': (((c.end.x - canvas.width/2)/canvas.width/2) + 0.1)*10,//shifted it by 0.1 so that it's visble on webgl scene
                                           'endY': ((c.end.y - canvas.height/2)/canvas.height/2)*10,
+                                          'direction': 1,
                                           'innerWall':1 //returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)
                                           });
         myObj.add(anObj);
