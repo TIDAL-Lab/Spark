@@ -13,11 +13,14 @@
   <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
   <script src="http://cdn.pubnub.com/pubnub.min.js"></script>
   <script src="lib/underscore.js"></script>
+<script src="lib/vector.js"></script>
+<script src="lib/main.js"></script>
 
   </head>
 
   <body>
     <input type="text" id="force"></input>
+    <input type="text" id="radius"></input>
     <input type="Button" onclick= "doParse()"></input>
     <script type="text/javascript">
     
@@ -28,7 +31,7 @@ var pubnub = PUBNUB.init({
  });
 
  pubnub.subscribe({
-    channel: 'mma',
+    channel: 'mma1',
     message: function(m){
       if (m == '1'){
         doParse();
@@ -81,10 +84,12 @@ function doParse(){
     </script>
     <script src="CircuitwithParse1.js"></script>    
 
-    <canvas id="webgl" width="800" height="600">
+    <canvas id="webgl" width="800" height="800">
     Please use a browser that supports "canvas"
     </canvas>
-    <p> Arrow Keys change camera position - Pg Up/Pg Dn change zoom</p>
+    <p> Press i to zoom in</p>
+    <p> Press o to zoom out</p>
+    <p> Arrow Keys to move up, down, left and right</p>
 
   </body>
 </html>

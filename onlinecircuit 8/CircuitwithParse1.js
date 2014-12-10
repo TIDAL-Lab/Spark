@@ -18,6 +18,7 @@ var VSHADER_SOURCE =
   'varying float v_alpha; \n' +
   'varying vec3 v_norm; \n' +
   'varying float isPoint; \n' +
+  'uniform float u_diam; \n' +
   'uniform bool u_isPart; \n' +
   'uniform int renderMode; \n' +
   'uniform mat4 u_ViewMatrix; \n' +
@@ -26,10 +27,10 @@ var VSHADER_SOURCE =
   'uniform float u_alpha; \n' + 
   'uniform vec3 u_lighting; \n' +
   'void main() {\n' +
+  '  gl_Position = u_ProjMatrix * u_ViewMatrix  *u_modelMatrix *a_Position;  \n' + 
   ' if (u_isPart) { \n' +
-  '  gl_PointSize = a_diam;\n' +
+  ' gl_PointSize = a_diam/gl_Position.w ;\n' +
   '}\n ' +
-  '  gl_Position = u_ProjMatrix * u_ViewMatrix * u_modelMatrix *a_Position;  \n' + 
   '  v_Color = a_Color; \n' +
   ' v_alpha = u_alpha;\n'+
   ' v_norm = a_norm; \n' +
@@ -160,6 +161,7 @@ const IPS_SIZE = 3;
 const IPS_IDEN = 0;
 const IPS_POSN = 1;
 const IPS_SIDE = 2;
+const PI = 3.142;
 
 function reset(Circuit1){
     currentConst = 10; // multiplied with calculated current to create "realistic" looking flows
@@ -170,7 +172,7 @@ function reset(Circuit1){
     circWidth = 0.2 // globally defined circuit width
     f = [ ];// = new Array(numComps); // array used to hold forces
     numParticles = 20 * Circuit1.length;//200; // number of electrons
-    ionSize = 15; // size of each ion
+    ionSize = 100; // size of each ion
     isPart = true; // T/F value used to tell the shader if rendering particles or other shapes (lines, triangles)
     circOn = 1, dragOn = 1;
     Solver = 0; // 0 for Euler
@@ -186,16 +188,24 @@ function reset(Circuit1){
     resistanceTotal = 0;
     constraints = [ ];
     current = 0;
-    circWalls = new Float32Array(12*numComps*PartEleCount);
+
+    //circWalls = new Float32Array(12*numComps*PartEleCount);
     Circuit = Circuit1;
 
-var g_eyeX = 0;
-var g_eyeY = 1;
-var g_eyeZ = 1;
+ /*g_eyeX = 0;
+ g_eyeY = -8;
+ g_eyeZ = 0;
 
-var g_lookAtX = 0;
-var g_lookAtY = 0;
-var g_lookAtZ = 0;
+ g_lookAtX = 0;
+ g_lookAtY = 0;
+ g_lookAtZ = 0;
+
+ g_UpX = 0;
+ g_UpY = 0;
+ g_UpZ = 1;
+
+near = 1;
+far = 100;*/
 
 }
 
@@ -207,7 +217,7 @@ var numWalls;// = numComps*2;
 var circWidth = 0.2 // globally defined circuit width
 var f;// = new Array(numComps); // array used to hold forces
 var numParticles = 200;// number of electrons will be calculated based on the number of components; no longer a constant number
-var ionSize = 15; // size of each ion
+var ionSize = 100; // size of each ion
 var isPart = true; // T/F value used to tell the shader if rendering particles or other shapes (lines, triangles)
 var circOn = 1, dragOn = 1;
 var Solver = 0; // 0 for Euler
@@ -220,9 +230,6 @@ var constraints;
 var current;
 
 
-var g_lookAtX = 0;
-var g_lookAtY = 0;
-var g_lookAtZ = 0;
 var Circuit;
   
 var modelMatrix = new Matrix4();
@@ -280,17 +287,29 @@ function initParticles() {
     var compStart = i%Circuit.length; // which circuit component this electron will initialize in 
     var offset = i*PartEleCount;
     s[offset+P_MASS] = 10;
-    s[offset+P_SIZE] = 4;
+    s[offset+P_SIZE] = 25;
 
       var randDist = Math.random();
-      s[offset+P_POSX] = Circuit[compStart].endp1[0] + randDist*(Circuit[compStart].endp2[0]-Circuit[compStart].endp1[0]) ; // +- [0.9 - 1.0]
-      s[offset+P_POSY] = Circuit[compStart].endp1[1] + randDist*(Circuit[compStart].endp2[1]-Circuit[compStart].endp1[1]);
+      initPosX = Circuit[compStart].endp1[0] + randDist*(Circuit[compStart].endp2[0]-Circuit[compStart].endp1[0]);
+      initPosY = Circuit[compStart].endp1[1] + randDist*(Circuit[compStart].endp2[1]-Circuit[compStart].endp1[1]);
+
+      //if(initPosX == 0 && initPosY == 0) initPosX = ionSize/canvas.width;
+
+      s[offset+P_POSX] = initPosX ; // +- [0.9 - 1.0]
+      s[offset+P_POSY] = initPosY;
 //      s[offset+P_POSZ] = 0.1*Math.random() - 0.1*Math.random();
       s[offset+P_POSZ] = 0;
 
+      // exclude 0;
+      initVelX = -0.001*Math.random() + 0.001*Math.random() ;
+      if (Math.abs(initVelX) < 0.0001) initVelX = 0.001;
+      initVelY = -0.001*Math.random() + 0.001*Math.random() ;
+      if (Math.abs(initVelY) < 0.0001) initVelY = 0.001;
 
-      s[offset+P_VELX] = -0.001*Math.random() + 0.001*Math.random();
-      s[offset+P_VELY] = -0.001*Math.random() + 0.001*Math.random();
+
+      s[offset+P_VELX] = initVelX;
+      s[offset+P_VELY] = initVelY;
+
 //      s[offset+P_VELZ] = -0.001*Math.random() + 0.001*Math.random();      
       s[offset+P_VELZ] = 0;      
 
@@ -382,6 +401,10 @@ if (!u_lighting) {
   if(!isPartID){
       console.log("Failed to get isPartID");
   }
+  u_diam = gl.getUniformLocation(gl.program,'u_diam');
+  if(!u_diam){
+      console.log("Failed to get u_diam");
+  }
   // set render mode to control what gets displayed
   var u_renderModeLoc = gl.getUniformLocation(gl.program, 'u_renderMode');
   if (u_renderModeLoc) { 
@@ -398,8 +421,16 @@ if (!u_lighting) {
   // registers left and right keys to adjust camera
   document.onkeydown = function(ev){ keydown(ev, gl, u_ViewMatrix, viewMatrix); };
 
+  //calculate height of near plane for scaling
 
-  projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100); // this never changes
+  fovy = 30;
+  viewPort = [0,0,0,0];
+  viewPort = gl.getParameter(gl.VIEWPORT);
+  heightOfNearPlane = parseFloat(Math.abs(viewPort[3] - viewPort[1]))/
+                      (2*Math.tan(0.5 * fovy * Math.PI/180))/100; //divided by 100 beccause the points were really large
+
+  gl.uniform1f(u_diam, heightOfNearPlane);
+  projMatrix.setPerspective(fovy, canvas.width/canvas.height, near, far); // this never changes
   // set the GLSL u_ProjMatrix to the value I have set
   gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
@@ -421,24 +452,32 @@ if (!u_lighting) {
   } else {
     //gl.clearColor(0, 0, 0, 1);
   }
-
+counttick =0
   // Start drawing
   var tick = function() {
     timeStep = animate(timeStep);  // Update the statespace
     draw(gl, myVerts, timeStep, u_ViewMatrix, viewMatrix, Circuit);
     requestAnimationFrame(tick, canvas);  // Request browser to ?call tick()?
+    counttick++;
   };
   tick();
 }
 
 
 var g_eyeX = 0;
-var g_eyeY = -4.0;
-var g_eyeZ = -2.9;
+var g_eyeY = -8;
+var g_eyeZ = 0;
 
 var g_lookAtX = 0;
 var g_lookAtY = 0;
 var g_lookAtZ = 0;
+
+var g_UpX = 0;
+var g_UpY = 0;
+var g_UpZ = 1;
+
+var near = 1;
+var far = 100;
 
 
 
@@ -448,19 +487,19 @@ function draw(gl, n, timeStep, u_ViewMatrix, viewMatrix) {
     connected(Circuit);
   
 
-   //document.getElementById('force').value =  g_eyeX + " " + g_eyeY + " " + g_eyeZ;
+   document.getElementById('force').value =  g_eyeX + " " + g_eyeY + " " + g_eyeZ;
   
   //gl.clear(gl.COLOR_BUFFER_BIT);
   // update state space
   calcForces();
   //applyForces(0, timeStep); // 0 for Euler
-    applyConstraints(Circuit);
+    applyConstraints(gl);
   
 
   viewMatrix.setLookAt(g_eyeX, g_eyeY, g_eyeZ,  // eye position
   //viewMatrix.setLookAt(xpos, ypos, zpos,  // eye position
                           g_lookAtX, g_lookAtY, g_lookAtZ,                // look-at point (origin)
-                          0, 0, 1);               // up vector (+z)
+                          g_UpX, g_eyeY, g_UpZ);               // up vector (+z)
 
   Render(gl, n, u_ViewMatrix, viewMatrix);
 
@@ -508,16 +547,16 @@ function calcForces() {
 /*              fxtot = Math.cos(PI/6);
               fytot = 2;
               fztot =1;*/
-/*              if(f[j].strt[1] < f[j].end[1]){
+              /*if(f[j].strt[1] < f[j].end[1]){
                 if(s[offset+P_POSY] > f[j].strt[1] && s[offset+P_POSY] < f[j].end[1])
-                  if (s[offset+P_CVEY] < 0 )s[offset+P_CVEY] = s[offset+P_CVEY] * -1;
+                  if (s[offset+P_VELY] < 0 )s[offset+P_VELY] = s[offset+P_VELY] * -1;
               }else{
                 if(s[offset+P_POSY] < f[j].strt[1] && s[offset+P_POSY] > f[j].end[1])
-                  if (s[offset+P_CVEY] > 0 )s[offset+P_CVEY] = s[offset+P_CVEY] * -1;
+                  if (s[offset+P_VELY] > 0 )s[offset+P_VELY] = s[offset+P_VELY] * -1;
               }*/
 
               s[offset+P_POSX] += s[offset+P_VELX];
-              s[offset+P_POSY] += s[offset+P_VELY];              
+              s[offset+P_POSY] += s[offset+P_VELY];             
               //s[offset+P_POSZ] += s[offset+P_CVEZ];
 
             }else{
@@ -529,13 +568,13 @@ function calcForces() {
               */
               /*if(f[j].strt[0] < f[j].end[0]){
                 if(s[offset+P_POSX] > f[j].strt[0] && s[offset+P_POSX] < f[j].end[0])
-                  if (s[offset+P_CVEX] < 0 )s[offset+P_CVEX] = s[offset+P_CVEX] * -1 ;
+                  if (s[offset+P_VELX] < 0 )s[offset+P_VELX] = s[offset+P_VELX] * -1 ;
               }else{
                 if(s[offset+P_POSX] < f[j].strt[0] && s[offset+P_POSX] > f[j].end[0])
-                  if (s[offset+P_CVEX] > 0 )s[offset+P_CVEX] = s[offset+P_CVEX] * -1 ;                
+                  if (s[offset+P_VELX] > 0 )s[offset+P_VELX] = s[offset+P_VELX] * -1 ;                
               }*/
               s[offset+P_POSX] += s[offset+P_VELX];
-              s[offset+P_POSY] += s[offset+P_VELY];              
+              s[offset+P_POSY] += s[offset+P_VELY];             
              // s[offset+P_POSZ] += s[offset+P_CVEZ];
 
             }
@@ -593,9 +632,8 @@ function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
   
   mygl.bufferSubData(mygl.ARRAY_BUFFER, 0, s);
  
- modelMatrix.setScale(1,1,1);
 
-  modelMatrix.setRotate(-45,1,0,0);
+  modelMatrix.setRotate(-90,1,0,0);
 
   mygl.uniformMatrix4fv(u_modelMatrix, false, modelMatrix.elements);
   
@@ -625,7 +663,7 @@ function animate() {
 }
 
 // circuitOn set to 1 imposes circuit-constraints
-function applyConstraints() {
+function applyConstraints(gl) {
    for (var i = 0; i < numParticles; i++) { // loop through all particles
     var offset = i*PartEleCount;
     // particle motion
@@ -636,30 +674,32 @@ function applyConstraints() {
         // check if the spheres for the particle and ion intersect
         // true if intersects in the x-direction AND intersects in the y-direction AND intersects in the z-direction
           // for each axis-direction, the particle can overlap in one of two ways
-        var pRad = (s[offset+P_SIZE])/canvas.width; // radius for each particle
-        var iRad = (constraints[j].Csize)/canvas.width; // radius for each ion
-        if ((s[offset+P_POSX] - pRad < constraints[j].xpos + iRad && // X-intersection (check both sides)
-             s[offset+P_POSX] - pRad > constraints[j].xpos - iRad || 
-             s[offset+P_POSX] + pRad < constraints[j].xpos + iRad &&
-             s[offset+P_POSX] + pRad > constraints[j].xpos - iRad) && 
-            (s[offset+P_POSY] - pRad < constraints[j].ypos + iRad && // Y-intersection (check both sides)
-             s[offset+P_POSY] - pRad > constraints[j].ypos - iRad || 
-             s[offset+P_POSY] + pRad < constraints[j].ypos + iRad &&
-             s[offset+P_POSY] + pRad > constraints[j].ypos - iRad) /*&&
-            /*(s[offset+P_POSZ] - pRad < constraints[j].zpos + iRad && // Z-intersection (check both sides)
-             s[offset+P_POSZ] - pRad > constraints[j].zpos - iRad || 
-             s[offset+P_POSZ] + pRad < constraints[j].zpos + iRad &&
-             s[offset+P_POSZ] + pRad > constraints[j].zpos - iRad)*/)
-          {
-          // if there is an intersection, flip all velocities.
-          // 
-          //var Ioffset = (Coffset / Cfields) * PartEleCount;
-          //circVerts[j*PartEleCount + P_CBLU] += 0.1;
-          //s[offset+P_CGRN] = 1.0;
-          s[offset+P_VELX] = -s[offset+P_VELX]; //+ 0.1*Math.random() - 0.1*Math.random();
-          s[offset+P_VELY] = -s[offset+P_VELY]; //+ 0.1*Math.random() - 0.1*Math.random();
-          //s[offset+P_CVEZ] = -s[offset+P_CVEZ];
+          //scale the radius according to Y position of the camera( the Y position controls the zoom;
+        //scale by gl_Position.w
+        //divide by 2 to change from diameter to radius;
+        var glPositionwp = scaleParticlePoint(s[offset+P_POSX], s[offset+P_POSY], s[offset+P_POSZ]);                 
+        var pRad = (s[offset+P_SIZE]/glPositionwp/2 )/(canvas.width);///( g_eyeY); // radius for each particle
+        //console.log("The particle radius " + pRad);
+        var glPositionwi = scaleParticlePoint(constraints[j].xpos, constraints[j].ypos,constraints[j].zpos);                 
+        var iRad = (constraints[j].Csize/glPositionwi/2)/(canvas.width);///( g_eyeY); // radius for each ion
+        //check if ion is in Electron
+        //gl.get(gl.POINT_SIZE);
+        //document.getElementById('radius').value =  iRad;
+        var dx = s[offset+P_POSX] - constraints[j].xpos;
+        var dy = s[offset+P_POSY] - constraints[j].ypos;
+
+        var d2 = dx* dx + dy * dy;
+        var r = (iRad + pRad) * (iRad + pRad);
+
+        if (d2 < r){
+            s[offset+P_VELX] = -s[offset+P_VELX]; //+ 0.1*Math.random() - 0.1*Math.random();
+            s[offset+P_VELY] = -s[offset+P_VELY]; //+ 0.1*Math.random() - 0.1*Math.random();
+
         }
+
+
+
+        
       }
       else if (constraints[j].Ctype == 1) { // if it's a wall constraint
         var wBuffer = 0.01; // distance from a wall before a collision is detected
@@ -674,11 +714,11 @@ function applyConstraints() {
 }
 
 
-//they are all 0.12 but I named them for readability
-  var bufferAbove = 0.19;
-  var bufferBeneath = 0.19;
-  var bufferRight = 0.19;
-  var bufferLeft = 0.19;
+//they are all 0.18 but I named them for readability
+  var bufferAbove = 0.18;
+  var bufferBeneath = 0.18;
+  var bufferRight = 0.18;
+  var bufferLeft = 0.18;
 // returns 1 for collisions with constant-x walls, 2 for constant-y walls, and 0 otherwise
 function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in state array for particle, buffer = distance from wall before collision occurs
   var colWindow = buffer;
@@ -748,7 +788,8 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
 
 
   }else if (Math.abs(wall.strt[0] - wall.end[0]) > Math.abs(wall.strt[1] - wall.end[1])) {
-
+            xvel = false;
+            yvel = false;
 
             //very verbose, I can think of many ways to simplify this code but ...
             if (wall.strt[0] < wall.end[0]){
@@ -759,6 +800,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        xvel = true;
                       }else{
                         s[sOffset+P_WALL] = wall_Id;
                         return;
@@ -767,6 +809,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        xvel = true;
                       }else{
                         s[sOffset+P_WALL] = wall_Id;
                         return;
@@ -780,6 +823,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        xvel = true;
                       }else{
                         s[sOffset+P_WALL] = wall_Id;
                         return;
@@ -788,6 +832,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        xvel = true;
                       }else{
                         s[sOffset+P_WALL] = wall_Id;
                         return;
@@ -796,12 +841,22 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                   } 
 
             }
+            overtx = [wall.strt[0]-bufferRight, wall.end[0]+bufferLeft, wall.strt[0]-bufferRight, wall.end[0]+bufferLeft];
+          overty = [wall.strt[1]-bufferAbove, wall.end[1]-bufferAbove, wall.strt[1]+ bufferBeneath, wall.end[1] + bufferBeneath];
+
+                              
                 if( s[sOffset+P_POSY] >= (wall.strt[1] + bufferAbove) && s[sOffset+P_VELY] > 0.0 ||
                     s[sOffset+P_POSY] <= (wall.end[1] - bufferBeneath)  && s[sOffset+P_VELY] < 0.0){
 
                       s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY]; 
+                    yvel = true;
 
                 }
+                           /* if ((pnpoly(4,overtx,overty, s[sOffset+P_POSX],s[sOffset+P_POSY]))){
+                                    s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                                    s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
+                            }*/
+
 
 
 
@@ -895,11 +950,11 @@ function connected(){
       
         
     }
-    console.log("Circuit Type" + Circuit[i].compType+ 
+    /*console.log("Circuit Type" + Circuit[i].compType+ 
                 " Circuit Identification " + Circuit[i].identification +" " +Circuit[i].connected +
                 "End Connections " + Circuit[i].openEnd +
                 "Start Connections " + Circuit[i].openStart + 
-                " IPS " +Circuit[i].IPS);
+                " IPS " +Circuit[i].IPS);*/
   }
 }
 
@@ -926,7 +981,7 @@ function isLRTB(xs,ys,xe,ye,OpenStartEnd){ //s for start and e for end pass conn
   }
 }
 
-
+scalePoint = 1;
 
 function keydown(ev) {
 //------------------------------------------------------
@@ -938,17 +993,28 @@ function keydown(ev) {
         g_lookAtX = g_lookAtX - 0.2;
       break;
       case 38:
-      //if(g_eyeZ <= 0.0)
         g_eyeZ = g_eyeZ + 0.2;
-
+        g_lookAtZ = g_lookAtZ + 0.2;
       break;
       case 39:
         g_eyeX = g_eyeX + 0.2;
         g_lookAtX = g_lookAtX + 0.2;
       break;
       case 40:
-        //if (g_eyeZ >= -7.5 )
-          g_eyeZ = g_eyeZ - 0.2;
+        g_eyeZ = g_eyeZ - 0.2;
+        g_lookAtZ = g_lookAtZ - 0.2;
+      break;
+      case 73:
+        scalePoint = scalePoint + 0.01;
+
+        g_eyeY = g_eyeY + 0.2;
+        g_lookAtY = g_lookAtY + 0.2;
+ 
+      break;
+      case 79:
+        scalePoint = scalePoint - 0.01;
+        g_eyeY = g_eyeY - 0.2;
+        g_lookAtY = g_lookAtY - 0.2;
       break;
     }
 }
@@ -1070,7 +1136,7 @@ function makeCircuit() {
 
       circVerts[offset+P_TPRT] = 1.0;
       // then add the ion as a constraint
-      var index = i + Math.floor(IonsDone / PartEleCount);
+      var index = i + Math.ceil(IonsDone / PartEleCount);
       constraints[index] = new Constraint(0, ionSize, 
                                           circVerts[offset+P_POSX],
                                           circVerts[offset+P_POSY],
@@ -1078,6 +1144,40 @@ function makeCircuit() {
                                           0, // height doesn't matter for point constraints
                                           0, // neither do endpoints
                                           0); 
+      //check if electrons are initialized in ions
+
+      for (k = 0; k < numParticles; k++){
+        var glPositionwp = scaleParticlePoint(s[offset+P_POSX], s[offset+P_POSY],s[offset+P_POSZ]);         
+        var pRad = (s[offset+P_SIZE]/glPositionwp/2)/(canvas.width );///( g_eyeY); // radius for each particle
+        var glPositionwi = scaleParticlePoint(constraints[index].xpos, constraints[index].ypos, constraints[index].zpos);                 
+        var iRad = (constraints[index].Csize/glPositionwi/2)/( canvas.width );///( g_eyeY); // radius for each ion        
+        
+          var offset = k*PartEleCount;
+
+          if (n == s[offset+P_WALL]){
+            var dx = s[offset+P_POSX] - constraints[index].xpos;
+            var dy = s[offset+P_POSY] - constraints[index].ypos;
+
+            var d2 = dx* dx + dy * dy;
+            var r = (iRad + pRad) * (iRad + pRad);
+
+            if (d2 < r){
+                s[offset + P_POSX] = s[offset + P_POSX] + iRad *2;
+                s[offset + P_POSY] = s[offset + P_POSY] + iRad * 2;
+
+            }
+
+/*            if(s[offset+P_POSX] >= constraints[index].xpos - iRad &&
+                s[offset+P_POSX] <= constraints[index].xpos + iRad  &&
+                s[offset+P_POSY] >= constraints[index].ypos - iRad &&
+                s[offset+P_POSY] <= constraints[index].ypos + iRad ){
+                s[offset+P_POSX] = constraints[index].xpos + iRad; //make sure electrons are not in the ions
+                s[offset+P_POSX] = constraints[index].xpos + iRad;
+                s[offset + P_POSX] = s[offset + P_POSX] + iRad * 2;
+                s[offset + P_POSY] = s[offset + P_POSY] + iRad * 2;
+            }*/
+          }
+      }
     }
     IonsDone += IonsInComp * PartEleCount;
   }
@@ -1113,6 +1213,8 @@ function makeCircuit() {
   }
   
 }
+
+
 
 /*function makeCircuitWalls() {
   // create four points on the outside, color them green
@@ -1160,6 +1262,7 @@ function makeCircuit() {
 
 
 }*/
+
 
 
 
@@ -1362,7 +1465,17 @@ function pnpoly(nvert, vertx, verty, testx, testy){
 
 function makeCircuitWalls() {
   // create four points on the outside, color them green
-  circWalls = new Float32Array(12*numComps*PartEleCount); // 4 triangles (3 verts each) per circuit component
+  //circWalls = new Float32Array(12*numComps*PartEleCount); // 4 triangles (3 verts each) per circuit component
+//count batteries
+countBatteries = 0;
+for (var i = 0; i < Circuit.length; i++){
+  if (Circuit[i].compType =="Battery"){
+    countBatteries++
+  }
+}
+circWalls = new Float32Array((12*numComps*PartEleCount) + (12*countBatteries*PartEleCount) );// 4 triangles (3 verts each) per circuit component
+//for the battery covering 6 more vertices
+
   manOffset = 0;
   negy = 1;
   negx = 1;
@@ -1376,7 +1489,7 @@ var g2 = 0.22;
 var b2 = 0.47;
 
   //?COnnected
-
+  calcOffset = 0; //determines offset in latter part of the code
   connected();
 
   for (i = 0; i < Circuit.length; i++) {
@@ -1436,6 +1549,76 @@ var b2 = 0.47;
 
           manOffset += PartEleCount; 
 
+          if (Circuit[i].compType == "Battery"){
+            // draw top covering
+              circWalls[manOffset+P_POSX] = startx-(0.2 - strtid * openingx)*negx, circWalls[manOffset+P_POSY] = starty +0.2, circWalls[manOffset+P_POSZ] = -0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              //normals
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;
+              circWalls[manOffset+P_POSX] = startx -(0.2 - strtid * openingx)*negx, circWalls[manOffset+P_POSY] = starty  -0.2, circWalls[manOffset+P_POSZ] = -0.2;
+              circWalls[manOffset+P_CRED] = r2, circWalls[manOffset+P_CBLU] = g2,circWalls[manOffset+P_CGRN] = b2;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;
+              circWalls[manOffset+P_POSX] = endx+(0.2 - endid * openingx)*negx, circWalls[manOffset+P_POSY] = endy  +0.2, circWalls[manOffset+P_POSZ] = -0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;
+              circWalls[manOffset+P_POSX] = startx-(0.2 - strtid * openingx)*negx, circWalls[manOffset+P_POSY] = starty -0.2, circWalls[manOffset+P_POSZ] = -0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;  
+              circWalls[manOffset+P_POSX] = endx+(0.2 - endid * openingx)*negx, circWalls[manOffset+P_POSY] = endy -0.2, circWalls[manOffset+P_POSZ] = -0.2;
+              circWalls[manOffset+P_CRED] = r2, circWalls[manOffset+P_CBLU] = g2,circWalls[manOffset+P_CGRN] = b2;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;  
+              circWalls[manOffset+P_POSX] = endx+(0.2 - endid * openingx)*negx, circWalls[manOffset+P_POSY] = endy +0.2, circWalls[manOffset+P_POSZ] = -0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount; 
+              // draw bottom cover
+              circWalls[manOffset+P_POSX] = startx-(0.2 - strtid * openingx)*negx, circWalls[manOffset+P_POSY] = starty +0.2, circWalls[manOffset+P_POSZ] = 0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              //normals
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;
+              circWalls[manOffset+P_POSX] = startx -(0.2 - strtid * openingx)*negx, circWalls[manOffset+P_POSY] = starty  -0.2, circWalls[manOffset+P_POSZ] = 0.2;
+              circWalls[manOffset+P_CRED] = r2, circWalls[manOffset+P_CBLU] = g2,circWalls[manOffset+P_CGRN] = b2;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;
+              circWalls[manOffset+P_POSX] = endx+(0.2 - endid * openingx)*negx, circWalls[manOffset+P_POSY] = endy  +0.2, circWalls[manOffset+P_POSZ] = 0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;
+              circWalls[manOffset+P_POSX] = startx-(0.2 - strtid * openingx)*negx, circWalls[manOffset+P_POSY] = starty -0.2, circWalls[manOffset+P_POSZ] = 0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;  
+              circWalls[manOffset+P_POSX] = endx+(0.2 - endid * openingx)*negx, circWalls[manOffset+P_POSY] = endy -0.2, circWalls[manOffset+P_POSZ] = 0.2;
+              circWalls[manOffset+P_CRED] = r2, circWalls[manOffset+P_CBLU] = g2,circWalls[manOffset+P_CGRN] = b2;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount;  
+              circWalls[manOffset+P_POSX] = endx+(0.2 - endid * openingx)*negx, circWalls[manOffset+P_POSY] = endy +0.2, circWalls[manOffset+P_POSZ] = 0.2;
+              circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+              circWalls[manOffset+P_NOMX] = 1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
+
+              manOffset += PartEleCount; 
+
+      
+          }
+
+
           strtid = 0;
           endid = 0;
 
@@ -1481,6 +1664,9 @@ var b2 = 0.47;
           circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
           circWalls[manOffset+P_NOMX] = -1, circWalls[manOffset+P_NOMY] = 0, circWalls[manOffset+P_NOMZ] = 0;
           manOffset += PartEleCount; 
+
+          
+
 
 
     }else{
@@ -1531,7 +1717,72 @@ var b2 = 0.47;
       circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
       manOffset += PartEleCount; 
 
+//Check to Know if its a baterry and cover completely
+      if (Circuit[i].compType == "Battery"){
+//the top cover
+          circWalls[manOffset+P_POSX] = startx+0.2, circWalls[manOffset+P_POSY] = starty +(0.2 - strtid * openingy)* negy, circWalls[manOffset+P_POSZ] = -0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;
 
+          circWalls[manOffset+P_POSX] = startx -0.2, circWalls[manOffset+P_POSY] = starty  +(0.2 - strtid * openingy)* negy, circWalls[manOffset+P_POSZ] = -0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;
+
+          circWalls[manOffset+P_POSX] = endx +0.2, circWalls[manOffset+P_POSY] = endy  -(0.2 - endid * openingy)* negy, circWalls[manOffset+P_POSZ] = -0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;
+
+          circWalls[manOffset+P_POSX] = startx-0.2, circWalls[manOffset+P_POSY] = starty +(0.2 - strtid * openingy)* negy, circWalls[manOffset+P_POSZ] = -0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;  
+
+          circWalls[manOffset+P_POSX] = endx-0.2, circWalls[manOffset+P_POSY] = endy -(0.2 - endid * openingy)* negy, circWalls[manOffset+P_POSZ] = -0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;  
+
+          circWalls[manOffset+P_POSX] = endx+0.2, circWalls[manOffset+P_POSY] = endy -(0.2 - endid * openingy)* negy, circWalls[manOffset+P_POSZ] = -0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount; 
+
+
+          //bottom cover
+          circWalls[manOffset+P_POSX] = startx+0.2, circWalls[manOffset+P_POSY] = starty +(0.2 - strtid * openingy)* negy, circWalls[manOffset+P_POSZ] = 0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;
+
+          circWalls[manOffset+P_POSX] = startx -0.2, circWalls[manOffset+P_POSY] = starty  +(0.2 - strtid * openingy)* negy, circWalls[manOffset+P_POSZ] = 0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;
+
+          circWalls[manOffset+P_POSX] = endx +0.2, circWalls[manOffset+P_POSY] = endy  -(0.2 - endid * openingy)* negy, circWalls[manOffset+P_POSZ] = 0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;
+
+          circWalls[manOffset+P_POSX] = startx-0.2, circWalls[manOffset+P_POSY] = starty +(0.2 - strtid * openingy)* negy, circWalls[manOffset+P_POSZ] = 0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;  
+
+          circWalls[manOffset+P_POSX] = endx-0.2, circWalls[manOffset+P_POSY] = endy -(0.2 - endid * openingy)* negy, circWalls[manOffset+P_POSZ] = 0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount;  
+
+          circWalls[manOffset+P_POSX] = endx+0.2, circWalls[manOffset+P_POSY] = endy -(0.2 - endid * openingy)* negy, circWalls[manOffset+P_POSZ] = 0.2;
+          circWalls[manOffset+P_CRED] = r1, circWalls[manOffset+P_CBLU] = g1,circWalls[manOffset+P_CGRN] = b1;
+          circWalls[manOffset+P_NOMX] = 0, circWalls[manOffset+P_NOMY] = 1, circWalls[manOffset+P_NOMZ] = 0;
+          manOffset += PartEleCount; 
+
+      }
 
       //left wall
 
@@ -1581,11 +1832,21 @@ var b2 = 0.47;
       manOffset += PartEleCount; 
 
     }
+    //wall triangle count
+    //ordinarily should be 12 for each component but when there is a 
+      if (i == 0){
+        triangleCount = 0;
+      }else if (Circuit[i -1].compType == "Battery"){
+        triangleCount = 24;
+      }else{
+        triangleCount = 12;
+      }
+      n = (Circuit[i].compType == "Battery")? 24:12;
+    //calculate offset in each iteration j*PartEleCount + i*PartEleCount*triangleCount; will not work
+    calcOffset += (PartEleCount*triangleCount);
+    for (j = 0; j < n; j++) {
 
-    
-    for (j = 0; j < 12; j++) {
-
-      var offset = j*PartEleCount + i*PartEleCount*12;
+      var offset = j*PartEleCount + calcOffset;
       circWalls[offset+P_MASS] = 100000;
       circWalls[offset+P_SIZE] = 1;
       // positions will be added manually  
@@ -1602,5 +1863,114 @@ var b2 = 0.47;
 
   }
   
+}
+
+function scaleParticlePoint(px, py, pz){
+//the variable e is projection matrix entry in the 3rd column and fourth row
+  var e = -1;
+//beta is the rotation that was applied to the model matrix
+  var beta  = -90;
+//betaRad is beta converted to Radians
+
+  var betaRad =   (Math.PI * beta)/180;
+//m  = -fx = the difference between the center and the lookat point in x
+  var fx = (g_lookAtX - g_eyeX);
+//m  = -fx = the difference between the center and the lookat point in x
+  var fy = (g_lookAtY - g_eyeY);
+//m  = -fx = the difference between the center and the lookat point in x
+  var fz =(g_lookAtZ - g_eyeZ);
+//Normalize m, n and p
+  var rlf = 1 / Math.sqrt(fx*fx + fy*fy + fz*fz);
+  fx  *= rlf;
+  fy  *= rlf;
+  fz  *= rlf;
+
+  // Calculate cross product of f and up.
+  sx = fy * g_UpZ - fz * g_UpY;
+  sy = fz * g_UpX - fx * g_UpZ;
+  sz = fx * g_UpY - fy * g_UpX;
+
+  // Normalize s.
+  rls = 1 / Math.sqrt(sx*sx + sy*sy + sz*sz);
+  sx *= rls;
+  sy *= rls;
+  sz *= rls;
+
+  // Calculate cross product of s and f.
+  ux = sy * fz - sz * fy;
+  uy = sz * fx - sx * fz;
+  uz = sx * fy - sy * fx;
+
+
+//w is the gl_Position.w
+//calculated as px *(emCosBeta + enSinBeta) + py * (-emSinBeta + enCosBeta) + z(ep) + w(eq)
+//z = 0 so we exclude it
+  /*var w  =  (px * (e * -m * Math.cos(betaRad) + e * -n * Math.sin(betaRad))) + 
+            (py * ((-(e * -m * Math.sin(betaRad))) + (e * -n * Math.cos(betaRad)))) */
+// [a 0 0 0] [f g h 0] [p 0 0 0]
+// [0 b 0 0] [i j k 0] [0 q r 0]
+// [0 0 c d] [l m n 0] [0 s t 0]
+// [0 0 e 0] [0 0 0 1] [0 0 0 u]
+// pespective matrix * view Matrix * rotation matix
+// w = (x * elp)  + y *(emq + ens) + z * (emr + ent)
+  sinFovy = Math.sin(fovy);
+  rd = 1 / (far - near);
+  ct = Math.cos(fovy) / sinFovy;
+  canvas = document.getElementById('webgl');
+  aspect = canvas.width/canvas.height;
+
+  var a = ct/aspect;
+  var b = ct;
+  var c = -(far + near) * rd;
+  var d = -2 * near * far * rd;
+  var e = -1;
+  var f = sx;
+  var g = sy;
+  var h = sz;
+  var i = ux;
+  var j = uy;
+  var k = uz;
+  var l = -fx;
+  var m = -fy; 
+  var n = -fz;
+  var p = 1;
+  var q = 0;//Math.cos(betaRad) where betaRad = -90;
+  var r = -Math.sin(betaRad)
+  var s = -r;
+  var t = 0;//Math.cos(betaRad) where betaRad = -90;
+  var u = 1;
+  var v = 1;
+  
+  xfinal = px * (a * f* p )+
+  py * (a * g * q + a * h * s )+
+  pz * (a * g * r + a * h * t);
+
+  yfinal = px * (b * i * p) +
+  py * (b * j * q + b * k * s) + 
+  pz * (b * j * r + b * k * t);
+
+  zfinal = px * (c * l *p) +
+  py * (c * m * q + c * n * s) +
+  pz * (c * m * r + c * n * t) + 
+  u * d;
+
+  wfinal = px * (e * l * p) +
+  py * (e * m * q + e * n * s) +
+  pz * (e * m * r + e * n * t);
+
+
+document.getElementById('radius').value = "e = " + e +
+" l = " + l +
+" m = " + m +
+" n = " + n +
+" p = " + p +
+" q = " + q +
+" s = " + s +
+" w = " + zfinal;
+
+  return zfinal;
+
+
+
 }
 
