@@ -107,7 +107,7 @@ class Circuit {
       if ( c.current > 0 ) { c.direction = 1; } // flow of electrons from start to end
       else if ( c.current < 0 ) { c.direction = -1; } // flow of electrons from end to start
       else { c.direction = 0; }
-      c.current = c.current.abs();
+      //c.current = c.current.abs();
       if (!(c is Battery))
        { c.voltageDrop = c.resistance * c.current; }
       if (c is Bulb) {
