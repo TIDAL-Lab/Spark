@@ -100,7 +100,7 @@ function Constraint (type, size, xloc, yloc, zloc, height, endptArray1, endptArr
 
 
 
-  var DRAG_CONST = 0.99;
+  var DRAG_CONST = 0.90;
   //var VOLTAGE = 100.0;
 
 
@@ -171,7 +171,7 @@ function reset(Circuit1){
     numWalls = 0;// = numComps*2;
     circWidth = 0.2 // globally defined circuit width
     f = [ ];// = new Array(numComps); // array used to hold forces
-    numParticles = 20 * Circuit1.length;//200; // number of electrons
+    numParticles = 20  *Circuit1.length;//200; // number of electrons
     ionSize = 100; // size of each ion
     isPart = true; // T/F value used to tell the shader if rendering particles or other shapes (lines, triangles)
     circOn = 1, dragOn = 1;
@@ -285,51 +285,50 @@ function initParticles() {
 
   for (var i = 0; i< numParticles; i++) {
     var compStart = i%Circuit.length; // which circuit component this electron will initialize in 
+    if (Circuit[compStart].compType != "Battery"){
     var offset = i*PartEleCount;
     s[offset+P_MASS] = 10;
     s[offset+P_SIZE] = 25;
 
-      var randDist = Math.random();
-      initPosX = Circuit[compStart].endp1[0] + randDist*(Circuit[compStart].endp2[0]-Circuit[compStart].endp1[0]);
-      initPosY = Circuit[compStart].endp1[1] + randDist*(Circuit[compStart].endp2[1]-Circuit[compStart].endp1[1]);
+          var randDist = Math.random();
+          initPosX = (Circuit[compStart].endp1[0] )+ randDist*(Circuit[compStart].endp2[0]-(Circuit[compStart].endp1[0]));
+          initPosY = (Circuit[compStart].endp1[1] )+randDist*(Circuit[compStart].endp2[1]-(Circuit[compStart].endp1[1]));
 
-      //if(initPosX == 0 && initPosY == 0) initPosX = ionSize/canvas.width;
+          //if(initPosX == 0 && initPosY == 0) initPosX = ionSize/canvas.width;
 
-      s[offset+P_POSX] = initPosX ; // +- [0.9 - 1.0]
-      s[offset+P_POSY] = initPosY;
-//      s[offset+P_POSZ] = 0.1*Math.random() - 0.1*Math.random();
-      s[offset+P_POSZ] = 0;
+          s[offset+P_POSX] = initPosX ; // +- [0.9 - 1.0]
+          s[offset+P_POSY] = initPosY;
+          s[offset+P_POSZ] = 0;
 
-      // exclude 0;
-      initVelX = -0.001*Math.random() + 0.001*Math.random() ;
-      if (Math.abs(initVelX) < 0.0001) initVelX = 0.001;
-      initVelY = -0.001*Math.random() + 0.001*Math.random() ;
-      if (Math.abs(initVelY) < 0.0001) initVelY = 0.001;
+          // exclude 0;
+          initVelX = -0.002*Math.random() + 0.002*Math.random() ;
+          initVelY = -0.002*Math.random() + 0.002*Math.random() ;
 
 
-      s[offset+P_VELX] = initVelX;
-      s[offset+P_VELY] = initVelY;
+          s[offset+P_VELX] = initVelX;
+          s[offset+P_VELY] = initVelY;
 
-//      s[offset+P_VELZ] = -0.001*Math.random() + 0.001*Math.random();      
-      s[offset+P_VELZ] = 0;      
+          s[offset+P_VELZ] = 0;      
 
-      //init acceleration
-      s[offset+P_ACCX] = -0.001*Math.random() + 0.001*Math.random();
-      s[offset+P_ACCY] = -0.001*Math.random() + 0.001*Math.random();
-      s[offset+P_ACCZ] = 0;      
+          //init acceleration
+          s[offset+P_ACCX] = Math.random() * (0.00025 - 0.0001) + 0.0001;
+          s[offset+P_ACCY] = Math.random() * (0.00025 - 0.0001) + 0.0001;
+          s[offset+P_ACCZ] = 0;      
 
-    s[offset+P_FORX] = 0;
-    s[offset+P_FORY] = 0;
-    s[offset+P_FORZ] = 0;
-    s[offset+P_CRED] = 0;
-    s[offset+P_CBLU] = 0.5;
-    s[offset+P_CGRN] = 0.5;
-    s[offset+P_TPRT] = 1.0;
-    s[offset+P_WALL] = compStart;
-    s[offset+P_AGE] = 1;
-    s[offset+P_NOMX] = 0;
-    s[offset+P_NOMY] = 0;
-    s[offset+P_NOMZ] = 1;
+        s[offset+P_FORX] = 0;
+        s[offset+P_FORY] = 0;
+        s[offset+P_FORZ] = 0;
+        s[offset+P_CRED] = 0;
+        s[offset+P_CBLU] = 0.5;
+        s[offset+P_CGRN] = 0.5;
+        s[offset+P_TPRT] = 1.0;
+        s[offset+P_WALL] = compStart;
+        s[offset+P_AGE] = 1;
+        s[offset+P_NOMX] = 0;
+        s[offset+P_NOMY] = 0;
+        s[offset+P_NOMZ] = 1;
+
+    }//Particles should not be initialized in Battery
     
 
   }
@@ -362,9 +361,6 @@ function main() {
   gl.viewportHeight = canvas.height;
   gl.viewportDepth = canvas.height;
   gl.enable(gl.DEPTH_TEST ); // makes objects "in front" obscure ones behind
-  //gl.enable(gl.BLEND); // makes objects "in front" obscure ones behind
-  //gl.disable(gl.DEPTH_TEST || gl.BLEND); // makes objects "in front" obscure ones behind
-  //gl.enable(gl.BLEND); // makes objects "in front" obscure ones behind
 
 
   // Initialize shaders
@@ -455,10 +451,13 @@ if (!u_lighting) {
 counttick =0
   // Start drawing
   var tick = function() {
-    timeStep = animate(timeStep);  // Update the statespace
-    draw(gl, myVerts, timeStep, u_ViewMatrix, viewMatrix, Circuit);
+    accumulator = animate();
+//    while (accumulator >= Dtime){
+      if (drawParticles)
+        draw(gl, myVerts, timeStep, u_ViewMatrix, viewMatrix, Circuit);
+
+//    }
     requestAnimationFrame(tick, canvas);  // Request browser to ?call tick()?
-    counttick++;
   };
   tick();
 }
@@ -481,21 +480,29 @@ var far = 100;
 
 
 
-function draw(gl, n, timeStep, u_ViewMatrix, viewMatrix) {
+function draw(gl, n, timeStep,u_ViewMatrix, viewMatrix) {
 //==============================================================================  // Set the rotation matrix
  //find out connections in the circuit
     connected(Circuit);
   
-
-   document.getElementById('force').value =  g_eyeX + " " + g_eyeY + " " + g_eyeZ;
+   //document.getElementById('force').value =  g_eyeX + " " + g_eyeY + " " + g_eyeZ;
   
   //gl.clear(gl.COLOR_BUFFER_BIT);
   // update state space
-  calcForces();
-  //applyForces(0, timeStep); // 0 for Euler
-    applyConstraints(gl);
-  
+   for (var i = 0; i < numParticles; i++) {
+    var offset = i*PartEleCount;
+    applyConstraints(gl,offset);
+    //calcForces(offset);
+    //updateHeun (s,offset)
+  }
 
+   for (var i = 0; i < numParticles; i++) {
+    var offset = i*PartEleCount;
+    //applyConstraints(gl,offset);
+    calcForces(offset);
+    //updateHeun (s,offset)
+  }
+  
   viewMatrix.setLookAt(g_eyeX, g_eyeY, g_eyeZ,  // eye position
   //viewMatrix.setLookAt(xpos, ypos, zpos,  // eye position
                           g_lookAtX, g_lookAtY, g_lookAtZ,                // look-at point (origin)
@@ -507,57 +514,22 @@ function draw(gl, n, timeStep, u_ViewMatrix, viewMatrix) {
 
 
 
-function calcForces() {
+function calcForces(offset) {
 
 
 
-     fxtot =fytot =fztot = 1; // position forces
-
-    PI = 3.14159
- 
-   for (var i = 0; i < numParticles; i++) {
-    var offset = i*PartEleCount;
+      accelx = 0;
+      accely = 0;
 
       for (var j = 0; j< f.length; j++){
         if(s[offset+P_WALL] == f[j].identification){ //if the electron belongs to a particular forcefield
-           //make particles experience resistance 
-           /*switch (f[j].forceType) {
-            case "Bulb":
-              s[offset+P_CVEX] = s[offset+P_VELX]/2;
-              s[offset+P_CVEY] = s[offset+P_VELY]/2;
-              s[offset+P_CVEZ] = s[offset+P_VELZ]/2;
-            break;
-            default:
-              s[offset+P_CVEX] = s[offset+P_VELX];
-              s[offset+P_CVEY] = s[offset+P_VELY];
-              s[offset+P_CVEZ] = s[offset+P_VELZ];
-         }
-         if (f[j].forceType != "Bulb"){
-              s[offset+P_CVEX] = s[offset+P_VELX]/2;
-              s[offset+P_CVEY] = s[offset+P_VELY]/2;
-              s[offset+P_CVEZ] = s[offset+P_VELZ]/2;          
-         }else{
-              s[offset+P_CVEX] = s[offset+P_VELX];
-              s[offset+P_CVEY] = s[offset+P_VELY];
-              s[offset+P_CVEZ] = s[offset+P_VELZ];          
-
-         }*/
           if (f[j].voltage != 0){ //is the circuit on or off
             if (Math.abs(f[j].strt[0] - f[j].end[0]) < Math.abs(f[j].strt[1] - f[j].end[1])) {
-/*              fxtot = Math.cos(PI/6);
-              fytot = 2;
-              fztot =1;*/
-              /*if(f[j].strt[1] < f[j].end[1]){
-                if(s[offset+P_POSY] > f[j].strt[1] && s[offset+P_POSY] < f[j].end[1])
-                  if (s[offset+P_VELY] < 0 )s[offset+P_VELY] = s[offset+P_VELY] * -1;
-              }else{
-                if(s[offset+P_POSY] < f[j].strt[1] && s[offset+P_POSY] > f[j].end[1])
-                  if (s[offset+P_VELY] > 0 )s[offset+P_VELY] = s[offset+P_VELY] * -1;
-              }*/
 
-              s[offset+P_POSX] += s[offset+P_VELX];
-              s[offset+P_POSY] += s[offset+P_VELY];             
-              //s[offset+P_POSZ] += s[offset+P_CVEZ];
+              //if (Math.abs(s[offset+P_VELY]) >0.004)          
+                //s[offset+P_VELY] *= DRAG_CONST;
+                accely = 0.00025;
+                accelx = s[offset+P_ACCX] * Math.sign(s[offset+P_VELX]);
 
             }else{
               /*There was a leak of particles from the sides as a result of the forces changing the direction
@@ -573,52 +545,38 @@ function calcForces() {
                 if(s[offset+P_POSX] < f[j].strt[0] && s[offset+P_POSX] > f[j].end[0])
                   if (s[offset+P_VELX] > 0 )s[offset+P_VELX] = s[offset+P_VELX] * -1 ;                
               }*/
-              s[offset+P_POSX] += s[offset+P_VELX];
-              s[offset+P_POSY] += s[offset+P_VELY];             
-             // s[offset+P_POSZ] += s[offset+P_CVEZ];
+              //s[offset+P_VELX] *= DRAG_CONST;
+                accelx = 0.00025;
+                accely = s[offset+P_ACCY] * Math.sign(s[offset+P_VELY]);
+
 
             }
 
-          }else{
-             //fxtot =fytot =fztot = 1; // position forces
-              s[offset+P_POSX] += s[offset+P_VELX];
-              s[offset+P_POSY] += s[offset+P_VELY];              
-              //s[offset+P_POSZ] += s[offset+P_CVEZ];
-          }
+             //fA drag constant to dampen the velocity
+              s[offset+P_VELY] *= DRAG_CONST;
+              s[offset+P_VELX] *= DRAG_CONST;
+
+              s[offset+P_POSX] += s[offset+P_VELX] 
+              s[offset+P_POSY] += s[offset+P_VELY]               
+
+                s[offset+P_VELX] += accelx; 
+                s[offset+P_VELY] += accely;
+
 
         }
+        //This should be the else condition but I liked the effect thes lines of code gave the circuit so I apply it
+        //to a circuit with and without voltage
+              s[offset+P_POSX] += s[offset+P_VELX] 
+              s[offset+P_POSY] += s[offset+P_VELY]               
+
+
+
 
       }
-    // set the state var force values to the calculated totals
-    s[offset+P_FORX] = fxtot;
-    s[offset+P_FORY] = fytot;
-    s[offset+P_FORZ] = fztot;
  }
 
 
 }
-
-/*function applyForces(solvertype, timeStep) {
-  switch(solvertype) {
-    case 0:
-      // basic Euler solver
-      for (var i = 0; i < numParticles; i++) {
-        var offset = i*PartEleCount;
-
-        fx = s[offset+P_VELX] * s[offset+P_FORX];
-        fy = s[offset+P_VELY] * s[offset+P_FORY];
-        fz = s[offset+P_VELZ] * s[offset+P_FORZ];
-
-        s[offset+P_POSX] += fx;
-        s[offset+P_POSY] += fy;
-        s[offset+P_POSZ] += fz;
-
-      }
-      break;
-      default:
-        console.log('error in solver! invalid solvertype');
-  }
-}*/
 
 
 function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
@@ -652,20 +610,22 @@ function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
   mygl.uniform1i(isPartID, true);
   
 }
-
+time = 0.0;
+timeAccumulator = 0.0; 
+const Dtime = 0.5;
 function animate() {
 //==============================================================================  // Calculate the elapsed time
   var now = Date.now();                       
   var elapsed = now - g_last;               
   g_last = now;
+
+  timeAccumulator += elapsed;
   // Return the amount of time passed.
-  return elapsed / 1000.0;
+  return timeAccumulator / 1000.0;
 }
 
 // circuitOn set to 1 imposes circuit-constraints
-function applyConstraints(gl) {
-   for (var i = 0; i < numParticles; i++) { // loop through all particles
-    var offset = i*PartEleCount;
+function applyConstraints(gl,offset) {
     // particle motion
     // calc z - constraint
       // collisions with ions      
@@ -679,25 +639,31 @@ function applyConstraints(gl) {
         //divide by 2 to change from diameter to radius;
         var glPositionwp = scaleParticlePoint(s[offset+P_POSX], s[offset+P_POSY], s[offset+P_POSZ]);                 
         var pRad = (s[offset+P_SIZE]/glPositionwp/2 )/(canvas.width);///( g_eyeY); // radius for each particle
-        //console.log("The particle radius " + pRad);
         var glPositionwi = scaleParticlePoint(constraints[j].xpos, constraints[j].ypos,constraints[j].zpos);                 
         var iRad = (constraints[j].Csize/glPositionwi/2)/(canvas.width);///( g_eyeY); // radius for each ion
-        //check if ion is in Electron
-        //gl.get(gl.POINT_SIZE);
-        //document.getElementById('radius').value =  iRad;
         var dx = s[offset+P_POSX] - constraints[j].xpos;
         var dy = s[offset+P_POSY] - constraints[j].ypos;
 
         var d2 = dx* dx + dy * dy;
         var r = (iRad + pRad) * (iRad + pRad);
-
         if (d2 < r){
-            s[offset+P_VELX] = -s[offset+P_VELX]; //+ 0.1*Math.random() - 0.1*Math.random();
-            s[offset+P_VELY] = -s[offset+P_VELY]; //+ 0.1*Math.random() - 0.1*Math.random();
+            //use the radii to substitute for mass and find the return velocity
+            //multiply by 2 for effective bounce back
+            if (Circuit[s[offset+P_WALL]].voltage > 0){
+              s[offset+P_VELX] = (s[offset+P_VELX] * (pRad - iRad)/(pRad + iRad))*2  ; 
+              s[offset+P_VELY] = (s[offset+P_VELY] * (pRad - iRad)/(pRad + iRad))*2  ; 
+
+            }else{
+              s[offset+P_VELX] = -s[offset+P_VELX]  ; 
+              s[offset+P_VELY] = -s[offset+P_VELY]  ;               
+            }
+
 
         }
 
+        document.getElementById('radius').value =  s[offset+P_VELX] ;
 
+        document.getElementById('force').value =  s[offset+P_VELY];
 
         
       }
@@ -710,7 +676,7 @@ function applyConstraints(gl) {
 
       }
     }
-  }
+
 }
 
 
@@ -981,7 +947,6 @@ function isLRTB(xs,ys,xe,ye,OpenStartEnd){ //s for start and e for end pass conn
   }
 }
 
-scalePoint = 1;
 
 function keydown(ev) {
 //------------------------------------------------------
@@ -1005,16 +970,13 @@ function keydown(ev) {
         g_lookAtZ = g_lookAtZ - 0.2;
       break;
       case 73:
-        scalePoint = scalePoint + 0.01;
-
         g_eyeY = g_eyeY + 0.2;
         g_lookAtY = g_lookAtY + 0.2;
  
       break;
       case 79:
-        scalePoint = scalePoint - 0.01;
-        g_eyeY = g_eyeY - 0.2;
-        g_lookAtY = g_lookAtY - 0.2;
+        g_eyeY = g_eyeY - 0.1;
+        g_lookAtY = g_lookAtY - 0.1;
       break;
     }
 }
@@ -1109,7 +1071,6 @@ function makeCircuit() {
         circVerts[offset+P_NOMX] = 0.0;
         circVerts[offset+P_NOMY] = 0.0;
         circVerts[offset+P_NOMZ] = 1.0;
-        console.log("CirVerts color " + circVerts[offset+P_CRED])
 
       if (Circuit[n].compType == "Battery") {
         circVerts[offset+P_CRED] = 0.0;
@@ -1147,35 +1108,28 @@ function makeCircuit() {
       //check if electrons are initialized in ions
 
       for (k = 0; k < numParticles; k++){
-        var glPositionwp = scaleParticlePoint(s[offset+P_POSX], s[offset+P_POSY],s[offset+P_POSZ]);         
-        var pRad = (s[offset+P_SIZE]/glPositionwp/2)/(canvas.width );///( g_eyeY); // radius for each particle
+          var ioffset = k*PartEleCount;
+
+        var glPositionwp = scaleParticlePoint(s[ioffset+P_POSX], s[ioffset+P_POSY],s[ioffset+P_POSZ]);         
+        var pRad = (s[ioffset+P_SIZE]/glPositionwp/2)/(canvas.width );///( g_eyeY); // radius for each particle
         var glPositionwi = scaleParticlePoint(constraints[index].xpos, constraints[index].ypos, constraints[index].zpos);                 
         var iRad = (constraints[index].Csize/glPositionwi/2)/( canvas.width );///( g_eyeY); // radius for each ion        
         
-          var offset = k*PartEleCount;
 
-          if (n == s[offset+P_WALL]){
-            var dx = s[offset+P_POSX] - constraints[index].xpos;
-            var dy = s[offset+P_POSY] - constraints[index].ypos;
+          if (n == s[ioffset+P_WALL]){
+            var dx = s[ioffset+P_POSX] - constraints[index].xpos;
+            var dy = s[ioffset+P_POSY] - constraints[index].ypos;
 
             var d2 = dx* dx + dy * dy;
             var r = (iRad + pRad) * (iRad + pRad);
 
             if (d2 < r){
-                s[offset + P_POSX] = s[offset + P_POSX] + iRad *2;
-                s[offset + P_POSY] = s[offset + P_POSY] + iRad * 2;
+                s[ioffset + P_POSX] = s[ioffset + P_POSX] + iRad *2 + pRad;
+                s[ioffset + P_POSY] = s[ioffset + P_POSY] + iRad * 2 + pRad;
 
             }
 
-/*            if(s[offset+P_POSX] >= constraints[index].xpos - iRad &&
-                s[offset+P_POSX] <= constraints[index].xpos + iRad  &&
-                s[offset+P_POSY] >= constraints[index].ypos - iRad &&
-                s[offset+P_POSY] <= constraints[index].ypos + iRad ){
-                s[offset+P_POSX] = constraints[index].xpos + iRad; //make sure electrons are not in the ions
-                s[offset+P_POSX] = constraints[index].xpos + iRad;
-                s[offset + P_POSX] = s[offset + P_POSX] + iRad * 2;
-                s[offset + P_POSY] = s[offset + P_POSY] + iRad * 2;
-            }*/
+
           }
       }
     }
@@ -1207,61 +1161,11 @@ function makeCircuit() {
                          [Circuit[n].endp2[0], Circuit[n].endp2[1] /*- circWidth/2*/], circWidth, Circuit[n].voltage, n);
         //identify Circuit Component
         Circuit[n].identification = n;
-          console.log("What happens here " + wallstart+2*n);
 
 
   }
   
 }
-
-
-
-/*function makeCircuitWalls() {
-  // create four points on the outside, color them green
-  circWalls = new Float32Array(12*numComps*PartEleCount); // 4 triangles (3 verts each) per circuit component
-
-  for (i = 0; i < Circuit.length; i++) {
-  offset =i*PartEleCount;
-  offset1 =(i+1)*PartEleCount;
-  offset2 =(i+2)*PartEleCount;
-  offset3 =(i+3)*PartEleCount;
-
-      circWalls[offset+P_POSX] = Circuit[i].endp1[0];
-      circWalls[offset+P_POSY] = Circuit[i].endp1[1]+1.2;
-      circWalls[offset+P_POSZ] = 0;
-      circWalls[offset1 +P_POSX] = Circuit[i].endp1[0];
-      circWalls[offset1 +P_POSY] = Circuit[i].endp1[1]-1.2;
-      circWalls[offset1 +P_POSZ] = 0;
-      circWalls[offset2 +P_POSX] = Circuit[i].endp2[0];
-      circWalls[offset2 +P_POSY] = Circuit[i].endp2[1]+1.2;
-      circWalls[offset2 +P_POSZ] = 0;
-      circWalls[offset3 +P_POSX] = Circuit[i].endp2[0];
-      circWalls[offset3 +P_POSY] = Circuit[i].endp2[1]-1.2;
-      circWalls[offset3 +P_POSZ] = 0;
-
-    for (j = 0; j < 12; j++) {
-      var offset = j*PartEleCount + i*PartEleCount*12;
-
-      circWalls[offset+P_MASS] = 100000;
-      circWalls[offset+P_SIZE] = 1;
-      // positions will be added manually  
-      circWalls[offset+P_VELX] = 0;
-      circWalls[offset+P_VELY] = 0;
-      circWalls[offset+P_VELZ] = 0;
-      circWalls[offset+P_FORX] = 0;
-      circWalls[offset+P_FORY] = 0;
-      circWalls[offset+P_FORZ] = 0;
-      circWalls[offset+P_CRED] = 0.1;
-      circWalls[offset+P_CBLU] = 0.1;
-      circWalls[offset+P_CGRN] = 0.1;
-      circWalls[offset+P_TPRT] = 1.0;
-    }
-  }
-  var manOffset = 0;
-  var wallBuffer = 0.03; // if walls are at the exact corners, some electrons bleed through
-
-
-}*/
 
 
 
@@ -1959,7 +1863,7 @@ function scaleParticlePoint(px, py, pz){
   pz * (e * m * r + e * n * t);
 
 
-document.getElementById('radius').value = "e = " + e +
+//document.getElementById('radius').value = "e = " + e +
 " l = " + l +
 " m = " + m +
 " n = " + n +
@@ -1972,5 +1876,66 @@ document.getElementById('radius').value = "e = " + e +
 
 
 
+}
+
+function findForces(s1, offset){
+          s1[offset + P_VELX]= s1[offset + P_VELX] * DRAG_CONST;
+          s1[offset + P_VELY]= s1[offset + P_VELY] * DRAG_CONST;
+          //s[offset + P_VELZ]= s[offset + P_VELZ] * DRAG_CONST;
+
+}
+
+function derivative(s1,sDot,offset){
+    sDot[P_POSX] = s1[offset + P_VELX];
+    sDot[P_POSY] = s1[offset + P_VELY];
+//    sDot[P_POSZ] = s[offset + P_VELZ];
+
+    sDot[P_VELX] = s1[offset + P_ACCX];
+    sDot[P_VELY] = s1[offset + P_ACCY];
+//    sDot[P_VELZ] = s[offset + P_ACCZ];
+  return sDot;
+}
+
+function newState(s1,offset,sDot,t){
+    s1[offset + P_POSX] = s1[offset + P_POSX] + sDot[P_POSX]/t;
+    s1[offset + P_POSY] = s1[offset + P_POSY] + sDot[P_POSY]/t;
+
+    s1[offset + P_VELX] = s1[offset + P_VELX] + sDot[P_VELX]/t;
+    s1[offset + P_VELY] = s1[offset + P_VELY] + sDot[P_VELY]/t;
+
+
+}
+
+function updateHeun (s1,offset) {
+    //apply force
+      findForces(s1, offset);
+    //CALCULATE DERIVITIVES (SDot)
+    var sDot = new Float32Array(PartEleCount);
+    derivative(s1, sDot, offset);
+
+    //calculate SM
+      sM = new Float32Array(PartEleCount);
+      newState(sM,0,sDot,2/3);
+    //apply force
+      findForces(sM,0);
+    //CALCULATE DERIVITIVES (SDot)
+    sM1 = new Float32Array(PartEleCount);
+    derivative(sM,sM1,0);
+
+    //calculate intermediate State
+      sM2 = new Float32Array(PartEleCount);//k2
+      newState(sM2,0,sM1,1/3)//(3k2 + k1)/4 but first k1 +3k2
+    //calculate final state
+      newState(s1,offset,sM2,4);//y0 + (3k2 + k1)/4
+    // Apply constraints
+  
+}
+
+drawParticles = true;
+function doPause(){
+  if (drawParticles)
+    drawParticles = false;
+  else 
+    drawParticles = true;
 }
 
