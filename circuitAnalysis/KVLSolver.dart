@@ -69,6 +69,7 @@ class KirchhoffSolver {
     
     Matrix solution = ms.solve();
     print('Solution: ${solution.getArray()}');
+    //print('Loops: ${circuit.loops.first}');
     //circuit.printGraph();
     return solution;
     
