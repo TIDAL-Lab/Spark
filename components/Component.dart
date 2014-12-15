@@ -46,6 +46,7 @@ class Component implements Touchable {
   double resistance;
   double current;
   double voltageDrop;
+  num direction = 0;
 
   bool visited = false; /* for moving connected graphs */
   bool visible = true;
