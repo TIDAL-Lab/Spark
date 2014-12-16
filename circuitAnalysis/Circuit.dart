@@ -104,10 +104,15 @@ class Circuit {
       for (Loop l in e.loops) {
         c.current += l.current;
       }
-      if ( c.current > 0 ) { c.direction = 1; } // flow of electrons from start to end
-      else if ( c.current < 0 ) { c.direction = -1; } // flow of electrons from end to start
-      else { c.direction = 0; }
-      //c.current = c.current.abs();
+      c.direction = 0;
+      if (c.current != 0) {
+        c.direction = e.direction * c.current.sign;
+      }
+      c.current = c.current.abs();
+      //if ( c.current > 0 ) { c.direction = 1; } // flow of electrons from start to end
+      //else if ( c.current < 0 ) { c.direction = -1; } // flow of electrons from end to start
+      //else { c.direction = 0; }
+      
       if (!(c is Battery))
        { c.voltageDrop = c.resistance * c.current; }
       if (c is Bulb) {
@@ -356,12 +361,20 @@ class Circuit {
     Loop l = new Loop();
     Node start = b.nodes[0];
     Node end = b.nodes[1];
+    b.direction = -1;
     if (start.discoverTime < end.discoverTime) {
       start = b.nodes[1];
       end = b.nodes[0];
-    }
+      b.direction = 1;
+    }     
     while (start != end) {
       Edge e = getEdge(start, start.parent);
+      // this is for deciding the direction of edge for later calculations of current.
+      if (e.nodes[0] == start) {
+        e.direction = 1;
+      } else {
+        e.direction = -1;
+      }
       l.path.add(e);
       e.loops.add(l);
       start = start.parent;     
@@ -460,8 +473,10 @@ class Edge {
   String label; // label is either 'tree' or 'back'
   List<Loop> loops;
   Component component;
+  num direction = 0;
   
-  Edge (Node first, Node second) {
+  Edge (Node first, Node second)
+  {
     nodes = [first, second];
     loops = new List<Loop>();
     label = null;
