@@ -79,7 +79,7 @@ class KirchhoffSolver {
     for (int i=0; i<circuit.loops.length; i++) {
       for (Edge e in circuit.loops[i].path) {
         if (e.component is Battery) {
-          es.equations[i].rhs += e.component.voltageDrop;
+          es.equations[i].rhs += e.component.voltageDrop * e.direction * -1;
         }
         else {
           for (Loop l in e.loops) {
