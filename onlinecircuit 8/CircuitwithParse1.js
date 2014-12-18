@@ -528,8 +528,21 @@ function calcForces(offset) {
 
               //if (Math.abs(s[offset+P_VELY]) >0.004)          
                 //s[offset+P_VELY] *= DRAG_CONST;
-                accely = 0.00025;
-                accelx = s[offset+P_ACCX] * Math.sign(s[offset+P_VELX]);
+                if (Circuit[f[j].identification].innerwall == 1){
+                  if (f[j].strt[1] - f[j].end[1] > 0){
+                      accely = -0.00025;
+                  }else{
+                      accely = 0.00025;
+                  }
+              }else{
+                  if (f[j].strt[1] - f[j].end[1] > 0){
+                      accely = 0.00025;
+                  }else{
+                      accely = -0.00025;
+                  }
+
+              }
+                  accelx = s[offset+P_ACCX] * Math.sign(s[offset+P_VELX]);
 
             }else{
               /*There was a leak of particles from the sides as a result of the forces changing the direction
@@ -546,7 +559,20 @@ function calcForces(offset) {
                   if (s[offset+P_VELX] > 0 )s[offset+P_VELX] = s[offset+P_VELX] * -1 ;                
               }*/
               //s[offset+P_VELX] *= DRAG_CONST;
-                accelx = 0.00025;
+                if (Circuit[f[j].identification].innerwall == 1){
+                  if (f[j].strt[0] - f[j].end[0] > 0){
+                      accelx = -0.00025;
+                  }else{
+                      accelx = 0.00025;
+                  }
+              }else{
+                  if (f[j].strt[0] - f[j].end[0] > 0){
+                      accelx = 0.00025;
+                  }else{
+                      accelx = -0.00025;
+                  }
+
+              }
                 accely = s[offset+P_ACCY] * Math.sign(s[offset+P_VELY]);
 
 
@@ -577,6 +603,7 @@ function calcForces(offset) {
 
 
 }
+
 
 
 function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
@@ -686,6 +713,71 @@ function applyConstraints(gl,offset) {
   var bufferRight = 0.18;
   var bufferLeft = 0.18;
 // returns 1 for collisions with constant-x walls, 2 for constant-y walls, and 0 otherwise
+function DetectCollision2(wall, sOffset, buffer){
+    //detect collision for any line
+    //given a wall; there are 4 lines 
+    //create 4 lines for each wall
+    topWall = [ ];
+    bottomWall = [ ];
+    rightWall = [ ];
+    leftWall = [ ];
+    //find the left Point and right point 
+    //find the top points and bottom points
+    if (wall.strt[0] > wall.end[0]){
+      strtWallx = wall.end[0];
+      endWallx = wall.strt[0];
+
+    }else{
+      strtWallx = wall.strt[0];
+      endWallx = wall.end[0];
+
+    }
+
+    if (wall.strt[1] > wall.end[1]){
+      strtWally = wall.end[1];
+      endWally = wall.strt[1];
+
+    }else{
+      strtWally = wall.strt[1];
+      endWally = wall.end[1];
+
+    }
+
+    topWall = [strtWallx - bufferLeft, strtWally + bufferAbove, endWallx + bufferRight, endWally + bufferAbove];
+    bottomWall = [strtWallx - bufferLeft, strtWally - bufferBeneath, endWallx + bufferRight, endWally - bufferBeneath];
+    leftWall = [strtWallx - bufferLeft, strtWally + bufferAbove, strtWallx - bufferLeft, strtWally - bufferBeneath];
+    rightWall = [endWallx + bufferRight, strtWally + bufferAbove, strtWallx + bufferRight, strtWally - bufferBeneath];
+
+    //given two points A(x,y) and B(x,y) that a line passes through to know if another point M(x,y) is on one side or the other
+    // determine the sign of the determinant of vectors (Ab, AM) where M(X,Y) is the query point
+    //Position = Math.sign((Bx - Ax)*(Y-Ay) - (By -Ay)*(X-Ax));
+
+    topPosition = pointInOutorOn(topWall[0], topWall[1], topWall[2], topWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
+    bottomPosition = pointInOutorOn(bottomWall[0], bottomWall[1], bottomWall[2], bottomWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
+    leftPosition = pointInOutorOn(leftWall[0], leftWall[1], leftWall[2], leftWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
+    rightPosition = pointInOutorOn(topWall[0], rightWall[1], rightWall[2], rightWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
+
+    if (topPosition == 1 || bottomPosition == -1){
+                        s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
+
+    }
+
+    if (rightPosition == 1 || leftPosition == -1){
+                        s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+
+    }
+
+}
+
+function pointInOutorOn(Ax,Ay,Bx,By,Mx,My){
+    //given two points A(x,y) and B(x,y) that a line passes through to know if another point M(x,y) is on one side or the other
+    // determine the sign of the determinant of vectors (Ab, AM) where M(X,Y) is the query point
+    //Position = Math.sign((Bx - Ax)*(Y-Ay) - (By -Ay)*(X-Ax));
+
+    return Math.sign((Bx-Ax)*(My-Ay) - (By-Ay)*(Mx-Ax));
+
+}
+
 function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in state array for particle, buffer = distance from wall before collision occurs
   var colWindow = buffer;
 
