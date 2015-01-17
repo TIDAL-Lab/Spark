@@ -35,11 +35,12 @@ var pubnub = PUBNUB.init({
     channel: 'mma2',
     message: function(m){
       if (m == '1'){
-        doParse();
+        doParse(m);
       }
     }
  });
-function doParse(){
+ countTimes = 0;
+function doParse(m){
        var numComps;
         var Circuit = [];
         var tCircuit;
@@ -71,10 +72,12 @@ function doParse(){
             });
             return promise;
           }).then(function(){
-             reset(Circuit);
+
+             //reset(Circuit);
             resistanceTotal = 0;
-            calcResistance();
-            main();
+
+            //calcResistance();
+            main1(Circuit,++countTimes);
            
           });  
 

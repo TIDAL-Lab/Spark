@@ -18,7 +18,6 @@ var VSHADER_SOURCE =
   'varying float v_alpha; \n' +
   'varying vec3 v_norm; \n' +
   'varying float isPoint; \n' +
-  'uniform float u_diam; \n' +
   'uniform bool u_isPart; \n' +
   'uniform int renderMode; \n' +
   'uniform mat4 u_ViewMatrix; \n' +
@@ -189,34 +188,43 @@ function reset(Circuit1){
     constraints = [ ];
     current = 0;
 
-    //circWalls = new Float32Array(12*numComps*PartEleCount);
     Circuit = Circuit1;
 
- /*g_eyeX = 0;
- g_eyeY = -8;
- g_eyeZ = 0;
+    calcResistance();
 
- g_lookAtX = 0;
- g_lookAtY = 0;
- g_lookAtZ = 0;
+    //moved all prior calcs here
+    numWalls = numComps;
+    f = new Array(numComps);
+    console.log('res, numions numwalls', " ",resistanceTotal," " ,IonNumConst, " ",numWalls);
+    constraints = new Array(Math.ceil(resistanceTotal*IonNumConst)+1*numComps+numWalls);
+    console.log('constraints length:', constraints.length);
+    current = Circuit[0].curr;
+   
 
- g_UpX = 0;
- g_UpY = 0;
- g_UpZ = 1;
+    initParticles();
 
-near = 1;
-far = 100;*/
+    myVerts = 0;
+    // bind and set up array buffer for particles
+    if (WallsOn == 1) {
+      myVerts = initVertexBufferwWalls(gl, Circuit); 
+    } else {
+      myVerts = initVertexBuffersNew(gl, Circuit);
+    }
+    if (myVerts < 0) {
+      console.log('Failed to set the positions of the vertices');
+      return;
+    }
 
 }
 
 var currentConst = 10; // multiplied with calculated current to create "realistic" looking flows
-var IonNumConst = 1; // multiplied with calculated number of ions in circuit component so wires aren't empty
+var IonNumConst = 3; // multiplied with calculated number of ions in circuit component so wires aren't empty
 var PartEleCount = 23; // number of fields per particle in the state array
 var numIons = 200; // total number of ions in circuit
 var numWalls;// = numComps*2;
 var circWidth = 0.2 // globally defined circuit width
 var f;// = new Array(numComps); // array used to hold forces
-var numParticles = 200;// number of electrons will be calculated based on the number of components; no longer a constant number
+//var numParticles = 200;// number of electrons will be calculated based on the number of components; no longer a constant number
 var ionSize = 100; // size of each ion
 var isPart = true; // T/F value used to tell the shader if rendering particles or other shapes (lines, triangles)
 var circOn = 1, dragOn = 1;
@@ -236,14 +244,7 @@ var modelMatrix = new Matrix4();
 var modelMatrix1 = new Matrix4();
 
 
-// calculate the current in the circuit
-/*function calcResistance(){
-  for (i = 0; i < Circuit.length; i++) {
-    console.log('res total:', resistanceTotal);
-    resistanceTotal += parseFloat(Circuit[i].resistance);
-  }
 
-}*/
 dspacing = 0.914;
 function calcResistance(){
   var resistanceTotal = 0;
@@ -275,7 +276,7 @@ function calcResistance(){
 var RenderMode = 0; // 0 -> circuit, 1-> unstable spring/mass, 2-> stable spring/mass, 3-> fire, 4-> boids, 5 -> atom
 
 
-var s = new Float32Array(numParticles*PartEleCount);
+var s = new Float32Array();
 
 
 
@@ -339,12 +340,19 @@ var FSIZE = s.BYTES_PER_ELEMENT;
 var timeStep = 1.0/30.0;
 var g_last = Date.now();
 
-function main() {
+function main(Circuit1) {
 //==============================================================================
   // Retrieve <canvas> element
   //calcResistance(Circuit);
+  //reset(Circuit1);
+  Circuit = Circuit1
+  numParticles = 20 * Circuit.length;
+  s = new Float32Array(numParticles*PartEleCount);
+
+  calcResistance();
   canvas = document.getElementById('webgl');
   //moved all prior calcs here
+  numComps = Circuit.length;
   numWalls = numComps;
   f = new Array(numComps);
  console.log('res, numions numwalls', " ",resistanceTotal," " ,IonNumConst, " ",numWalls);
@@ -352,15 +360,11 @@ function main() {
   console.log('constraints length:', constraints.length);
   current = Circuit[0].curr;
   // Get the rendering context for WebGL
-  var gl = getWebGLContext(canvas);
+  gl = getWebGLContext(canvas);
   if (!gl) {
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
-  gl.viewportWidth = canvas.width;
-  gl.viewportHeight = canvas.height;
-  gl.viewportDepth = canvas.height;
-  gl.enable(gl.DEPTH_TEST ); // makes objects "in front" obscure ones behind
 
 
   // Initialize shaders
@@ -370,8 +374,8 @@ function main() {
   }
   
   // Get the storage locations of u_ViewMatrix and u_ProjMatrix variables
-  var u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
-  var u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
+  u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix');
+  u_ProjMatrix = gl.getUniformLocation(gl.program, 'u_ProjMatrix');
   u_modelMatrix = gl.getUniformLocation(gl.program, 'u_modelMatrix'); 
   u_alpha = gl.getUniformLocation(gl.program,'u_alpha');
   u_lighting = gl.getUniformLocation(gl.program,'u_lighting');
@@ -393,26 +397,23 @@ if (!u_lighting) {
     console.log('Failed to get u_lighting');
     return;
   }
+
   isPartID = gl.getUniformLocation(gl.program,'u_isPart');
   if(!isPartID){
       console.log("Failed to get isPartID");
   }
-  u_diam = gl.getUniformLocation(gl.program,'u_diam');
-  if(!u_diam){
-      console.log("Failed to get u_diam");
-  }
   // set render mode to control what gets displayed
-  var u_renderModeLoc = gl.getUniformLocation(gl.program, 'u_renderMode');
+  u_renderModeLoc = gl.getUniformLocation(gl.program, 'u_renderMode');
   if (u_renderModeLoc) { 
     console.log('Failed to get render mode variable location');
     return;
   }
   gl.uniform1i(u_renderModeLoc, RenderMode);
 
-  initParticles(Circuit);
+  initParticles();
 
-  var viewMatrix = new Matrix4();
-  var projMatrix = new Matrix4();
+  viewMatrix = new Matrix4();
+  projMatrix = new Matrix4();
 
   // registers left and right keys to adjust camera
   document.onkeydown = function(ev){ keydown(ev, gl, u_ViewMatrix, viewMatrix); };
@@ -425,12 +426,11 @@ if (!u_lighting) {
   heightOfNearPlane = parseFloat(Math.abs(viewPort[3] - viewPort[1]))/
                       (2*Math.tan(0.5 * fovy * Math.PI/180))/100; //divided by 100 beccause the points were really large
 
-  gl.uniform1f(u_diam, heightOfNearPlane);
   projMatrix.setPerspective(fovy, canvas.width/canvas.height, near, far); // this never changes
   // set the GLSL u_ProjMatrix to the value I have set
   gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
-  var myVerts;
+  myVerts = 0;
   // bind and set up array buffer for particles
   if (WallsOn == 1) {
     myVerts = initVertexBufferwWalls(gl, Circuit); 
@@ -448,20 +448,27 @@ if (!u_lighting) {
   } else {
     //gl.clearColor(0, 0, 0, 1);
   }
-counttick =0
+
   // Start drawing
   var tick = function() {
-    accumulator = animate();
-//    while (accumulator >= Dtime){
-      if (drawParticles)
-        draw(gl, myVerts, timeStep, u_ViewMatrix, viewMatrix, Circuit);
 
-//    }
+      if (drawParticles)
+        draw(gl, myVerts, timeStep, u_ViewMatrix, viewMatrix, Circuit)
+
     requestAnimationFrame(tick, canvas);  // Request browser to ?call tick()?
   };
   tick();
+  return false;
 }
 
+function main1(Circuit1,m)
+{
+  if (m== 1)
+    main(Circuit1)
+  else
+    reset(Circuit1);
+
+}
 
 var g_eyeX = 0;
 var g_eyeY = -8;
@@ -492,15 +499,11 @@ function draw(gl, n, timeStep,u_ViewMatrix, viewMatrix) {
    for (var i = 0; i < numParticles; i++) {
     var offset = i*PartEleCount;
     applyConstraints(gl,offset);
-    //calcForces(offset);
-    //updateHeun (s,offset)
   }
 
    for (var i = 0; i < numParticles; i++) {
     var offset = i*PartEleCount;
-    //applyConstraints(gl,offset);
     calcForces(offset);
-    //updateHeun (s,offset)
   }
   
   viewMatrix.setLookAt(g_eyeX, g_eyeY, g_eyeZ,  // eye position
@@ -611,7 +614,6 @@ function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
 
   mygl.clear(mygl.COLOR_BUFFER_BIT | mygl.DEPTH_BUFFER_BIT);
 
-  mygl.blendFunc(mygl.SRC_ALPHA, mygl.ONE);
 
   mygl.uniformMatrix4fv(myu_ViewMatrix, false, myViewMatrix.elements);
   
@@ -637,19 +639,7 @@ function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
   mygl.uniform1i(isPartID, true);
   
 }
-time = 0.0;
-timeAccumulator = 0.0; 
-const Dtime = 0.5;
-function animate() {
-//==============================================================================  // Calculate the elapsed time
-  var now = Date.now();                       
-  var elapsed = now - g_last;               
-  g_last = now;
 
-  timeAccumulator += elapsed;
-  // Return the amount of time passed.
-  return timeAccumulator / 1000.0;
-}
 
 // circuitOn set to 1 imposes circuit-constraints
 function applyConstraints(gl,offset) {
@@ -695,10 +685,8 @@ function applyConstraints(gl,offset) {
         
       }
       else if (constraints[j].Ctype == 1) { // if it's a wall constraint
-        var wBuffer = 0.01; // distance from a wall before a collision is detected
-        var isCollision;
       
-            DetectCollision(constraints[j], offset, wBuffer, Circuit);
+            DetectCollision(constraints[j], offset);
         
 
       }
@@ -708,85 +696,22 @@ function applyConstraints(gl,offset) {
 
 
 //they are all 0.18 but I named them for readability
+//between walls 
   var bufferAbove = 0.18;
   var bufferBeneath = 0.18;
   var bufferRight = 0.18;
   var bufferLeft = 0.18;
+
+//beyondWalls(used to reduce constraint)
+  var bufferAbove1 = 0.12;
+  var bufferBeneath1 = 0.12;
+  var bufferRight1 = 0.12;
+  var bufferLeft1 = 0.12;
+
 // returns 1 for collisions with constant-x walls, 2 for constant-y walls, and 0 otherwise
-function DetectCollision2(wall, sOffset, buffer){
-    //detect collision for any line
-    //given a wall; there are 4 lines 
-    //create 4 lines for each wall
-    topWall = [ ];
-    bottomWall = [ ];
-    rightWall = [ ];
-    leftWall = [ ];
-    //find the left Point and right point 
-    //find the top points and bottom points
-    if (wall.strt[0] > wall.end[0]){
-      strtWallx = wall.end[0];
-      endWallx = wall.strt[0];
 
-    }else{
-      strtWallx = wall.strt[0];
-      endWallx = wall.end[0];
-
-    }
-
-    if (wall.strt[1] > wall.end[1]){
-      strtWally = wall.end[1];
-      endWally = wall.strt[1];
-
-    }else{
-      strtWally = wall.strt[1];
-      endWally = wall.end[1];
-
-    }
-
-    topWall = [strtWallx - bufferLeft, strtWally + bufferAbove, endWallx + bufferRight, endWally + bufferAbove];
-    bottomWall = [strtWallx - bufferLeft, strtWally - bufferBeneath, endWallx + bufferRight, endWally - bufferBeneath];
-    leftWall = [strtWallx - bufferLeft, strtWally + bufferAbove, strtWallx - bufferLeft, strtWally - bufferBeneath];
-    rightWall = [endWallx + bufferRight, strtWally + bufferAbove, strtWallx + bufferRight, strtWally - bufferBeneath];
-
-    //given two points A(x,y) and B(x,y) that a line passes through to know if another point M(x,y) is on one side or the other
-    // determine the sign of the determinant of vectors (Ab, AM) where M(X,Y) is the query point
-    //Position = Math.sign((Bx - Ax)*(Y-Ay) - (By -Ay)*(X-Ax));
-
-    topPosition = pointInOutorOn(topWall[0], topWall[1], topWall[2], topWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
-    bottomPosition = pointInOutorOn(bottomWall[0], bottomWall[1], bottomWall[2], bottomWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
-    leftPosition = pointInOutorOn(leftWall[0], leftWall[1], leftWall[2], leftWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
-    rightPosition = pointInOutorOn(topWall[0], rightWall[1], rightWall[2], rightWall[3],s[sOffset+P_POSX],s[sOffset+P_POSY]);
-
-    if (topPosition == 1 || bottomPosition == -1){
-                        s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
-
-    }
-
-    if (rightPosition == 1 || leftPosition == -1){
-                        s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
-
-    }
-
-}
-
-function pointInOutorOn(Ax,Ay,Bx,By,Mx,My){
-    //given two points A(x,y) and B(x,y) that a line passes through to know if another point M(x,y) is on one side or the other
-    // determine the sign of the determinant of vectors (Ab, AM) where M(X,Y) is the query point
-    //Position = Math.sign((Bx - Ax)*(Y-Ay) - (By -Ay)*(X-Ax));
-
-    return Math.sign((Bx-Ax)*(My-Ay) - (By-Ay)*(Mx-Ax));
-
-}
 
 function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in state array for particle, buffer = distance from wall before collision occurs
-  var colWindow = buffer;
-
-
-
-              //s[sOffset+P_FORX] = 1;
-              //s[sOffset+P_FORY] = 1; 
-              //s[sOffset+P_FORZ] = 1;      
-
   
   if (s[sOffset+P_WALL] != wall.Csize ) return; //every particle is initialized in a wall 
                                                 //check which wall it is and define the constraints
@@ -800,7 +725,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
           }
 
             if (wall.strt[1] < wall.end[1]){
-                  if (s[sOffset+P_POSY] <= (wall.strt[1] - bufferLeft) && s[sOffset+P_VELY] < 0.0){ 
+                  if (s[sOffset+P_POSY] <= (wall.strt[1] + bufferLeft1) && s[sOffset+P_VELY] < 0.0){ 
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"S" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
@@ -808,7 +733,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
-                  } else if(s[sOffset+P_POSY] >= (wall.end[1] + bufferRight)&& s[sOffset+P_VELY] > 0.0){ // collision! 
+                  } else if(s[sOffset+P_POSY] >= (wall.end[1] - bufferRight1)&& s[sOffset+P_VELY] > 0.0){ // collision! 
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"E for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
@@ -817,11 +742,17 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
 
-                  } 
+                  } else if (s[sOffset+P_POSY] <= (wall.strt[1] - 0.2) && s[sOffset+P_VELY] < 0.0){ 
+                        s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
+                        //return;
+                  }else if (s[sOffset+P_POSY] >= (wall.end[1] + 0.2)&& s[sOffset+P_VELY] > 0.0){ // collision! 
+                        s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
+                        //return;
+                  }
 
 
             }else {
-                  if (s[sOffset+P_POSY] >= (wall.strt[1] + bufferLeft) && s[sOffset+P_VELY] > 0.0){ 
+                  if (s[sOffset+P_POSY] >= (wall.strt[1] - bufferRight1) && s[sOffset+P_VELY] > 0.0){ 
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"S" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
@@ -829,7 +760,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
-                  } else if(s[sOffset+P_POSY] <= (wall.end[1] - bufferRight)&& s[sOffset+P_VELY] < 0.0){ // collision! 
+                  } else if(s[sOffset+P_POSY] <= (wall.end[1] + bufferLeft1)&& s[sOffset+P_VELY] < 0.0){ // collision! 
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"E for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
@@ -838,7 +769,13 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
 
-                  } 
+                  } else  if (s[sOffset+P_POSY] >= (wall.strt[1] + 0.2) && s[sOffset+P_VELY] > 0.0){ 
+                        s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
+                        //return;
+                  } else if(s[sOffset+P_POSY] <= (wall.end[1] - 0.2)&& s[sOffset+P_VELY] < 0.0){ // collision! 
+                        s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
+                        //return;
+                  }
 
 
             }
@@ -846,15 +783,19 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
 
 
   }else if (Math.abs(wall.strt[0] - wall.end[0]) > Math.abs(wall.strt[1] - wall.end[1])) {
-            xvel = false;
-            yvel = false;
+
+          if( s[sOffset+P_POSY] >= (wall.strt[1] + bufferRight) && s[sOffset+P_VELY] > 0.0 ||
+          s[sOffset+P_POSY] <= (wall.end[1] - bufferLeft)  && s[sOffset+P_VELY] < 0.0){
+
+            s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY]; 
+
+      }
+
 
             //very verbose, I can think of many ways to simplify this code but ...
             if (wall.strt[0] < wall.end[0]){
-                  if(wall.voltage != 0){
 
-                  }
-                  if (s[sOffset+P_POSX] <= (wall.strt[0] - bufferLeft) && s[sOffset+P_VELX] < 0.0){ 
+                  if (s[sOffset+P_POSX] <= (wall.strt[0] + bufferLeft1) && s[sOffset+P_VELX] < 0.0){ 
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
@@ -863,7 +804,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
-                  } else if(s[sOffset+P_POSX] >= (wall.end[0] + bufferRight)&& s[sOffset+P_VELX] > 0.0){ // collision! 
+                  } else if(s[sOffset+P_POSX] >= (wall.end[0] - bufferRight1)&& s[sOffset+P_VELX] > 0.0){ // collision! 
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
@@ -873,11 +814,18 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
 
+                  } else  if (s[sOffset+P_POSX] <= (wall.strt[0] - 0.2 ) && s[sOffset+P_VELX] < 0.0){ 
+                        s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        //return;
+                  } else if(s[sOffset+P_POSX] >= (wall.end[0] + 0.2)&& s[sOffset+P_VELX] > 0.0){ // collision! 
+                        s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        //return;
                   } 
+
 
 
             } else{ // start and end are reveresed sometimes
-                  if (s[sOffset+P_POSX] >= (wall.strt[0] + bufferLeft) && s[sOffset+P_VELX] > 0.0){ 
+                  if (s[sOffset+P_POSX] >= (wall.strt[0] - bufferRight1) && s[sOffset+P_VELX] > 0.0){ 
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
@@ -886,43 +834,32 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
-                  } else if(s[sOffset+P_POSX] <= (wall.end[0] - bufferRight)&& s[sOffset+P_VELX] < 0.0){ // collision! 
+                  } else if(s[sOffset+P_POSX] <= (wall.end[0] + bufferLeft1)&& s[sOffset+P_VELX] < 0.0){ // collision! 
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
-                        xvel = true;
+
                       }else{
                         s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
 
+                  }else if (s[sOffset+P_POSX] >= (wall.strt[0] + 0.2) && s[sOffset+P_VELX] > 0.0){ 
+                        s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        //return;
+                  } else if(s[sOffset+P_POSX] <= (wall.end[0] - 0.2)&& s[sOffset+P_VELX] < 0.0){ // collision! 
+                        s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
+                        //return;
                   } 
 
             }
-            overtx = [wall.strt[0]-bufferRight, wall.end[0]+bufferLeft, wall.strt[0]-bufferRight, wall.end[0]+bufferLeft];
-          overty = [wall.strt[1]-bufferAbove, wall.end[1]-bufferAbove, wall.strt[1]+ bufferBeneath, wall.end[1] + bufferBeneath];
 
                               
-                if( s[sOffset+P_POSY] >= (wall.strt[1] + bufferAbove) && s[sOffset+P_VELY] > 0.0 ||
-                    s[sOffset+P_POSY] <= (wall.end[1] - bufferBeneath)  && s[sOffset+P_VELY] < 0.0){
-
-                      s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY]; 
-                    yvel = true;
-
-                }
-                           /* if ((pnpoly(4,overtx,overty, s[sOffset+P_POSX],s[sOffset+P_POSY]))){
-                                    s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
-                                    s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
-                            }*/
 
 
 
 
   }
-/*            if( s[sOffset+P_POSZ] >= (0.05) && s[sOffset+P_CVEZ] > 0.0 || //0.2 for a little space above the line 
-              s[sOffset+P_POSZ] <= (-0.05)  && s[sOffset+P_CVEZ] < 0.0){ //and some space below the line to make a wall
-                s[sOffset+P_CVEZ] = -1 * s[sOffset+P_CVEZ];
-          }*/
 
 
 }
@@ -1199,7 +1136,7 @@ function makeCircuit() {
                                           0); 
       //check if electrons are initialized in ions
 
-      for (k = 0; k < numParticles; k++){
+      for (var k = 0; k < numParticles; k++){
           var ioffset = k*PartEleCount;
 
         var glPositionwp = scaleParticlePoint(s[ioffset+P_POSX], s[ioffset+P_POSY],s[ioffset+P_POSZ]);         
@@ -1231,7 +1168,7 @@ function makeCircuit() {
   // add wall constraints to constraints array
   var wallstart = constraints.length;
   // left outer wall
-  for (n = 0; n < Circuit.length; n++) {
+  for (var n = 0; n < Circuit.length; n++) {
 
 
         constraints[wallstart+n] = new Constraint(1, // wall type 
@@ -2030,4 +1967,5 @@ function doPause(){
   else 
     drawParticles = true;
 }
+
 
