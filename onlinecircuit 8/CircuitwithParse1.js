@@ -537,6 +537,7 @@ function calcForces(offset) {
                   }else{
                       accely = 0.00025;
                   }
+
               }else{
                   if (f[j].strt[1] - f[j].end[1] > 0){
                       accely = 0.00025;
@@ -742,13 +743,13 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
 
-                  } else if (s[sOffset+P_POSY] <= (wall.strt[1] - 0.2) && s[sOffset+P_VELY] < 0.0){ 
+                  } /*else if (s[sOffset+P_POSY] <= (wall.strt[1] - 0.2) && s[sOffset+P_VELY] < 0.0){ 
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
                         //return;
                   }else if (s[sOffset+P_POSY] >= (wall.end[1] + 0.2)&& s[sOffset+P_VELY] > 0.0){ // collision! 
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
                         //return;
-                  }
+                  }*/
 
 
             }else {
@@ -769,13 +770,13 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
 
-                  } else  if (s[sOffset+P_POSY] >= (wall.strt[1] + 0.2) && s[sOffset+P_VELY] > 0.0){ 
+                  }/* else  if (s[sOffset+P_POSY] >= (wall.strt[1] + 0.2) && s[sOffset+P_VELY] > 0.0){ 
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
                         //return;
                   } else if(s[sOffset+P_POSY] <= (wall.end[1] - 0.2)&& s[sOffset+P_VELY] < 0.0){ // collision! 
                         s[sOffset+P_VELY] = -1 * s[sOffset+P_VELY];
                         //return;
-                  }
+                  }*/
 
 
             }
@@ -799,33 +800,31 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
-                        xvel = true;
                       }else{
-                        s[sOffset+P_WALL] = wall_Id;
+                          s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
                   } else if(s[sOffset+P_POSX] >= (wall.end[0] - bufferRight1)&& s[sOffset+P_VELX] > 0.0){ // collision! 
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
-                        xvel = true;
                       }else{
                         s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
 
-                  } else  if (s[sOffset+P_POSX] <= (wall.strt[0] - 0.2 ) && s[sOffset+P_VELX] < 0.0){ 
+                  } /*else  if (s[sOffset+P_POSX] <= (wall.strt[0] - 0.2 ) && s[sOffset+P_VELX] < 0.0){ 
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                         //return;
                   } else if(s[sOffset+P_POSX] >= (wall.end[0] + 0.2)&& s[sOffset+P_VELX] > 0.0){ // collision! 
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                         //return;
-                  } 
+                  } */
 
 
 
             } else{ // start and end are reveresed sometimes
-                  if (s[sOffset+P_POSX] >= (wall.strt[0] - bufferRight1) && s[sOffset+P_VELX] > 0.0){ 
+                  if (s[sOffset+P_POSX] >= (wall.strt[0] - 0.18) && s[sOffset+P_VELX] > 0.0){ 
                       var wall_Id= bumpedInto(wall, "0" ,Circuit);//"0" for start
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
@@ -834,7 +833,7 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         s[sOffset+P_WALL] = wall_Id;
                         return;
                       }
-                  } else if(s[sOffset+P_POSX] <= (wall.end[0] + bufferLeft1)&& s[sOffset+P_VELX] < 0.0){ // collision! 
+                  } else if(s[sOffset+P_POSX] <= (wall.end[0] + 0.18)&& s[sOffset+P_VELX] < 0.0){ // collision! 
                       var wall_Id= bumpedInto(wall, "1",Circuit);//"1 for end"
                       if(wall_Id == -1){
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
@@ -844,13 +843,13 @@ function DetectCollision(wall, sOffset, buffer){ // wall constraint, offset in s
                         return;
                       }
 
-                  }else if (s[sOffset+P_POSX] >= (wall.strt[0] + 0.2) && s[sOffset+P_VELX] > 0.0){ 
+                  }/*else if (s[sOffset+P_POSX] >= (wall.strt[0] + 0.2) && s[sOffset+P_VELX] > 0.0){ 
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                         //return;
                   } else if(s[sOffset+P_POSX] <= (wall.end[0] - 0.2)&& s[sOffset+P_VELX] < 0.0){ // collision! 
                         s[sOffset+P_VELX] = -1 * s[sOffset+P_VELX];
                         //return;
-                  } 
+                  } */
 
             }
 
