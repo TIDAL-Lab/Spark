@@ -31,7 +31,7 @@ class Bulb extends Component  {
 
   Bulb(num x0, num y0, num x1, num y1, num r) : super("Bulb",x0, y0, x1, y1) {
     setImage("images/bulb-off.png");
-    onbulb.src = "images/bulb-on.png";
+    onbulb.src = "images/bulb-on-yellow.png";
     current = 0.0;
     resistance = 3.0;
     voltageDrop = 0.0;

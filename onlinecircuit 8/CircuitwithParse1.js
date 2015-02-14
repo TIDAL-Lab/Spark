@@ -57,7 +57,7 @@ var FSHADER_SOURCE =
   '    if (isPoint == 1.0) { \n' +
   '       float dist = distance(gl_PointCoord, vec2(0.5, 0.5)); \n' +
   '       if(dist < 0.5) { \n' + 
-  '           gl_FragColor = vec4((1.0 - 1.5*dist)*v_Color.rgb, v_Color.a * v_alpha);\n' +
+  '           gl_FragColor = vec4((1.0 - 1.5*dist)*v_Color.rgb, v_Color.a * v_alpha );\n' +
   '       } else { discard; }\n' +
   '    } else { \n' +
   '       gl_FragColor = vec4(v_Color.rgb, v_Color.a * v_alpha ); } \n' +
@@ -627,7 +627,7 @@ function Render(mygl, n, myu_ViewMatrix, myViewMatrix) {
   
   mygl.uniform1f(u_alpha, 2);
    
-  mygl.drawArrays(mygl.POINTS, 0, n); // draws electrons
+mygl.drawArrays(mygl.POINTS, 0, n); // draws electrons
   
   mygl.uniform1i(isPartID, false);
 

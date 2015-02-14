@@ -76,8 +76,10 @@ class Toolbar {
     if (slider1 != null) {
       changeValue("battery-value", double.parse(slider1.value)); /* initiate the slider value */
       //slider1.onChange.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
-      slider1.onTouchMove.listen((e) => sliderTouch(e, "#battery-slider"));
+      slider1.onTouchMove.listen((e) => sliderMove(e, "#battery-slider"));
+      slider1.onMouseMove.listen((e) => sliderMove(e, "#battery-slider"));
       slider1.onTouchEnd.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
+      slider1.onMouseUp.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
     }
 
     
@@ -90,7 +92,7 @@ class Toolbar {
     if (slider3 != null) {
     changeValue("resistor-value", double.parse(slider3.value));
     //slider3.onChange.listen((evt) => changeValue("resistor-value", double.parse(slider3.value)));
-    slider3.onTouchMove.listen((e) => sliderTouch(e, "#resistor-slider"));
+    slider3.onTouchMove.listen((e) => sliderMove(e, "#resistor-slider"));
     slider3.onTouchEnd.listen((e) => changeValue("resistor-value", double.parse(slider3.value)));
     }
     
@@ -98,7 +100,7 @@ class Toolbar {
     if (slider4 != null) {
     changeValue("bulb-value", double.parse(slider4.value));
     slider4.onChange.listen((evt) => changeValue("bulb-value", double.parse(slider4.value)));
-    slider4.onTouchMove.listen((e) => sliderTouch(e, "#bulb-slider"));
+    slider4.onTouchMove.listen((e) => sliderMove(e, "#bulb-slider"));
     slider4.onTouchEnd.listen((e) => changeValue("bulb-value", double.parse(slider4.value)));
     }
   }
@@ -129,15 +131,21 @@ class Toolbar {
     }
   }
 }
-
-void sliderTouch(TouchEvent tframe, String who) {
+void sliderMove(UIEvent evt, String who) {
   InputElement slider = document.querySelector(who);
   Rectangle box = slider.getBoundingClientRect();
   num left = box.left + window.pageXOffset;
   num top = box.top + window.pageYOffset;
   num width = box.width;
-  num tx = tframe.changedTouches[0].client.x - left;
-  num ty = tframe.changedTouches[0].client.y - top;
+  num tx, ty;
+  if (evt is TouchEvent) {
+    tx = evt.changedTouches[0].client.x - left;
+    ty = evt.changedTouches[0].client.y - top;
+  }
+  if (evt is MouseEvent) {
+    tx = evt.client.x - left;
+    ty = evt.client.y - top;
+  }  
   if (tx < width / 5.0) {
     slider.value = "1.0";
   } else if (tx < width * 2 / 5) {
@@ -150,6 +158,27 @@ void sliderTouch(TouchEvent tframe, String who) {
     slider.value = "3.0";
   }
 }
+//
+//void sliderTouch(TouchEvent tframe, String who) {
+//  InputElement slider = document.querySelector(who);
+//  Rectangle box = slider.getBoundingClientRect();
+//  num left = box.left + window.pageXOffset;
+//  num top = box.top + window.pageYOffset;
+//  num width = box.width;
+//  num tx = tframe.changedTouches[0].client.x - left;
+//  num ty = tframe.changedTouches[0].client.y - top;
+//  if (tx < width / 5.0) {
+//    slider.value = "1.0";
+//  } else if (tx < width * 2 / 5) {
+//    slider.value = "1.5";
+//  } else if (tx < width * 3 / 5) {
+//    slider.value = "2";
+//  } else if (tx < width * 4 / 5) {
+//    slider.value = "2.5";
+//  } else {
+//    slider.value = "3.0";
+//  }
+//}
 
 void changeValue(String who, num value) {
   switch (who) {
