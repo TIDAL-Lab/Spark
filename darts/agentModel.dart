@@ -21,14 +21,14 @@
 part of SparkProject;
 
 
-class Model {
+class agentModel {
   
   App app;
   String id; // html id for toolbar div tag
   Random rand = new Random();
   Component component;
    
-  Model(this.app, String id) {
+  agentModel(this.app, String id) {
     
     ButtonElement button;
     button = document.querySelector("$id .close-button");

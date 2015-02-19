@@ -1,14 +1,14 @@
 part of SparkProject;
 
 
-class Model2 {
+class lumpModel {
   
   App app;
   String id; // html id for toolbar div tag
   Random rand = new Random();
   Component component;
    
-  Model2(this.app, String id) {
+  lumpModel(this.app, String id) {
     //theApp.help.show();
     ButtonElement button;
     button = document.querySelector("$id .close-button");

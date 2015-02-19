@@ -32,8 +32,8 @@ import 'dart:js';
 
 part 'darts/Touch.dart';
 part 'darts/toolbar.dart';
-part 'darts/model.dart';
-part 'darts/model2.dart';
+part 'darts/agentModel.dart';
+part 'darts/lumpModel.dart';
 part 'darts/sounds.dart';
 part 'darts/slider.dart';
 part 'darts/help.dart';
@@ -106,7 +106,7 @@ class App extends TouchManager {
     * 0 --> control condition: only circuit, no ABM model
     * 1 --> ABM + circuit model, with the NetTango model embedded in the canvas
     */
-   num condition = 0;  
+   num condition = 1;  
 
       
    App() {
@@ -136,10 +136,10 @@ class App extends TouchManager {
       * if condition = 1 --> model is the NetTango model as a frame
       */
      if (condition==0) {
-       model1 = new Model2(this, "div#model1");
+       model1 = new lumpModel(this, "div#model1");
      }
      else {
-       model1 = new Model(this, "div#model1");
+       model1 = new agentModel(this, "div#model1");
      }
      
 
