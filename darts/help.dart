@@ -28,12 +28,20 @@ class Help implements Touchable {
   ImageElement img;
   int number;
   bool visible = false;
+  String helpSrc;
   Help (num x, num y) {
     this.x = x;
     this.y = y;
 
     img = new ImageElement();
-    setImage("images/helps/bg.png");
+    if (theApp.condition == 0) {
+      helpSrc = "images/helps2/";
+    }
+    else {
+      helpSrc ="images/helps/";
+    }
+    String temp = helpSrc +"bg.png";
+    setImage(temp);
     
     theApp.addTouchable(this);
     
@@ -69,7 +77,7 @@ class Help implements Touchable {
     ButtonElement button = document.getElementsByClassName("help-button").first;
     button.style.display = "none";
     visible = true;
-    img.src = "images/helps/help1.png";
+    img.src = helpSrc + "help1.png";
     number = 1;
     App.repaint();
   }
@@ -77,7 +85,7 @@ class Help implements Touchable {
   void next() {
     if (number != 4) {
       number++;
-      img.src = "images/helps/help${number.toString()}.png";
+      img.src = helpSrc + "help${number.toString()}.png";
     }
     App.repaint();    
   }
@@ -85,7 +93,7 @@ class Help implements Touchable {
   void back() {
     if (number != 1){
       number--;
-      img.src = "images/helps/help${number.toString()}.png";
+      img.src = helpSrc + "help${number.toString()}.png";
     }
     App.repaint();    
   }
