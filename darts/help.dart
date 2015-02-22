@@ -26,7 +26,7 @@ class Help implements Touchable {
   num clickX, clickY;
   num iw, ih;
   ImageElement img;
-  int number;
+  int number, max;
   bool visible = false;
   String helpSrc;
   Help (num x, num y) {
@@ -35,7 +35,7 @@ class Help implements Touchable {
 
     img = new ImageElement();
     if (theApp.condition == 0) {
-      helpSrc = "images/helps2/";
+      helpSrc = "images/helps-control/";
     }
     else {
       helpSrc ="images/helps/";
@@ -83,7 +83,13 @@ class Help implements Touchable {
   }
   
   void next() {
-    if (number != 4) {
+    if (theApp.condition==0) {
+      max = 3;
+    }
+    else {
+      max = 4;
+    }
+    if (number != max) {
       number++;
       img.src = helpSrc + "help${number.toString()}.png";
     }

@@ -106,7 +106,7 @@ class App extends TouchManager {
     * 0 --> control condition: only circuit, no ABM model
     * 1 --> ABM + circuit model, with the NetTango model embedded in the canvas
     */
-   num condition = 1;  
+   num condition = 0;  
 
       
    App() {
@@ -192,6 +192,18 @@ class App extends TouchManager {
 
      num centerX = workingBox.width/2;
      num centerY = workingBox.height/2;
+     
+     // reset the sliders
+     //InputElement batterySlider = querySelector("#battery-slider");
+     //InputElement resistorSlider = querySelector("#resistor-slider");
+     //querySelector("#battery-slider").value =2.0;
+     InputElement slider1 = document.querySelector("#battery-slider");
+     slider1.value = "2.0";
+     querySelector("#battery-value").text = "Voltage = 2.0";
+     InputElement slider2 = document.querySelector("#resistor-slider");
+     slider2.value = "1.0";
+     querySelector("#resistor-value").text = "Resistance = 1.0";
+     
      /* create the first battery */
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);

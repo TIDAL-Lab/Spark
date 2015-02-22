@@ -44,8 +44,8 @@ void main() {
   }
   
   var iFormated = new NumberFormat("#0.00").format(i);
-  var vFormated = new NumberFormat("#0.0000").format(v);
-  var rFormated = new NumberFormat("#0.000").format(r);
+  var vFormated = new NumberFormat("#0.00").format(v);
+  var rFormated = new NumberFormat("#0.0").format(r);
   
   ParagraphElement p = new ParagraphElement();
   p = document.querySelector("#voltage-value");

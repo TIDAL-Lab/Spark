@@ -1,0 +1,13 @@
+// 02.19.2015
+
+// merging the two conditions into one code
+1. main.dart: added a condition switch
+2. copied probe.html, probe.dart, and css/probeToolbar.css
+3. copied a 2nd version of dart/model.dart --> now they are two files: agentModel.dart & lumpModel.dart
+4. track where the model is called:
+	--> main.dart: if condition --> model
+	--> help.dart
+5. style issues: fixed default.css --> #model1
+
+// 
+

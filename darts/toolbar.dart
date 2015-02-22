@@ -42,7 +42,7 @@ class Toolbar {
     button = document.querySelector("$id #battery-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Battery"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Battery"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Battery"));
       
     }
@@ -50,21 +50,21 @@ class Toolbar {
     button = document.querySelector("$id #wire-button"); /* do not remove $id, it causes some errors! */
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Wire"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Wire"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Wire"));
     }
     
     button = document.querySelector("$id #resistor-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Resistor"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Resistor"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Resistor"));
     }
     
     button = document.querySelector("$id #bulb-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Bulb"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Bulb"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Bulb"));
     }
       
@@ -77,9 +77,9 @@ class Toolbar {
       changeValue("battery-value", double.parse(slider1.value)); /* initiate the slider value */
       //slider1.onChange.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
       slider1.onTouchMove.listen((e) => sliderMove(e, "#battery-slider"));
-      slider1.onMouseMove.listen((e) => sliderMove(e, "#battery-slider"));
+      //slider1.onMouseMove.listen((e) => sliderMove(e, "#battery-slider"));
       slider1.onTouchEnd.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
-      slider1.onMouseUp.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
+      //slider1.onMouseUp.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
     }
 
     
