@@ -11,3 +11,12 @@
 
 // 
 
+// 02.27.2015
+
+// Changing the brightness of light bulb
+1. I changed the bulb-on and bulb-off colors
+2. A drop shadow is added (it first draws bulb-off, then the shadow (with radius proportional with current)
+and then bulb-on image.
+
+// Adding a battery info page for condition = 0
+// 
