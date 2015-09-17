@@ -19,6 +19,8 @@ var sphere; //image element for particles
 var components = []; // an array of components
 var electrons, electronGeometry, electronMaterial;
 var ions, ionGeometry, ionMaterial;
+var raycaster;
+var worldCenter;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -32,31 +34,37 @@ function init() {
 	container = document.createElement( 'div' );
 	document.body.appendChild( container );
 
-	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 3000 );
+	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
 	camera.position.z = 1000;
 
 	scene = new THREE.Scene();
 	scene.fog = new THREE.FogExp2( 0xffffff, 0.0007 );
+
+	raycaster = new THREE.Raycaster();
 	
 	THREE.ImageUtils.crossOrigin = 'anonymous'; // for using images from the image folder
 	// component inputs (type, current, resistance, volt, startx, starty, endx, endy, direction)
-	var comp1 = new Component("wire", 0, 1, 0, 0, -500, 1000, -500, 0); 
-	var comp2 = new Component("wire", 0, 1, 0, 0, 100, 1000, 100, 0);
-	var comp3 = new Component("resistor", 0, 1, 0, -1000, 0, -500, 0, 0);
+	var comp1 = new Component("wire", 0, 1, 0, 0, -500, 800, 100, 0); 
+	var comp2 = new Component("resistor", 0, 1, 0, -1000, -200, -200, -200, 0);
+	//var comp3 = new Component("resistor", 0, 1, 0, -1000, 0, -500, 0, 0);
 	components.push(comp1);
 	components.push(comp2);
-	components.push(comp3);
+	//components.push(comp3);
 
 	console.log('# of components = ' + components.length);
-	
+	worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial( {color: 0x00ff00} ));
+	scene.add (worldCenter);
 	initComponents();
 
 
 	renderer = new THREE.WebGLRenderer();
-	renderer.setClearColor ( 0x005368 );
+	//renderer.setClearColor ( 0x005368 );
+	renderer.setClearColor ( 0xCCCCCC );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	container.appendChild( renderer.domElement );
+
+	//renderer.sortObjects = false; //this is to solve the rendering of transparent objects inside each other! 
 
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
@@ -86,8 +94,9 @@ function render() {
 
 	var time = Date.now() * 0.00005;
 
-	//camera.position.x += ( mouseX - camera.position.x ) * 0.05;
-	//camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+	camera.position.x += ( mouseX - camera.position.x ) * 0.05;
+	camera.position.y += ( - mouseY - camera.position.y ) * 0.05;
+
 
 	camera.lookAt( scene.position );
 
@@ -140,8 +149,8 @@ function onWindowResize() {
 
 function onDocumentMouseMove( event ) {
 
-// mouseX = event.clientX - windowHalfX;
-// mouseY = event.clientY - windowHalfY;
+ mouseX = event.clientX - windowHalfX;
+ mouseY = event.clientY - windowHalfY;
 
 }
 

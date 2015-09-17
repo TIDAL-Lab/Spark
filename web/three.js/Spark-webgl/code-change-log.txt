@@ -1,0 +1,30 @@
+*** notes on 9/14/2015
+1. I am studying how to run collision detection on particle systems. So far it seems that there is nothing good!
+2. I am studying raycasters in three.js
+3. I am changing the createContainer() function to createBox() function, the main change is that I am creating a 3D box instead of a 2D rectangle.
+	And instead of actually drawing the box, I am creating a MESH using BoxGeometry(). 
+	I also need to set the position and rotate the box so that it matches the coordinates of the input json object
+4. I also am changing the start and end point objects to a bunch of Vector3() objects, I think this make thins easier later.
+5. I made the component box transparent by adding:
+	boxMaterial.transparent = true;
+	boxMaterial.opacity = 0.5;
+	But it did not work and it did not show the particles inside the box. I searched and added this line, which solved the problem:
+	boxMaterial.depthWrite = false;
+	
+*** notes on 9/15/2015
+1. Now it's time to work on collision detection!
+2. Can I use boundingBox? 
+	boundingBox = new THREE.Box3().setFromObject(boxMesh);
+3. No! boundingBox is not the answer, because the box is parallel to the XYZ axes. 
+4. I should define walls and use collision detection to the walls.
+
+*** notes on 9/16/2015
+1. Trying to rotate a geometry around a point that is external to the geometry --> to rotate the walls of component
+	the solution is to append the walls to the component as its children and then rotate all of them at once
+	component.add(walls[i]);
+2. Now dealing with the raycaster and collision	
+	For each electron I need to build a raycaster with electron's position and direction of moving, which is basically it's velocity vector.
+3. For now, the electrons move randomly inside the box.
+4. I made all the electrons moving with the same initial velocity, by changing random velocity.y to a value that results in a constant velocity 
+	( velocity.y = sqrt(velocity-velocity.x^2) )
+5. 
