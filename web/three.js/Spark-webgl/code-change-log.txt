@@ -27,4 +27,26 @@
 3. For now, the electrons move randomly inside the box.
 4. I made all the electrons moving with the same initial velocity, by changing random velocity.y to a value that results in a constant velocity 
 	( velocity.y = sqrt(velocity-velocity.x^2) )
-5. 
+5. Now it's time to import the components from parse json object.
+
+ADD LATER: change the bouncing off the walls
+ADD LATER: add bumping into the ions!
+
+*** notes on 9/16/2015
+1. I added the code from old code that passes the json object of components to the webgl. I needed to make some little modifications in the code,
+	including moving the js code from html file to the top of my main code. 
+2. There are issues with when the parse code is called, which I'll fix later.
+3. I fixed the problem with the coordinates, changing the code in "Circuit.dart" file, where it sends the json object.
+	Before it was scaled to match the webgl format, but now I want the real position according to the center of working box.
+4. ISSUE: not generating ions.
+5. ISSUE: the component is rotated 90 degree on the XY plane.
+6. ISSUE: the code stops when I change the circuit, any change.
+
+*** notes on 9/17/2015
+1. working on parsing code. Things to fix:
+	* XY coordinates are not correct
+	* run parse first, before making a change in the circuit.
+	* there are no ions in the system now 
+	* the code stops after making one change
+2. I don't know what this is for: SyntaxError: unreachable code after return statement
+

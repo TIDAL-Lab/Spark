@@ -38,7 +38,7 @@ part 'sounds.dart';
 part 'slider.dart';
 part 'help.dart';
 part 'Lens.dart';
-part 'connectServer.dart';
+//part 'connectServer.dart';
 part 'circuitAnalysis/Circuit.dart';
 part 'circuitAnalysis/Matrix.dart';
 part 'circuitAnalysis/LUDecomposition.dart';
@@ -130,6 +130,9 @@ class App extends TouchManager {
      selectionBar = new Toolbar(this, "div#selection-toolbar");
      editionBar = new Toolbar(this, "div#edition-toolbar");
      
+     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
+     workingBox = new Rectangle(canvasMargin, canvasMargin,width - 530, toolbarRect.top -(3*canvasMargin));
+     
      /* 
       * set the model based on the condition
       * if condition = 0 --> model is the the only measures model as a frame
@@ -153,8 +156,10 @@ class App extends TouchManager {
      deleteBox.src = "images/trash-bin.png";
      deleteBox.onLoad.listen((event) { draw(); });
 
-     num centerX = (width - 530)/2;
-     num centerY = height/2;
+//     num centerX = (width - 530)/2;
+//     num centerY = height/2;
+     num centerX = workingBox.width / 2;
+     num centerY = workingBox.height / 2;
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
      components.add(new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage));
@@ -229,8 +234,8 @@ class App extends TouchManager {
      ctx.strokeStyle = 'white';
      ctx.lineWidth = 2;
      ctx.fillStyle = "rgba(255,255,255,0.2)";
-     ctx.strokeRect(workingBox.left, workingBox.top, workingBox.width, workingBox.height);
-     ctx.fillRect(workingBox.left, workingBox.top, workingBox.width, workingBox.height);
+     ctx.strokeRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
+     ctx.fillRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
 
      /*
      if (this.gridsOn == true) {

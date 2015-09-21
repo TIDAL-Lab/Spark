@@ -10,8 +10,7 @@
    <link rel="stylesheet" href="css/default.css" />
 </head>
 <body>
-  <script src="http://cdn.pubnub.com/pubnub.min.js"></script> 
-  <script src="http://cdn.pubnub.com/pubnub.min.js"></script>    
+  <script src="https://cdn.pubnub.com/pubnub-3.7.14.min.js"></script>     
   <script src="js/dart.js"></script>
   <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
   <script src="js/underscore.js"></script>
@@ -21,7 +20,7 @@
          publish_key: 'demo',
          subscribe_key: 'demo'
      });
-      Parse.initialize("SbWUnxqysDvhjXDhanT4fuKrym9mNjNW7ApADEc8", "kiJz6q8Z8VNUaRfduu6aT8I1daKR393SnploBlUU");
+      Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
       var deleteParse = function(myObj){
         
         this.doDeleteParse = function(){
@@ -68,7 +67,7 @@
               
             }).then(function(Circuit){
                 pubnub.publish({
-                  channel: 'mma2',
+                  channel: 'ebz',
                   message: '1'
                });
               
@@ -144,7 +143,6 @@
 
 
    <script src="dart/main.dart" type="application/dart"></script>
-   <script src="dart.js"></script>
    <script type="text/javascript">
       window.oncontextmenu = function(event) {
          event.preventDefault();

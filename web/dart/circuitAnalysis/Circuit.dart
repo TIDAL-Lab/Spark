@@ -137,25 +137,38 @@ class Circuit {
     for (Edge e in this.edges) {
       
       Component c = e.component;
-        var anObj = new JsObject.jsify({'type': c.type,
-                                          'voltageDrop': c.voltageDrop,
-                                          'current': c.current,
-                                          'resistance': c.resistance,
-                                          'startX': (((c.start.x -canvas.width/2)/canvas.width/2) + 0.1)*20,
-                                          'startY':((c.start.y-canvas.height/2)/canvas.height/2)* 10 ,
-                                          'endX': (((c.end.x - canvas.width/2)/canvas.width/2) + 0.1)*20,//shifted it by 0.1 so that it's visble on webgl scene
-                                          'endY': ((c.end.y - canvas.height/2)/canvas.height/2)*10,
-                                          'direction': c.direction,
-                                          'innerWall':1, //returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)
-                                          'tag': c.ARTag
-                                          });
+//        var anObj = new JsObject.jsify({'type': c.type,
+//                                          'voltageDrop': c.voltageDrop,
+//                                          'current': c.current,
+//                                          'resistance': c.resistance,
+//                                          'startX': (((c.start.x -canvas.width/2)/canvas.width/2) + 0.1)*20,
+//                                          'startY':((c.start.y-canvas.height/2)/canvas.height/2)* 10 ,
+//                                          'endX': (((c.end.x - canvas.width/2)/canvas.width/2) + 0.1)*20,//shifted it by 0.1 so that it's visble on webgl scene
+//                                          'endY': ((c.end.y - canvas.height/2)/canvas.height/2)*10,
+//                                          'direction': c.direction,
+//                                          'innerWall':1, //returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)
+//                                          'tag': c.ARTag
+//                                          });
+      //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
+      var anObj = new JsObject.jsify({'type': c.type,
+                                        'voltageDrop': c.voltageDrop,
+                                        'current': c.current,
+                                        'resistance': c.resistance,
+                                        'startX': (c.start.x -theApp.workingBox.width/2),
+                                        'startY':(theApp.workingBox.height/2 - c.start.y),
+                                        'endX': (c.end.x - theApp.workingBox.width/2),
+                                        'endY': (theApp.workingBox.height/2 - c.end.y),
+                                        'direction': c.direction,
+                                        'innerWall':1, //returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)
+                                        'tag': c.ARTag
+                                        });
         myObj.add(anObj);
 
 
     }
-
-    var deleteParse = new JsObject(context['deleteParse'],[myObj]);
-    deleteParse.callMethod('doDeleteParse'); 
+    // call the "doDeleteParse method on myObj (the code is in index.html)
+    var deleteParse = new JsObject(context['deleteParse'],[myObj]); // instantiate a JS "deleteParse" object
+    deleteParse.callMethod('doDeleteParse'); // call its method "doDeleteParse"
 
   }
 /* ------------------------

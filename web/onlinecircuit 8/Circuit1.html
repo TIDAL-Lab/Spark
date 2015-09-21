@@ -24,7 +24,6 @@
     <input type="Button" onclick= "doParse()" value = "Activate"></input>
     <input type="Button" onclick= "doPause()" value = "Pause"></input>
     <script type="text/javascript">
-    
 
 //listen for streamed messages
 var pubnub = PUBNUB.init({
@@ -72,6 +71,7 @@ function doParse(m){
               });
 
             });
+            
             return promise;
           }).then(function(){
 
