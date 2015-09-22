@@ -27,13 +27,18 @@ console.log('window half x is ' + windowHalfX);
 console.log('window half y is ' + windowHalfY);
 
 
-function main(circuit) {	
+function doInit(circuit) {	
 	components = circuit;
 	init();
 	animate();
 }
 
-
+function doUpdate(circuit) {	
+	components = circuit;
+	update();
+	animate();
+	//render();
+}
 
 // component inputs (type, current, resistance, volt, startx, starty, endx, endy, direction)
 //var Circuit = [];
@@ -62,14 +67,14 @@ function init() {
 	THREE.ImageUtils.crossOrigin = 'anonymous'; // enables using images from the image folder
 
 	// draw a sphere to show the center of screen
-	worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial( {color: 0x00ff00} ));
+	worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial( {color: 0x000000} ));
 	scene.add (worldCenter);
 	initComponents();
 
 
 	renderer = new THREE.WebGLRenderer();
 	//renderer.setClearColor ( 0x005368 );
-	renderer.setClearColor ( 0xCCCCCC );
+	renderer.setClearColor ( 0x337586 ); //bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	container.appendChild( renderer.domElement );
@@ -80,9 +85,29 @@ function init() {
 	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
 	document.addEventListener( 'touchmove', onDocumentTouchMove, false );
 
+	// need both for FF and Webkit - others I haven't tested
+  	document.addEventListener('DOMMouseScroll', mousewheel, false);
+  	document.addEventListener('mousewheel', mousewheel, false);
+
 	//
 
 	window.addEventListener( 'resize', onWindowResize, false );
+
+}
+
+function update() {
+	//console.log('this is where update starts');
+	console.log('# of components = ' + components.length);
+	// remove all children of scene
+	for (c = scene.children.length - 1; c >= 0; c--) { 
+		var obj = scene.children[c];
+		scene.remove(obj);
+	}
+
+	// draw a sphere to show the center of screen
+	worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial( {color: 0x000000} ));
+	scene.add (worldCenter);
+	initComponents();
 
 }
 
@@ -90,19 +115,23 @@ function initComponents() {
 	electronGeometry = new THREE.Geometry();
 	ionGeometry = new THREE.Geometry();
 	for (k=0; k < components.length; k++) {
+		console.log('component ' + k + ' : ' + components[k].compType);
 		console.log('sx = ' + components[k].startPoint.x + ' and sy = ' + components[k].startPoint.y + 'and ex = ' + components[k].endPoint.x + ' and ey = ' + components[k].endPoint.y);
 		console.log('sz = ' + components[k].startPoint.z + ' and ez = ' + components[k].endPoint.z);
-		components[k].init(electronGeometry, ionGeometry);	
+		components[k].init(electronGeometry, ionGeometry);
+		//console.log('component # of ions = ' + components[k].ionCount);	
 	}
 	console.log('# of electrons = ' + electronGeometry.vertices.length);
 	console.log('# of ions = ' + ionGeometry.vertices.length);
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
-	scene.add ( electrons ); 
+	
 
 	ionMaterial = new THREE.PointCloudMaterial( { size: ionSize, map: sphere, color: 0xCC0000 , transparent: true } );
 	ions = new THREE.PointCloud ( ionGeometry, ionMaterial );
+	scene.add ( electrons ); 
 	scene.add ( ions ); 
+	console.log('# of scene children are ' + scene.children.length);
 }
 
 
@@ -132,12 +161,12 @@ function render() {
 
 
 function updateElectrons() {
-	console.log('I get this far, so electrons should move!');
+	//console.log('I get this far, so electrons should move!');
 	var startIndex = 0
 	for (k=0; k < components.length; k++) {
 		var endIndex = startIndex + components[k].electronCount; 
 		var electronVertices = electrons.geometry.vertices.slice(startIndex, endIndex);
-		components[k].updateElectrons(electronVertices); //for now, only 1 component, fix it later.
+		components[k].updateElectrons(electronVertices); 
 		startIndex = endIndex; 
 	}
 }
@@ -156,8 +185,8 @@ function onWindowResize() {
 
 function onDocumentMouseMove( event ) {
 
- mouseX = event.clientX - windowHalfX;
- mouseY = event.clientY - windowHalfY;
+ // mouseX = event.clientX - windowHalfX;
+ // mouseY = event.clientY - windowHalfY;
 
 }
 
@@ -185,6 +214,36 @@ function onDocumentTouchMove( event ) {
 
 	}
 
+}
+
+
+
+function mousewheel( e )
+{
+  var amount = 100; // parameter
+
+  // get wheel direction 
+   var d = ((typeof e.wheelDelta != "undefined")?(-e.wheelDelta):e.detail);
+    d = 100 * ((d>0)?1:-1);
+
+    // do calculations, I'm not using any three.js internal methods here, maybe there is a better way of doing this
+    // applies movement in the direction of (0,0,0), assuming this is where the camera is pointing
+    var cPos = camera.position;
+    var r = cPos.x*cPos.x + cPos.y*cPos.y;
+    var sqr = Math.sqrt(r);
+    var sqrZ = Math.sqrt(cPos.z*cPos.z + r);
+
+    var nx = cPos.x + ((r==0)?0:(d * cPos.x/sqr));
+    var ny = cPos.y + ((r==0)?0:(d * cPos.y/sqr));
+    var nz = cPos.z + ((sqrZ==0)?0:(d * cPos.z/sqrZ));
+
+    // verify we're applying valid numbers
+    if (isNaN(nx) || isNaN(ny) || isNaN(nz))
+      return;
+
+    cPos.x = nx;
+    cPos.y = ny;
+    cPos.z = nz;
 }
 
 

@@ -29,7 +29,7 @@
 		<script type="text/javascript">
 
 		Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
-
+		doParse('init');
 		//listen for streamed messages
 		var pubnub = PUBNUB.init({
 			publish_key: 'demo',
@@ -44,15 +44,17 @@
 		pubnub.subscribe({
 		    channel: 'ebz',
 		    message: function(m){
-		    	console.log("message is " + m);
-		    	if (m == '1'){
-		        	doParse();
+		    	console.log("******************************************************\n" + 
+		    		"Pubnub message = " + m +
+		    		"\n******************************************************");
+		    	if (m == 'update') {
+		        	doParse('update');
 		      	}
 		    }
 		});
 
 
-		function doParse(){
+		function doParse(message){
 			console.log('this is where doParse starts');
 		   	var numComps;
 		    var Circuit = [];
@@ -83,7 +85,14 @@
 		        return promise;
 		    }).then(function(){
 
-		    main(Circuit);
+		    	if (message == 'init') {
+		    		doInit(Circuit);
+		    	}
+		    	else { // message is update
+		    		doUpdate(Circuit);
+		    	}
+		    	//doInit(Circuit);
+		    	
 		  
 		    });  
 		}

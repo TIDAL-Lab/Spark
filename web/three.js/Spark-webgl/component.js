@@ -26,9 +26,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.electronCount; // Change it later
   	this.ionCount; //Change it later
   	this.l = Math.sqrt((endX-startX)*(endX-startX)+(endY-startY)*(endY-startY));
-  	this.w = 50;
+  	this.w = 110;
   	this.walls = [];
-  	this.ions = [];
+  	// this.ions = [];
   	this.obstacles = [];
 
   	this.forceX = this.V * (endX - startX) * direction; 
@@ -74,30 +74,36 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			electronGeometry.vertices.push( electron );
 		}
+		if (this.compType != "Battery") {
+			// create ions
+			var count = 0;
+			for ( i = 1; i < this.l/50; i ++ ) {
+				for (j = 1; j < this.w/50; j++) {
+					var ion;
+					if ((i+j) % 3 == 0) {
+						ion = new THREE.Vector3();
+						ion.x = -this.l/2 + i * 50; 
+						ion.y = -this.w/2 + j * 50;
 
-		// create ions
-		var count = 0;
-		for ( i = 1; i < this.l/100; i ++ ) {
-			for (j = 1; j < this.w/100; j++) {
-				var ion = new THREE.Vector3();
-				if ((i+j) % 3 == 0) {
-					ion.x = -this.l/2 + i * 100; 
-					ion.y = -this.w/2 + j * 100;
-				}				
-				// if (i % 2 == 0) { vertex.y = j * 100;}
-				// else { vertex.y = (j+1)*100;} 
-				ion.z = 0;
+						// if (i % 2 == 0) { vertex.y = j * 100;}
+						// else { vertex.y = (j+1)*100;} 
+						ion.z = 0;
 
-				// translate the ion to be inside the component container
-				var newCoordinate = this.componentToScreen([ion.x, ion.y]);
-				ion.x = newCoordinate[0], ion.y = newCoordinate[1];
+						// translate the ion to be inside the component container
+						var newCoordinate = this.componentToScreen([ion.x, ion.y]);
+						ion.x = newCoordinate[0], ion.y = newCoordinate[1];
 
-				ionGeometry.vertices.push( ion );
-				this.ions.push(ion);
-				count++;
+						ionGeometry.vertices.push( ion );
+						//this.ions.push(ion);
+						count++;
+					}				
+
+				}
 			}
+			this.ionCount = count;
+
 		}
-		this.ionCount = count;
+
 
 		//this.obstacles.concat(this.walls, this.ions);
 		
@@ -125,6 +131,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		
 		// now add the walls
 		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0xCC0C00 } );
+		if (this.compType == 'Battery') {
+			boxMaterial.color.setHex(0x009933);
+			wallMaterial.color.setHex(0x009933);
+		}
         var walls = [
                     new THREE.Mesh( new THREE.PlaneGeometry(boxHeight, boxWidth), wallMaterial),
                     new THREE.Mesh( new THREE.PlaneGeometry(boxHeight, boxWidth), wallMaterial),
@@ -208,6 +218,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			else { 			// no colission
 				electron.x += electron.velocity.x; //bounces off the wall with 180 degree
 				electron.y += electron.velocity.y;
+				//console.log('this electron velocity is ' + electron.velocity.x + ' ' + electron.velocity.y );
 			}
 			
 		}

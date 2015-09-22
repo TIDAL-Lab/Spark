@@ -38,9 +38,9 @@ ADD LATER: add bumping into the ions!
 2. There are issues with when the parse code is called, which I'll fix later.
 3. I fixed the problem with the coordinates, changing the code in "Circuit.dart" file, where it sends the json object.
 	Before it was scaled to match the webgl format, but now I want the real position according to the center of working box.
-4. ISSUE: not generating ions.
-5. ISSUE: the component is rotated 90 degree on the XY plane.
-6. ISSUE: the code stops when I change the circuit, any change.
+4. ISSUE: not generating ions (SOLVED).
+5. ISSUE: the component is rotated 90 degree on the XY plane (SOLVED).
+6. ISSUE: the code stops when I change the circuit, any change (SOLVED).
 
 *** notes on 9/17/2015
 1. working on parsing code. Things to fix:
@@ -49,4 +49,35 @@ ADD LATER: add bumping into the ions!
 	* there are no ions in the system now 
 	* the code stops after making one change
 2. I don't know what this is for: SyntaxError: unreachable code after return statement
+
+*** notes on 9/21/2015
+1. Today, I am trying to figure out how data streaming works in pubnub and parse.
+2. I updated the JS Parse source, but then the execution gives error that Parse is not defined! I changed it back to the old one for now, to fix it later!
+	For now, don't use the latest source!
+3. I studies all the details about data streaming.
+4. I created my own pubnub channel, and my own Parse app with my own account! All understood from Mmachi's code!
+5. The components were not rotated by 90 degrees, the XY coordinates were set wrongly, which I fixed. Right now, the input coordinates in webgl are scaled up by x2
+6. Warning Message: THREE.PlaneGeometry: Consider using THREE.PlaneBufferGeometry for lower memory footprint.
+	---> NOT an issue for now, IGNORE it.
+7. The issue with ions is solved. The issue was not with not generating ions, but with some scaling issue in the code that resulted in no ion to generate.
+
+*** notes on 9/22/2015
+1. Today, I am working on the issue that code stops rendering after I update the circuit. I am reading about requestAnimationFrame() method and how renderer works in WebGL.
+2. I think at each update, I only need to remove objects from the scene, and add new objects to the scene.
+3. YESSSSS! IT WORKED:
+	I just needed to write an update() function, which only removes scene children and adds the updated objects to the scene.
+4. ISSUE: with each update, electrons speed up!
+5. ISSUE: it is still not rendering correctly, some objects don't update correctly, some particles remain on canvas after the update, etc. 
+	(SOLVED)
+	Explanation: it was not corretcly removing the scene children, I used a wrong for loop.
+	stackoverflow link that helped: http://stackoverflow.com/questions/29417374/threejs-remove-all-together-object-from-scene
+
+6. I am working on camera, Z coordinate, and zooming in and zooming out
+	I found a code online and added to my code, and now by mouse wheel, it zooms in/out.
+	I used this link: http://stackoverflow.com/questions/10354574/webgl-zooming-camera-in-threejs-without-trackball-controls-or-other-camera-con
+	ISSUE: when it zooms in as much that the objects are out of scene, it cannot zoom out anymore!
+	
+
+	
+	
 
