@@ -28,14 +28,15 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.l = Math.sqrt((endX-startX)*(endX-startX)+(endY-startY)*(endY-startY));
   	this.w = 110;
   	this.walls = [];
-  	// this.ions = [];
+  	this.ions = [];
   	this.obstacles = [];
+  	this.boxMesh;
 
   	this.forceX = this.V * (endX - startX) * direction; 
   	this.forceY = this.V * (endY - startY) * direction;
 
   	if (this.compType == "Wire") {
-  		this.electronCount = 100;
+  		this.electronCount = 50;
   	}
   	else if ( this.compType == "Resistor" ){
   		this.electronCount = 10;
@@ -45,14 +46,14 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	}
  
 
-  	this.init = function(electronGeometry, ionGeometry) {
+  	this.init = function( electronGeometry, ionGeometry ) {
 
 		
 		this.createBox();
 
   		// create electrons
 		for ( i = 0; i < this.electronCount; i ++ ) {
-			// create electrons 
+
 			var electron = new THREE.Vector3();
 			var l = this.l;
 			electron.x = Math.random() * this.l - this.l/2; //the x coordinate changes based on component length 
@@ -74,43 +75,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			electronGeometry.vertices.push( electron );
 		}
-		if (this.compType != "Battery") {
-			// create ions
-			var count = 0;
-			for ( i = 1; i < this.l/50; i ++ ) {
-				for (j = 1; j < this.w/50; j++) {
-					var ion;
-					if ((i+j) % 3 == 0) {
-						ion = new THREE.Vector3();
-						ion.x = -this.l/2 + i * 50; 
-						ion.y = -this.w/2 + j * 50;
 
-						// if (i % 2 == 0) { vertex.y = j * 100;}
-						// else { vertex.y = (j+1)*100;} 
-						ion.z = 0;
-
-						// translate the ion to be inside the component container
-						var newCoordinate = this.componentToScreen([ion.x, ion.y]);
-						ion.x = newCoordinate[0], ion.y = newCoordinate[1];
-
-						ionGeometry.vertices.push( ion );
-						//this.ions.push(ion);
-						count++;
-					}				
-
-				}
-			}
-			this.ionCount = count;
-
-		}
-
-
-		//this.obstacles.concat(this.walls, this.ions);
-		
-		
 	}
 
-	// draw the rectangle behind the component
+	// create the box and add walls and ions as the box children
 	this.createBox = function() {
 		var startX = this.startPoint.x, startY = this.startPoint.y;
 		var endX = this.endPoint.x, endY = this.endPoint.y;
@@ -121,13 +89,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var zAxis = new THREE.Vector3(0, 0, 1);
 		var boxLength = Math.sqrt((endX - startX)*(endX - startX) + (endY - startY)*(endY - startY));
 		var boxWidth = this.w;
-		var boxHeight = 100;
+		var boxHeight = 30;
 		var boxGeom = new THREE.BoxGeometry( boxLength, boxWidth, boxHeight);
 		var boxMaterial = new THREE.MeshBasicMaterial( { color: 0xCCCC00 } );
 		boxMaterial.transparent = true;
 		boxMaterial.opacity = 0.5;
 		boxMaterial.depthWrite = false;
-		var boxMesh = new THREE.Mesh( boxGeom, boxMaterial );
+		this.boxMesh = new THREE.Mesh( boxGeom, boxMaterial );
 		
 		// now add the walls
 		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0xCC0C00 } );
@@ -136,10 +104,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			wallMaterial.color.setHex(0x009933);
 		}
         var walls = [
-                    new THREE.Mesh( new THREE.PlaneGeometry(boxHeight, boxWidth), wallMaterial),
-                    new THREE.Mesh( new THREE.PlaneGeometry(boxHeight, boxWidth), wallMaterial),
-                    new THREE.Mesh( new THREE.PlaneGeometry(boxLength, boxHeight), wallMaterial),
-                    new THREE.Mesh( new THREE.PlaneGeometry(boxLength, boxHeight), wallMaterial)
+                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxHeight, boxWidth), wallMaterial),
+                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxHeight, boxWidth), wallMaterial),
+                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxLength, boxHeight), wallMaterial),
+                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxLength, boxHeight), wallMaterial)
             ];
         // wall0 contains start point
         walls[0].rotation.y = Math.PI / 2;	
@@ -156,17 +124,52 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		for (i=0; i< walls.length; i++) {
 			this.walls[i] = walls[i]; // this is component
-			boxMesh.add(walls[i]);
+			this.boxMesh.add(walls[i]);
 		}
 
-		boxMesh.position.set(center.x, center.y, center.z);
+		// now create ions and add them to the box
+		if (this.compType != "Battery") { // no ions for battery
+
+			// create ions
+			var count = 0;
+			for ( i = 1; i < this.l/50; i ++ ) {
+				for (j = 1; j < this.w/50; j++) {
+					var pos;
+					if ((i+j) % 3 == 0) {
+						pos = new THREE.Vector3();
+						pos.x = -this.l/2 + i * 50; 
+						pos.y = -this.w/2 + j * 50;
+						pos.z = 0;
+
+						// translate the ion to be inside the component container
+						// var newCoordinate = this.componentToScreen([pos.x, pos.y]);
+						// pos.x = newCoordinate[0], pos.y = newCoordinate[1];
+
+						
+						var ionGeometry = new THREE.SphereGeometry(10, 128, 128 );
+						//ionGeometry.vertices.push( pos );
+						var ionMaterial = new THREE.MeshPhongMaterial( {color: 0xCC0000 , transparent: true} );
+						var ion = new THREE.Mesh( ionGeometry, ionMaterial );
+						ion.position.set(pos.x, pos.y, pos.z);
+						this.ions.push(ion);
+						this.boxMesh.add(ion);
+						count++;
+					}				
+
+				}
+			}
+			this.ionCount = count;
+		}
+			
+		console.log('compoent boxmesh has this many children: ' + this.boxMesh.children.length);
+		console.log('number of ions of this component is: ' + this.ions.length);
+
+		this.boxMesh.position.set(center.x, center.y, center.z);
 		//boxMesh.geometry.translate ( center.x, center.y, center.z );
 		//boxMesh.rotateOnAxis(zAxis, rotationAngle); // instead, the line below
-		boxMesh.rotation.z = rotationAngle;
-		//console.log("rotation angle is " + rotationAngle);
+		this.boxMesh.rotation.z = rotationAngle;	
 
-
-		scene.add ( boxMesh );
+		scene.add ( this.boxMesh );	
 
 		/* did not work!
 		//boundingBox = new THREE.Box3().setFromObject(boxMesh);
@@ -209,7 +212,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			electron.velocity.x += this.forceX;
 			electron.velocity.y += this.forceY;
 
-			if (this.wallCollision(electron)) {
+			if (this.collision(electron)) {
 				electron.velocity.x = -electron.velocity.x;
 				electron.velocity.y = -electron.velocity.y;
 				electron.x += electron.velocity.x; //bounces off the wall with 180 degree
@@ -220,6 +223,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 				electron.y += electron.velocity.y;
 				//console.log('this electron velocity is ' + electron.velocity.x + ' ' + electron.velocity.y );
 			}
+
 			
 		}
 
@@ -232,17 +236,19 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		electrons.geometry.verticesNeedUpdate = true;
 	}
 
-	this.wallCollision = function ( electron ) {
+	this.collision = function ( electron ) {
 		var ray = new THREE.Vector3(electron.velocity.x, electron.velocity.y, electron.velocity.z);
-		ray = ray.normalize();
+		ray = ray.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
 		//e.caster = raycaster;
 		var pos = new THREE.Vector3(electron.x, electron.y, electron.z );
 		raycaster.set(pos, ray);
 		var distance = 10;
 		raycaster.near = 0;
 		raycaster.far = 11;
-		var obstacles = ions;
-		var collisions = raycaster.intersectObjects(this.walls);
+		// ionObjects = [];
+		var obstacles = this.ions.concat(this.walls);
+		//console.log('# of obstacles = ' + obstacles.length);
+		var collisions = raycaster.intersectObjects(obstacles);
 		if (collisions.length > 0 && collisions[0].distance <= distance) {
 			//collisions[0].object.material.color.set ( 0xffCC00 );
 		 	return true;
@@ -250,21 +256,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		 else {
 		 	return false;
 		 }
-	}
-
-	  /** finds if there is any ion nearby the electron
-	  @return Ion
-	  */  
-	this.ionHere = function(el) {
-		//var r = (ionSize/2) + (electronSize/2);
-		var r = 5; // because I am not sure what is the correct r!!	
-		for (j = 0; j < 20; j++) {
-			var ion = ions.geometry.vertices[j];
-			var distance = (ion.x - el.x) * (ion.x - el.x) + (ion.y - el.y) * (ion.y - el.y);
-
-			if ( distance <= r * r ) {return ion;}
-		}
-		return null;
 	}
 
 }

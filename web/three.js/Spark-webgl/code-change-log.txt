@@ -66,7 +66,7 @@ ADD LATER: add bumping into the ions!
 2. I think at each update, I only need to remove objects from the scene, and add new objects to the scene.
 3. YESSSSS! IT WORKED:
 	I just needed to write an update() function, which only removes scene children and adds the updated objects to the scene.
-4. ISSUE: with each update, electrons speed up!
+4. ISSUE: with each update, electrons speed up! (SOLVED)
 5. ISSUE: it is still not rendering correctly, some objects don't update correctly, some particles remain on canvas after the update, etc. 
 	(SOLVED)
 	Explanation: it was not corretcly removing the scene children, I used a wrong for loop.
@@ -75,8 +75,27 @@ ADD LATER: add bumping into the ions!
 6. I am working on camera, Z coordinate, and zooming in and zooming out
 	I found a code online and added to my code, and now by mouse wheel, it zooms in/out.
 	I used this link: http://stackoverflow.com/questions/10354574/webgl-zooming-camera-in-threejs-without-trackball-controls-or-other-camera-con
-	ISSUE: when it zooms in as much that the objects are out of scene, it cannot zoom out anymore!
+ISSUE: when it zooms in as much that the objects are out of scene, it cannot zoom out anymore!
+
+*** notes on 9/23/2015
+1. Solved the problem with electrons speeding up:
+	Apparently, at each time that it was calling requestAnimationFrame( animate ), it was changing the time interval or something, 
+	and as a result it was moving the particles faster (i.e., each update resulted in a shorter time step, and hence a faster particle)
+	Solution was to only call render() function at each update, and not the whole animate() function.
+2. I added a mouse drag functionality, by adding mouse up, mouse move, and mouse down functions. It now rotates the camera
+	I originally wanted the mouse drag to drag the scene but it need more work later.
+3. Working on collision with ions.
+4. It seems that I have to change ions from being a particle system to an array of regular objects. It seems impossible to add the collision function if ions are particles.
+	i.e., the raycaster only works with object3 structures, and the individual particles are not objects!
+5. I changed the ion structure to become an array of ions as children of each component, so they are not pointcloud structure anymore.
+
+*** notes on 9/24/2015
+1. I studies how I can draw spheres for electrons, instead of using a ball texture. I haven't changed the code yet, but this link seems to show some good tricks, check it later:
+http://stackoverflow.com/questions/12372834/rendering-spheres-or-points-in-a-particle-system
+2. I added collision with ions
+3. 
 	
+
 
 	
 	
