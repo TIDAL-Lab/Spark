@@ -16,9 +16,9 @@ var camera, scene, renderer;
 var pointLight;
 var mouseX = 0, mouseY = 0;
 var sphere; //image element for particles
+var batteryImg, resistorImg;
 var components = []; // an array of components
 var electrons, electronGeometry, electronMaterial;
-//var ions, ionGeometry, ionMaterial;
 var raycaster;
 var worldCenter;
 var mouseFlag = 0; // this flag is used to distinguish a mouse drag from a mouse click
@@ -54,12 +54,14 @@ function init() {
 	console.log('this is where init starts');
 	console.log('# of components = ' + components.length);
 	sphere = THREE.ImageUtils.loadTexture( "textures/ball.png" );
+	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery3t.png" );
+	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );
 	container = document.createElement( 'div' );
 	document.body.appendChild( container );
 
 	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
 	//camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
-	camera.position.z = 1000;
+	camera.position.z = 700;
 
 	scene = new THREE.Scene();
 	scene.fog = new THREE.FogExp2( 0xffffff, 0.0007 );
@@ -120,25 +122,27 @@ function update() {
 
 function initComponents() {
 	electronGeometry = new THREE.Geometry();
-	//ionGeometry = new THREE.Geometry();
 	for (k=0; k < components.length; k++) {
 		console.log('component ' + k + ' : ' + components[k].compType);
 		console.log('sx = ' + components[k].startPoint.x + ' and sy = ' + components[k].startPoint.y + 'and ex = ' + components[k].endPoint.x + ' and ey = ' + components[k].endPoint.y);
 		console.log('sz = ' + components[k].startPoint.z + ' and ez = ' + components[k].endPoint.z);
-		//components[k].init(electronGeometry, ionGeometry);
-		components[k].init(electronGeometry);
-		//console.log('component # of ions = ' + components[k].ionCount);	
+		console.log('component length is ' + components[k].l);
+		
+		if (components[k].compType != "Battery") {
+
+			components[k].init(electronGeometry, k); // sends k as the component ID
+		}
+		else {
+			components[k].initForBattery(k);
+		}
+				
 	}
 	console.log('# of electrons = ' + electronGeometry.vertices.length);
-	//console.log('# of ions = ' + ionGeometry.vertices.length);
+	
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 	scene.add ( electrons ); 
 
-	// ionMaterial = new THREE.PointCloudMaterial( { size: ionSize, map: sphere, color: 0xCC0000 , transparent: true } );
-	// ions = new THREE.PointCloud ( ionGeometry, ionMaterial );
-	
-	// scene.add ( ions ); 
 	console.log('# of scene children are ' + scene.children.length);
 }
 
@@ -170,23 +174,29 @@ function render() {
 
 
 function updateElectrons() {
-	//console.log('I get this far, so electrons should move!');
-	var startIndexElectrons = 0
-	// var startIndexIons = 0
+	/*
+	var startIndex = 0
+
 	for (k=0; k < components.length; k++) {
 		
-		var endIndexElectrons = startIndexElectrons + components[k].electronCount; 
-		var electronVertices = electrons.geometry.vertices.slice(startIndexElectrons, endIndexElectrons);
-		
-		// var endIndexIons = startIndexIons + components[k].ionCount;
-		// var ionVertices = ions.geometry.vertices.slice(startIndexIons, endIndexIons);
-		
-		// components[k].updateElectrons(electronVertices, ionVertices); 
-		components[k].updateElectrons(electronVertices); 
-		
-		startIndexElectrons = endIndexElectrons; 
-		// startIndexIons = endIndexIons;
+		var endIndex = startIndex + components[k].electronCount; 
+
+		//var electronVertices = electrons.geometry.vertices.slice(startIndexElectrons, endIndexElectrons);
+		//components[k].updateElectrons(electronVertices); 
+
+		components[k].updateElectrons(electrons.geometry.vertices, startIndexElectrons, endIndexElectrons);
+		startIndex = endIndex; 
+
 	}
+	*/
+	var eVertices = electrons.geometry.vertices;
+	for ( k = 0; k < eVertices.length; k++ ) {
+		var electron = eVertices[k];
+		components[electron.componentID.x].updateElectron(electron); // the compoentID shows the 
+																	// index for the components array
+
+	}
+	electrons.geometry.verticesNeedUpdate = true;
 }
 
 function onWindowResize() {

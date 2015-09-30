@@ -93,8 +93,20 @@ ISSUE: when it zooms in as much that the objects are out of scene, it cannot zoo
 1. I studies how I can draw spheres for electrons, instead of using a ball texture. I haven't changed the code yet, but this link seems to show some good tricks, check it later:
 http://stackoverflow.com/questions/12372834/rendering-spheres-or-points-in-a-particle-system
 2. I added collision with ions
-3. 
+3. I added a tiny randomness in the bouncing back direction, but it still needs more work
+4. I added a battery image texture to the battery and wrote a separate function for initializing the battery.
 	
+*** notes on 9/29/2015
+1. Mike suggested that I don't use slice() method to select the electrons for each component (for the updateElectrons function).
+	He thinks each time slice() is called, maybe it copies a whole array which can significantly slows down the execution. 
+	Instead, I can pass the whole electrons array with start and end index to the updateElectron function.
+	I did that, but I am not sure if I seen any obvious change in the speed of electrons moving.
+2. I changed the structue of code, in a way that instead of assigning arrays of electrons to components in order, I create an ID field for each electron,
+	which says which component it belongs to. This will make moving from one component to another easier later on.
+	
+*** notes on 9/30/2015	
+1. Add junctions!
+
 
 
 	
