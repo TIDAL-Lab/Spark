@@ -105,8 +105,10 @@ http://stackoverflow.com/questions/12372834/rendering-spheres-or-points-in-a-par
 	which says which component it belongs to. This will make moving from one component to another easier later on.
 	
 *** notes on 9/30/2015	
-1. Add junctions!
-
+1. Next project: Add junctions!
+2. To avoid electrons flying off the component at reset: 
+	I added a constant 5 to the calculated init coordination of electrons to avoid creating electrons right on the edge.
+3. I also made the ion structure look a bit better!
 
 
 	

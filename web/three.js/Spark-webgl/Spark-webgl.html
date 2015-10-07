@@ -11,22 +11,62 @@
     	<script src="lib/cuon-utils.js"></script>
     	<script src="lib/cuon-matrix-quat.js"></script> 
     -->
-  		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-  		<script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
-  		<script src="https://cdn.pubnub.com/pubnub-3.7.14.min.js"></script>
+  		<script src="lib/jquery.min.js"></script>
+  		<script src="lib/parse-1.2.19.min.js"></script>
+  		<script src="lib/pubnub-3.7.14.min.js"></script>
   		<script src="lib/underscore.js"></script>
 
   		<!-- the following scripts are the three.js scripts -->
 		<script src="lib/three.js/build/three.min.js"></script>
 		<script src="lib/three.js/examples/js/Detector.js"></script>
 		<script src="lib/three.js/examples/js/libs/stats.min.js"></script>
-		
-		<!-- the following scripts are various classes in the code -->
-		<script src="component.js"></script>
-		<!-- the following scripts are the functional scripts for Spark -->
-		<script src="main.js"></script>
 
-		<script type="text/javascript">
+		<style>
+			body {
+				background-color: #005368;
+				margin: 0px;
+				overflow: hidden;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				font-weight: bold;
+				text-align:center;
+			}
+
+			a {
+				color:#0078ff;
+			}
+
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+
+		</style>
+	</head>
+	<body>
+<!--
+	<div id="info">
+		<a href="http://threejs.org" target="_blank">three.js</a> - Spark - particles system
+	</div>
+
+-->
+
+	<input type="text" id="force"></input>
+    <input type="text" id="radius"></input>
+    <input type="Button" onclick= "doParse()" value = "Activate"></input>
+    <input type="Button" onclick= "doPause()" value = "Pause"></input>
+
+	<!-- the following scripts are various classes in the code -->
+	<script src="component.js"></script>
+	<!-- the following scripts are the functional scripts for Spark -->
+	<script src="main.js"></script>
+
+	<script type="text/javascript">
 
 		Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
 		doParse('init');
@@ -53,11 +93,18 @@
 		    }
 		});
 
+		pubnub.subscribe({
+		    channel: 'ebz',
+		    message: function(m){
+
+		    	doParse('update');
+		    }
+		});
 
 		function doParse(message){
 			console.log('this is where doParse starts');
 		   	var numComps;
-		    var Circuit = [];
+		    components = [];
 		    var tCircuit;
 			// create a new subclass of Parse.Object named Circuit
 		    var parseCircuit = Parse.Object.extend("Circuit");
@@ -77,8 +124,8 @@
 		              endx = 2 * result.get("endX");
 		              endy = 2 * result.get("endY");
 		              direction = result.get("direction");
-		              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction);
-		              Circuit.push(tCircuit);        
+		              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction, null);
+		              components.push(tCircuit);        
 		      		});
 
 		    	});
@@ -86,57 +133,30 @@
 		    }).then(function(){
 
 		    	if (message == 'init') {
-		    		doInit(Circuit);
+		    		doInit();
 		    	}
 		    	else { // message is update
-		    		doUpdate(Circuit);
+		    		doUpdate();
 		    	}
 		    	//doInit(Circuit);
-		    	
+// component inputs (type, current, resistance, volt, startx, starty, endx, endy, direction, connected)
+//var Circuit = [];
+// [1, 1, 0]: component 1 is connected to me from my end point to its start point
+//var comp0 = new Component("Wire", 0, 1, 0.2, -800, -200, -200, -200, 1, [1, 1, 0]);
+// [0, 0, 1]: component 0 is connected to me from my start point to its end point
+//var comp1 = new Component("Wire", 0, 1, 0, -200, -200, 100, -200, 0, [0, 0, 1]); 
+// not connected
+// var comp0 = new Component("Wire", 0, 1, 0, -400, -200, -200, -200, 1, null);
+// var comp1 = new Component("Wire", 0, 1, 0, -100, -200, 100, -200, 0, null); 
+
+// Circuit.push(comp0);
+// Circuit.push(comp1);
+//doInit(Circuit);
 		  
 		    });  
 		}
 
 		</script>
-
-		<style>
-			body {
-				background-color: #005368;
-				margin: 0px;
-				overflow: hidden;
-				font-family:Monospace;
-				font-size:13px;
-				text-align:center;
-				font-weight: bold;
-				text-align:center;
-			}
-
-			a {
-				color:#0078ff;
-			}
-
-			#info {
-				color: #fff;
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
-				z-index: 100;
-			}
-
-		</style>
-	</head>
-	<body>
-<!--
-	<div id="info">
-		<a href="http://threejs.org" target="_blank">three.js</a> - Spark - particles system
-	</div>
-
--->
-
-	<input type="text" id="force"></input>
-    <input type="text" id="radius"></input>
-    <input type="Button" onclick= "doParse()" value = "Activate"></input>
-    <input type="Button" onclick= "doPause()" value = "Pause"></input>
 
 	</body>
 </html>

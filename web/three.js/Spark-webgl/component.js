@@ -10,13 +10,29 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var electronSize = 20, ionSize = 40;
+ /*
+ * component inputs:
+ * type: "Wire", "Resistor", "Bulb", or "Battery"
+ * current: electric current measure
+ * res: electric resistance measure
+ * volt: voltage measure
+ * startX: X coordinate of start point
+ * startY: Y coordinate of start point
+ * endX: X coordinate of end point
+ * endY: Y coordinate of end point
+ * direction: 1 if from start to end, -1 if from end to start, 0 if no current
+	
+ */
+
+var electronSize = 15;
 var rectGeom, rectMesh;
 //var boundingBox;
 var velocity = 2;
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
+var red = 0xD11919;
+var green = 0x008F00;
 
-function Component(type, current, res, volt, startX, startY, endX, endY, direction) {
+function Component(type, current, res, volt, startX, startY, endX, endY, direction, connected) {
  	this.compType = type; // "wire", "resistor", "bulb", "battery"
   	this.I = current;
   	this.R = res;
@@ -33,18 +49,19 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.ions = [];
   	this.obstacles = [];
   	this.boxMesh;
+  	this.connected = connected;
 
-  	this.forceX = this.V * (endX - startX) * direction; 
-  	this.forceY = this.V * (endY - startY) * direction;
+  	this.forceX = direction * this.V * (endX - startX) / this.l; 
+  	this.forceY = direction * this.V * (endY - startY) / this.l;
 
   	if (this.compType == "Wire") {
-  		this.electronCount = Math.round( 50 * this.l/standardLength); // this.l might not be an integer
+  		this.electronCount = Math.round( 10 * this.l/standardLength); // this.l might not be an integer
   	}
   	else if ( this.compType == "Battery" ){
   		this.electronCount = 0;
   	}
   	else { 		// Resistor or Bulb
-  		this.electronCount = 50;
+  		this.electronCount = 30;
   	}
  
 
@@ -58,27 +75,26 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			var electron = new THREE.Vector3();
 			var l = this.l;
-			electron.x = Math.random() * this.l - this.l/2; //the x coordinate changes based on component length 
-			electron.y = Math.random() * this.w - this.w/2; // component width 
+			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
+			electron.x = Math.random() * (this.l - 5) - (this.l - 5) /2; //the x coordinate changes based on component length 
+			electron.y = Math.random() * (this.w - 5) - (this.w - 5)/2; // component width 
 			electron.z = 0;
 
 			//translate the electron to be inside the component
 			var newCoordinate = this.componentToScreen([electron.x, electron.y]);
-			electron.x = newCoordinate[0], electron.y = newCoordinate[1];
+			electron.x = newCoordinate[0];
+			electron.y = newCoordinate[1];
 		    //electrons.geometry.verticesNeedUpdate = true;
 
 		    var vX = Math.random() * velocity * 2 - velocity;
-		    var vY = Math.sqrt( velocity * 2 - vX*vX);   // this results in a constant velocity of 2
+		    var vY = Math.sqrt( velocity * 2 - vX*vX);   // this results in a constant velocity 
 
 			electron.velocity = new THREE.Vector3(
 		    	vX,		// x
 		    	vY,		//  
 		    	0);		// z
 
-			electron.componentID = new THREE.Vector3(
-				this.ID,	// this shows which component the electrons belongs to at each tick
-				0,
-				0);
+			electron.componentID = this.ID;
 
 			electronGeometry.vertices.push( electron );
 		}
@@ -114,23 +130,34 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.boxMesh = new THREE.Mesh( boxGeom, boxMaterial );
 		
 		// now add the walls
-		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0xCC0C00 } );
-		if (this.compType == 'Battery') {
-			boxMaterial.color.setHex(0x009933);
-			wallMaterial.color.setHex(0x009933);
-		}
+		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0x808080 } );
+		//var junctionMaterial = ;
+
+		var junction1 = new THREE.Mesh( new THREE.BoxGeometry(boxHeight, boxWidth, 20), 
+										new THREE.MeshBasicMaterial( { color: red } ));
+		var junction2 = new THREE.Mesh( new THREE.BoxGeometry(boxHeight, boxWidth, 20), 
+										new THREE.MeshBasicMaterial( { color: red } ));
+
         var walls = [
-                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxHeight, boxWidth), wallMaterial),
-                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxHeight, boxWidth), wallMaterial),
+                    junction1,
+                    junction2,
                     new THREE.Mesh( new THREE.PlaneBufferGeometry(boxLength, boxHeight), wallMaterial),
                     new THREE.Mesh( new THREE.PlaneBufferGeometry(boxLength, boxHeight), wallMaterial)
             ];
+
+        if ( this.connected != null) {
+
+        	var thisJunction = this.connected[1];
+        	walls[thisJunction].material.color.set(green);
+        	walls[thisJunction].connected = true;
+			
+		} 
         // wall0 contains start point
         walls[0].rotation.y = Math.PI / 2;	
-        walls[0].position.x = -boxLength / 2;
+        walls[0].position.x = - (boxLength / 2 + 20 / 2);
         // wall1 contains end point
         walls[1].rotation.y = -Math.PI / 2;	
-        walls[1].position.x = boxLength / 2;
+        walls[1].position.x = boxLength / 2 + 20 / 2;
         // wall2 is the wall with lower y
         walls[2].rotation.x = -Math.PI / 2;
         walls[2].position.y = -boxWidth / 2;
@@ -148,16 +175,17 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			// create ions
 			var count = 0;
-			for ( i = 1; i < this.l/50; i ++ ) {
-				for (j = 1; j < this.w/50; j++) {
+			var d = 30;
+			for ( i = 1; i * d < this.l; i ++ ) {
+				for (j = 1; j * d < this.w; j++) {
 					var pos;
 					if ((i+j) % 3 == 0) {
 						pos = new THREE.Vector3();
-						pos.x = -this.l/2 + i * 50; 
-						pos.y = -this.w/2 + j * 50;
+						pos.x = -this.l/2 + i * d; 
+						pos.y = -this.w/2 + j * d;
 						pos.z = 0;
 
-						var ionGeometry = new THREE.SphereGeometry(10, 128, 128 );
+						var ionGeometry = new THREE.SphereGeometry(7, 128, 128 );
 						//ionGeometry.vertices.push( pos );
 						var ionMaterial = new THREE.MeshPhongMaterial( {color: 0xCC0000 , transparent: true} );
 						var ion = new THREE.Mesh( ionGeometry, ionMaterial );
@@ -235,31 +263,67 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.updateElectron = function ( electron ) {
+		var obstacle = this.collision(electron);
+		//var obstacle = null;
+		if (obstacle == null) { 	// no colision
 
-		electron.velocity.x += this.forceX;
-		electron.velocity.y += this.forceY;
+			// update velocity
+			electron.velocity.x += this.forceX;
+			electron.velocity.y += this.forceY;
+			var v = Math.sqrt(electron.velocity.x * electron.velocity.x + 
+								electron.velocity.y * electron.velocity.y);
 
-		if (this.collision(electron)) {
-			// reflect the electron with 180 degree
-			electron.velocity.x = -electron.velocity.x;
-			electron.velocity.y = -electron.velocity.y;
-			var sign = Math.sign(electron.velocity.y);
-			// now add a tiny random angle
-			var velocity2 = velocity * velocity;
-			var deltaVX = electron.velocity.x * (Math.random() * 0.7 - 0.35); // random between -0.1 and 0.1 of velocityX
-			//var deltaVX = 0;
-			electron.velocity.x += deltaVX;
-			var vx2 = electron.velocity.x * electron.velocity.x;
-			electron.velocity.y = Math.sqrt(velocity2 - vx2) * sign;
+			if (v > 10) {	// don't allow the speed to become more than 10, which is the distance for raycaster
+				
+				electron.velocity.x -= this.forceX;
+				electron.velocity.y -= this.forceY;
+			}
 
-			electron.x += electron.velocity.x; //bounces off the wall with 180 degree
+			// move the electron
+			electron.x += electron.velocity.x; 
 			electron.y += electron.velocity.y;
+
 		}
-		else { 			// no colission
-			electron.x += electron.velocity.x; //bounces off the wall with 180 degree
-			electron.y += electron.velocity.y;
+		else if (obstacle.object == this.walls[0] || obstacle.object == this.walls[1]) { 
+			if (obstacle.object.connected) {
+				electron.componentID = this.connected[0];
+				// var vX = Math.random() * velocity * 2 - velocity;
+		  //   	var vY = Math.sqrt( velocity * 2 - vX*vX);   // this results in a constant velocity 
+
+		  //   	electron.velocity.x = vX;
+		  //   	electron.velocity.y = vY;
+			}
+
+			else {
+
+				this.bounceBack(electron);
+			}
+
+
 		}
 
+		else {		// bounce off the obstacle, either the two walls or the ion
+			
+			this.bounceBack(electron);
+		}
+
+
+
+	}
+	// this.bounceBack = function (electron, obstacle) {
+	this.bounceBack = function (electron) {
+
+		//reflect the electron around the normal vector // obstacle.face.normal; // Vector3
+
+		// reflect the electron with 180 +- random(18)
+		var angle = Math.PI + Math.random() * (Math.PI/5) - (Math.PI/10);
+		var zAxis = new THREE.Vector3(0, 0, 1);
+		electron.velocity.applyAxisAngle( zAxis, angle );
+		// if (this.collision(electron) != null) {
+			
+		// 	this.updateElectron(electron);
+
+		// }
 	}
 
 	this.collision = function ( electron ) {
@@ -270,57 +334,15 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		raycaster.set(pos, ray);
 		var distance = 10;
 		raycaster.near = 0;
-		raycaster.far = 11;
-		//var obstacles = this.ions.concat(this.walls);
+		raycaster.far = 20;
 		var collisions = raycaster.intersectObjects(this.obstacles);
 		if (collisions.length > 0 && collisions[0].distance <= distance) {
 			//collisions[0].object.material.color.set ( 0xffCC00 );
-		 	return true;
+		 	return collisions[0];
 		 }
 		 else {
-		 	return false;
+		 	return null;
 		 }
 	}
-
-
-/*
-	// draw the electrons in one component
-	this.updateElectrons = function( eVertices, start, end ) {
-		var pCount = this.electronCount;
-		for ( i = start; i < end; i ++) {
-			//electrons.geometry.dynamic = true;
-			var electron = eVertices[i];
-
-			electron.velocity.x += this.forceX;
-			electron.velocity.y += this.forceY;
-
-			if (this.collision(electron)) {
-				// reflect the electron with 180 degree
-				electron.velocity.x = -electron.velocity.x;
-				electron.velocity.y = -electron.velocity.y;
-				var sign = Math.sign(electron.velocity.y);
-				// now add a tiny random angle
-				var velocity2 = velocity * velocity;
-				var deltaVX = electron.velocity.x * (Math.random() * 0.7 - 0.35); // random between -0.1 and 0.1 of velocityX
-				//var deltaVX = 0;
-				electron.velocity.x += deltaVX;
-				var vx2 = electron.velocity.x * electron.velocity.x;
-				electron.velocity.y = Math.sqrt(velocity2 - vx2) * sign;
-
-				electron.x += electron.velocity.x; //bounces off the wall with 180 degree
-				electron.y += electron.velocity.y;
-			}
-			else { 			// no colission
-				electron.x += electron.velocity.x; //bounces off the wall with 180 degree
-				electron.y += electron.velocity.y;
-			}
-
-			
-		}
-
-		//particles.geometry.__dirtyVertices = true;
-		electrons.geometry.verticesNeedUpdate = true;
-	}
-*/
 
 }

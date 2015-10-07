@@ -29,26 +29,18 @@ console.log('window half x is ' + windowHalfX);
 console.log('window half y is ' + windowHalfY);
 
 
-function doInit(circuit) {	
-	components = circuit;
+function doInit() {	
+	//components = circuit;
 	init();
 	animate();
 }
 
-function doUpdate(circuit) {	
-	components = circuit;
+function doUpdate() {	
+	//components = circuit;
 	update();
 	render();
 }
 
-// component inputs (type, current, resistance, volt, startx, starty, endx, endy, direction)
-//var Circuit = [];
-// var comp1 = new Component("Wire", 0, 1, 0, 0, -500, 800, 100, 0); 
-// var comp2 = new Component("Resistor", 0, 1, 0, -1000, -200, -200, -200, 0);
-
-// Circuit.push(comp1);
-// Circuit.push(comp2);
-// main(Circuit);
 
 function init() {
 	console.log('this is where init starts');
@@ -64,7 +56,7 @@ function init() {
 	camera.position.z = 700;
 
 	scene = new THREE.Scene();
-	scene.fog = new THREE.FogExp2( 0xffffff, 0.0007 );
+	//scene.fog = new THREE.FogExp2( 0xffffff, 0.0007 );
 
 	raycaster = new THREE.Raycaster();
 	
@@ -129,7 +121,6 @@ function initComponents() {
 		console.log('component length is ' + components[k].l);
 		
 		if (components[k].compType != "Battery") {
-
 			components[k].init(electronGeometry, k); // sends k as the component ID
 		}
 		else {
@@ -141,7 +132,7 @@ function initComponents() {
 	
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
-	scene.add ( electrons ); 
+	scene.add ( electrons );
 
 	console.log('# of scene children are ' + scene.children.length);
 }
@@ -192,7 +183,7 @@ function updateElectrons() {
 	var eVertices = electrons.geometry.vertices;
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
-		components[electron.componentID.x].updateElectron(electron); // the compoentID shows the 
+		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
 																	// index for the components array
 
 	}

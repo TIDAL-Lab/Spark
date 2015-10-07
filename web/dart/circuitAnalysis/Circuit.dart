@@ -150,19 +150,21 @@ class Circuit {
 //                                          'tag': c.ARTag
 //                                          });
       //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
-      var anObj = new JsObject.jsify({'type': c.type,
-                                        'voltageDrop': c.voltageDrop,
-                                        'current': c.current,
-                                        'resistance': c.resistance,
-                                        'startX': (c.start.x -theApp.workingBox.width/2),
-                                        'startY':(theApp.workingBox.height/2 - c.start.y),
-                                        'endX': (c.end.x - theApp.workingBox.width/2),
-                                        'endY': (theApp.workingBox.height/2 - c.end.y),
-                                        'direction': c.direction,
-                                        'innerWall':1, //returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)
-                                        'tag': c.ARTag
+      var compObj = new JsObject.jsify(//{'component': 
+                                          {'type': c.type,
+                                          'voltageDrop': c.voltageDrop,
+                                          'current': c.current,
+                                          'resistance': c.resistance,
+                                          'startX': (c.start.x -theApp.workingBox.width/2),
+                                          'startY':(theApp.workingBox.height/2 - c.start.y),
+                                          'endX': (c.end.x - theApp.workingBox.width/2),
+                                          'endY': (theApp.workingBox.height/2 - c.end.y),
+                                          'direction': c.direction,
+                                          'innerWall':1,
+                                          'tag': c.ARTag
+                                          //}
                                         });
-        myObj.add(anObj);
+        myObj.add(compObj);
 
 
     }
