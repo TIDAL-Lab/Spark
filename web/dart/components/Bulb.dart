@@ -38,7 +38,7 @@ class Bulb extends Component  {
     
     isOn = false;
     
-    theApp.circuit.addNewBranch(this); 
+    //theApp.circuit.addNewBranch(this); 
     
   }
   
@@ -65,7 +65,7 @@ class Bulb extends Component  {
       var powerScaled = log(power)/log(base); // calculate log base 100 of power
       ctx.globalAlpha = powerScaled;
       //ctx.globalAlpha = 1.0;
-      print(ctx.globalAlpha);
+      //print(ctx.globalAlpha);
     }
     ctx.save();
     {

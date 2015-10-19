@@ -111,22 +111,30 @@ class Toolbar {
     switch (type) {
       case 'Battery':
         InputElement slider = querySelector("#battery-slider");
-        var voltage = double.parse(slider.value);        
-        theApp.components.add(new Battery(cx - 50, cy - 100, cx + 50, cy - 100, voltage));
+        var voltage = double.parse(slider.value);
+        var battery = new Battery(cx - 50, cy - 100, cx + 50, cy - 100, voltage);
+        theApp.components.add(battery);
+        theApp.circuit.addNewBranch(battery);
         break;
       case 'Wire':
-        theApp.components.add(new Wire(cx - 50, cy - 100, cx + 50, cy - 100));
+        var wire = new Wire(cx - 50, cy - 100, cx + 50, cy - 100);
+        theApp.components.add(wire);
+        theApp.circuit.addNewBranch(wire);
         break;
       case 'Resistor':
         InputElement slider = querySelector("#resistor-slider");
         var resistance = double.parse(slider.value);
-        theApp.components.add(new Resistor(cx - 50, cy - 100, cx + 50, cy - 100, resistance));
+        var resistor = new Resistor(cx - 50, cy - 100, cx + 50, cy - 100, resistance);
+        theApp.components.add(resistor);
+        theApp.circuit.addNewBranch(resistor);
         break;
       case 'Bulb':
         InputElement slider = querySelector("#bulb-slider");
         var resistance = double.parse(slider.value);
         //var resistance = 1.0;
-        theApp.components.add(new Bulb(cx - 50, cy - 100, cx + 50, cy - 100, resistance));
+        var bulb = new Bulb(cx - 50, cy - 100, cx + 50, cy - 100, resistance);
+        theApp.components.add(bulb);
+        theApp.circuit.addNewBranch(bulb);
         break;
     }
   }

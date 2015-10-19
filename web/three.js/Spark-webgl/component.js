@@ -26,13 +26,15 @@
 
 var electronSize = 15;
 var rectGeom, rectMesh;
+var ionGeometry = new THREE.SphereGeometry(7, 128, 128 );
+var ionMaterial = new THREE.MeshPhongMaterial( {color: 0xCC0000 , transparent: true} );
 //var boundingBox;
 var velocity = 2;
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 var red = 0xD11919;
 var green = 0x008F00;
 
-function Component(type, current, res, volt, startX, startY, endX, endY, direction, connected) {
+function Component(type, current, res, volt, startX, startY, endX, endY, direction, connections) {
  	this.compType = type; // "wire", "resistor", "bulb", "battery"
   	this.I = current;
   	this.R = res;
@@ -49,11 +51,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.ions = [];
   	this.obstacles = [];
   	this.boxMesh;
-  	this.connected = connected;
-
+  	  	
   	this.forceX = direction * this.V * (endX - startX) / this.l; 
   	this.forceY = direction * this.V * (endY - startY) / this.l;
 
+  	this.connections = connections;
+  	//this.connections = [].concat.apply([], connections); // this flattens the nested array of connection
+  	
   	if (this.compType == "Wire") {
   		this.electronCount = Math.round( 10 * this.l/standardLength); // this.l might not be an integer
   	}
@@ -109,9 +113,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var endX = this.endPoint.x, endY = this.endPoint.y;
 
 		var center = new THREE.Vector3( (startX + endX) / 2, (startY + endY) / 2, 0.0 );
-		var v = new THREE.Vector3( endX-startX, endY-startY, 0.0);
-		var rotationAngle = Math.atan((endY-startY)/(endX-startX));
-		var zAxis = new THREE.Vector3(0, 0, 1);
+
+		//var boxLength = startToEnd.length(); // computes the length of startToEnd vector
 		var boxLength = Math.sqrt((endX - startX)*(endX - startX) + (endY - startY)*(endY - startY));
 		var boxWidth = this.w;
 		var boxHeight = 30;
@@ -137,47 +140,64 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 										new THREE.MeshBasicMaterial( { color: red } ));
 		var junction2 = new THREE.Mesh( new THREE.BoxGeometry(boxHeight, boxWidth, 20), 
 										new THREE.MeshBasicMaterial( { color: red } ));
-
+		var wall1 = new THREE.Mesh( new THREE.BoxGeometry(boxLength, boxHeight, 10), wallMaterial);
+		var wall2 = new THREE.Mesh( new THREE.BoxGeometry(boxLength, boxHeight, 10), wallMaterial)
         var walls = [
                     junction1,
                     junction2,
-                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxLength, boxHeight), wallMaterial),
-                    new THREE.Mesh( new THREE.PlaneBufferGeometry(boxLength, boxHeight), wallMaterial)
+                    wall1,
+                    wall2
             ];
 
-        if ( this.connected != null) {
+        // make the junctions
 
-        	var thisJunction = this.connected[1];
-        	walls[thisJunction].material.color.set(green);
-        	walls[thisJunction].connected = true;
-			
-		} 
+        // this.connections = [{"0":1}, {"1":3}, {"2":5}];
+		for (i=0; i < this.connections.length; i++) {
+			var obj = this.connections[i];
+			var key = i.toString();
+			var code = obj[key];
+			console.log('this is code ' + code);
+			if (code == 1 || code == 3) {
+				walls[0].material.color.set(green);
+				walls[0].connected = true;
+			}
+			else if (code == 2 || code == 4) {
+				walls[1].material.color.set(green);
+				walls[1].connected = true;
+			}
+		}
+
         // wall0 contains start point
         walls[0].rotation.y = Math.PI / 2;	
         walls[0].position.x = - (boxLength / 2 + 20 / 2);
+        
         // wall1 contains end point
         walls[1].rotation.y = -Math.PI / 2;	
         walls[1].position.x = boxLength / 2 + 20 / 2;
+        
         // wall2 is the wall with lower y
         walls[2].rotation.x = -Math.PI / 2;
         walls[2].position.y = -boxWidth / 2;
+        //walls[2].position.z += 5;
         // wall 3 is the wall with higher y
 		walls[3].rotation.x = Math.PI / 2;
         walls[3].position.y = boxWidth / 2;
+        //walls[3].position.z += 5;
 
 		for (i=0; i< walls.length; i++) {
 			this.walls[i] = walls[i]; // this is component
 			this.boxMesh.add(walls[i]);
 		}
-
 		// now create ions and add them to the box
 		if (this.compType != "Battery") { // no ions for battery
 
 			// create ions
 			var count = 0;
-			var d = 30;
-			for ( i = 1; i * d < this.l; i ++ ) {
-				for (j = 1; j * d < this.w; j++) {
+			var d = 40;
+
+		
+			for ( i = 1; i < this.l/d; i ++ ) {
+				for (j = 1; j < this.w/d; j++) {
 					var pos;
 					if ((i+j) % 3 == 0) {
 						pos = new THREE.Vector3();
@@ -185,9 +205,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 						pos.y = -this.w/2 + j * d;
 						pos.z = 0;
 
-						var ionGeometry = new THREE.SphereGeometry(7, 128, 128 );
-						//ionGeometry.vertices.push( pos );
-						var ionMaterial = new THREE.MeshPhongMaterial( {color: 0xCC0000 , transparent: true} );
 						var ion = new THREE.Mesh( ionGeometry, ionMaterial );
 						ion.position.set(pos.x, pos.y, pos.z);
 						this.ions.push(ion);
@@ -197,16 +214,25 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 				}
 			}
+
 			this.ionCount = count;
 		}
-			
-		console.log('compoent boxmesh has this many children: ' + this.boxMesh.children.length);
-		console.log('number of ions of this component is: ' + this.ions.length);
 
 		this.boxMesh.position.set(center.x, center.y, center.z);
 		//boxMesh.geometry.translate ( center.x, center.y, center.z );
 		//boxMesh.rotateOnAxis(zAxis, rotationAngle); // instead, the line below
-		this.boxMesh.rotation.z = rotationAngle;	
+		
+		// var rotationAngle = Math.atan((endY-startY)/(endX-startX));
+		//var zAxis = new THREE.Vector3(0, 0, 1);
+		var startToEnd = new THREE.Vector3( endX-startX, endY-startY, 0.0);
+		var xAxis = new THREE.Vector3(1, 0, 0);
+		var angle = startToEnd.angleTo(xAxis);
+		var vector = new THREE.Vector3();
+		vector.crossVectors(xAxis, startToEnd);
+		var sign = Math.sign(vector.z);
+		
+		var rotationAngle = angle*sign;
+		this.boxMesh.rotation.z = rotationAngle;
 
 		scene.add ( this.boxMesh );	
 
@@ -223,9 +249,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var endX = this.endPoint.x, endY = this.endPoint.y;
 
 		var center = new THREE.Vector3( (startX + endX) / 2, (startY + endY) / 2, 0.0 );
-		var v = new THREE.Vector3( endX-startX, endY-startY, 0.0);
-		var rotationAngle = Math.atan((endY-startY)/(endX-startX));
-		var zAxis = new THREE.Vector3(0, 0, 1);
+		//var v = new THREE.Vector3( endX-startX, endY-startY, 0.0);
+		//var rotationAngle = Math.atan((endY-startY)/(endX-startX));
+		//var zAxis = new THREE.Vector3(0, 0, 1);
 		var boxLength = Math.sqrt((endX - startX)*(endX - startX) + (endY - startY)*(endY - startY));
 		var boxWidth = this.w;
 		var boxHeight = 30;
@@ -237,6 +263,15 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.boxMesh = new THREE.Mesh( boxGeom, boxMaterial );
 
 		this.boxMesh.position.set(center.x, center.y, center.z);
+
+		var startToEnd = new THREE.Vector3( endX-startX, endY-startY, 0.0);
+		var xAxis = new THREE.Vector3(1, 0, 0);
+		var angle = startToEnd.angleTo(xAxis);
+		var vector = new THREE.Vector3();
+		vector.crossVectors(xAxis, startToEnd);
+		var sign = Math.sign(vector.z);		
+		var rotationAngle = angle*sign;
+
 		this.boxMesh.rotation.z = rotationAngle;	
 
 		scene.add ( this.boxMesh );	
@@ -273,11 +308,11 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			var v = Math.sqrt(electron.velocity.x * electron.velocity.x + 
 								electron.velocity.y * electron.velocity.y);
 
-			if (v > 10) {	// don't allow the speed to become more than 10, which is the distance for raycaster
+			// if (v > 8) {	// don't allow the speed to become more than 10, which is the distance for raycaster
 				
-				electron.velocity.x -= this.forceX;
-				electron.velocity.y -= this.forceY;
-			}
+			// 	electron.velocity.x -= this.forceX;
+			// 	electron.velocity.y -= this.forceY;
+			// }
 
 			// move the electron
 			electron.x += electron.velocity.x; 
@@ -286,7 +321,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		}
 		else if (obstacle.object == this.walls[0] || obstacle.object == this.walls[1]) { 
 			if (obstacle.object.connected) {
-				electron.componentID = this.connected[0];
+				//electron.componentID = this.connections[0];
+				this.bounceBack(electron, obstacle, 'wall');
 				// var vX = Math.random() * velocity * 2 - velocity;
 		  //   	var vY = Math.sqrt( velocity * 2 - vX*vX);   // this results in a constant velocity 
 
@@ -296,34 +332,50 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			else {
 
-				this.bounceBack(electron);
+				this.bounceBack(electron, obstacle, 'wall');
 			}
 
 
 		}
 
-		else {		// bounce off the obstacle, either the two walls or the ion
+		else if (obstacle.object == this.walls[2] || obstacle.object == this.walls[3]) {		
 			
-			this.bounceBack(electron);
+			this.bounceBack(electron, obstacle, 'wall'); // bounce off the two wrapping walls
+		}
+
+		else {
+			this.bounceBack(electron, obstacle, 'ion'); // bounce off the ion
 		}
 
 
 
 	}
-	// this.bounceBack = function (electron, obstacle) {
-	this.bounceBack = function (electron) {
+	
+	this.bounceBack = function (electron, obstacle, type) {
 
-		//reflect the electron around the normal vector // obstacle.face.normal; // Vector3
+		
+		if (type == 'wall') {
+			// reflect the electron with 180 +- random(18)
+			var angle = Math.PI + Math.random() * (Math.PI/5) - (Math.PI/10);
+			var zAxis = new THREE.Vector3(0, 0, 1);
+			electron.velocity.applyAxisAngle( zAxis, angle );
+		}
 
-		// reflect the electron with 180 +- random(18)
-		var angle = Math.PI + Math.random() * (Math.PI/5) - (Math.PI/10);
-		var zAxis = new THREE.Vector3(0, 0, 1);
-		electron.velocity.applyAxisAngle( zAxis, angle );
-		// if (this.collision(electron) != null) {
-			
-		// 	this.updateElectron(electron);
+		//reflect the electron around the normal vector of the ion 
+		else {
+			var n = obstacle.face.normal; // n is a vector3
+			n.z = 0; // we just want the image of the normal vector on the XY plane with Z = 0
+			var theta = electron.velocity.angleTo(n);
+			var Beta = (2 * theta) - Math.PI ;
+			var rotationAxis = new THREE.Vector3(); // 
+			rotationAxis.crossVectors( electron.velocity, n );
+			rotationAxis = rotationAxis.normalize();
+			electron.velocity.applyAxisAngle( rotationAxis, Beta );
 
-		// }
+		}
+
+
+		
 	}
 
 	this.collision = function ( electron ) {
@@ -334,7 +386,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		raycaster.set(pos, ray);
 		var distance = 10;
 		raycaster.near = 0;
-		raycaster.far = 20;
+		raycaster.far = 10;
 		var collisions = raycaster.intersectObjects(this.obstacles);
 		if (collisions.length > 0 && collisions[0].distance <= distance) {
 			//collisions[0].object.material.color.set ( 0xffCC00 );

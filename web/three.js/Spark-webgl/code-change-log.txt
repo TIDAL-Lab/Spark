@@ -108,9 +108,46 @@ http://stackoverflow.com/questions/12372834/rendering-spheres-or-points-in-a-par
 1. Next project: Add junctions!
 2. To avoid electrons flying off the component at reset: 
 	I added a constant 5 to the calculated init coordination of electrons to avoid creating electrons right on the edge.
-3. I also made the ion structure look a bit better!
+3. I also made the ion layout look a bit better!
+
+*** notes on 10/6/2015
+1. Since last week the code started crashing! Mike helped me run the code on Chrome using local server 127.0.0.1:3030
+	But still the code crashes.
+2. I am now trying to debug the issue. First, the crash was due to initing the code with two components initiated in the code
+	and then when I update the circuit with Parse and data streaming, for some reason it crashes the code. 
+	So for now, I commented the testing components and it directly initiates the circuit that is streamed from Parse.
+3. Still the problem with updating speed is not solved. I submitted the code to gitub and am trying to compare it to the last commint to detect the source of issue.
+4. I went through the code step by step and found out that the part that creates ions slows down the execution!!!
+	*** the problem was that at each run of for loop for creating ions, the ionGeometry and ionMaterial were initialized too. 
+		I movet it out of the loop, and the problem was solved :)
+5. I fixed bouncing back code, using the face and normal property of the raycaster. The code is fixed for the ions, but still does not work for bouncing off the walls
+	
+*** notes on 10/7/2015
+1. For some reason, bouncing back from the ions dramatically slows down the electrons. I need to troubleshoot it and find why! 	
+	It also seems that the slowed down electron does not bounce off the ions anymore! (actually it is not always the case)
+	Answer: the reflection is not working right. after bouncing back the z component of the velocity vector is not zero anymore, this explains both above observations!
+2. ISSUE: the new bouncing back code still does not work for the walls, for some reason it detects a wrong face with a normal in z direction.
+3. Now I am working on constructing a json object to send the information about connected components.
+jsify():
+https://api.dartlang.org/1.12.1/dart-js/JsObject/JsObject.jsify.html
+create JSON by JS for loop:
+http://stackoverflow.com/questions/920930/how-to-create-json-by-javascript-for-loop
+4. I finished making the matrix in the dart code. the matrix encodes information about what components are connected and how (from s to e, from s to s, etc.)
+
+*** notes on 10/8/2015
+1. I need to flatten the connections array sent from Parse to the JS code.
+Link to how to flatten a nested array: http://www.christopherbiscardi.com/2014/01/06/flattening-nested-arrays-in-javascript/
+2. ISSUE: fix the bug with removing connected components!
+3. ISSUE: fix the bug with reset button in Dart: not showing the battery when it is reset.
+4. ISSUE: bouncing off the walls not working!
 
 
-	
-	
+*** notes on 10/11/2015
+1. DART OLD ISSUE: fix the singlewhere issue with the get edge code.
+2. DART OLD ISSUE: fix the issue with mixing the touch event and mouse event.
+   For example, creating two components.
+3. DART OLD ISSUE: fix the issue with changing the circuit configuration 
+when clicking/holding the click on a component or a control point!!
+
+
 

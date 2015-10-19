@@ -32,7 +32,7 @@ class Resistor extends Component {
     voltageDrop = 0.0;
     
     //addSlider(x0, y0);
-    theApp.circuit.addNewBranch(this); 
+    //theApp.circuit.addNewBranch(this); 
   }
   
   CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {

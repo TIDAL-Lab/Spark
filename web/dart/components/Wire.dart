@@ -30,7 +30,7 @@ class Wire extends Component {
     resistance = 0.001;
     voltageDrop = 0.0;
     
-    theApp.circuit.addNewBranch(this); 
+    //theApp.circuit.addNewBranch(this); 
     }
   
   CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {

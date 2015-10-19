@@ -106,7 +106,7 @@ class App extends TouchManager {
     * 0 --> control condition: only circuit, no ABM model
     * 1 --> ABM + circuit model, with the NetTango model embedded in the canvas
     */
-   num condition = 1;  
+   num condition = 0;  
 
       
    App() {
@@ -162,8 +162,11 @@ class App extends TouchManager {
      num centerY = workingBox.height / 2;
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
-     components.add(new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage));
-    
+     
+     var battery = new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
+     components.add(battery);
+     circuit.addNewBranch(battery);
+         
      var t = 65;
    }
    /* Resize the window
@@ -187,7 +190,6 @@ class App extends TouchManager {
      circuit.edges.clear();
      circuit.nodes.clear();
      circuit.updateComponents();
-     circuit.sendDataToServer();
      document.querySelector("#model1").style.display = "none";
      document.querySelector("#generic-slider").style.display = "none";
      model1.component = null;
@@ -212,7 +214,9 @@ class App extends TouchManager {
      /* create the first battery */
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
-     components.add(new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage));
+     var battery = new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
+     components.add(battery);
+     circuit.addNewBranch(battery);
    }
 
    /* Draw */

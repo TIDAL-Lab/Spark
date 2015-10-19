@@ -129,29 +129,22 @@ class Circuit {
   /** create JSON data and send the string to the server
    */
   void sendDataToServer() {
-    var myObj = new JsArray();
-    //added to access canvas element
-    CanvasElement canvas = 
-          document.querySelector('#foreground');
-    
+  
+    //var myObj = new JsArray();
+    var myObj = [];
     for (Edge e in this.edges) {
       
       Component c = e.component;
-//        var anObj = new JsObject.jsify({'type': c.type,
-//                                          'voltageDrop': c.voltageDrop,
-//                                          'current': c.current,
-//                                          'resistance': c.resistance,
-//                                          'startX': (((c.start.x -canvas.width/2)/canvas.width/2) + 0.1)*20,
-//                                          'startY':((c.start.y-canvas.height/2)/canvas.height/2)* 10 ,
-//                                          'endX': (((c.end.x - canvas.width/2)/canvas.width/2) + 0.1)*20,//shifted it by 0.1 so that it's visble on webgl scene
-//                                          'endY': ((c.end.y - canvas.height/2)/canvas.height/2)*10,
-//                                          'direction': c.direction,
-//                                          'innerWall':1, //returnDirection(c.start.x, c.end.x, c.start.y, c.end.y)
-//                                          'tag': c.ARTag
-//                                          });
-      //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
-      var compObj = new JsObject.jsify(//{'component': 
-                                          {'type': c.type,
+      var connectionArray = createConnectionArray(c); 
+      var rowArray = [];
+      for (int j = 0; j < connectionArray.length; j++) {
+        if (connectionArray[j] == null) {connectionArray[j] = 0;}
+        rowArray.add({
+          j.toString(): connectionArray[j]
+          
+        });
+      }
+      var compObj = {'type': c.type,
                                           'voltageDrop': c.voltageDrop,
                                           'current': c.current,
                                           'resistance': c.resistance,
@@ -161,17 +154,63 @@ class Circuit {
                                           'endY': (theApp.workingBox.height/2 - c.end.y),
                                           'direction': c.direction,
                                           'innerWall':1,
-                                          'tag': c.ARTag
-                                          //}
-                                        });
+                                          'tag': c.ARTag,
+                                          'connection': rowArray
+                                          };
+      
         myObj.add(compObj);
 
 
     }
+    print(JSON.encode(myObj));
+    
+
+    //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
+    myObj = new JsObject.jsify(myObj);
+       
     // call the "doDeleteParse method on myObj (the code is in index.html)
     var deleteParse = new JsObject(context['deleteParse'],[myObj]); // instantiate a JS "deleteParse" object
     deleteParse.callMethod('doDeleteParse'); // call its method "doDeleteParse"
 
+  }
+  
+  /** called to create the array of codes for the component connections status
+  @param c    component
+  @return     List<int>: -1 -> diagonal (cj is c)
+  *                       0 -> not connected with cj
+  *                       1 -> s is connected to cj's s
+  *                       2 -> e is connected to cj's e
+  *                       3 -> s is connected to cj's e
+  *                       4 -> e is connected to cj's s 
+  */  
+  
+  List<int> createConnectionArray( Component c ) {
+    
+    var array = new List(theApp.components.length); // creates an array of 0 with a fixed length of # of components
+    int index = theApp.components.indexOf(c);
+    array[index] = -1;
+    List<ControlPoint> sList = c.start.connections;
+    for (ControlPoint cp in sList) {
+      var c2 = cp.myComponent;
+      if (c2.start == cp) {
+        array[theApp.components.indexOf(c2)] = 1;
+      }
+      else {
+        array[theApp.components.indexOf(c2)] = 3;
+      }
+    }
+    List<ControlPoint> eList = c.end.connections;
+    for (ControlPoint cp in eList) {
+      var c2 = cp.myComponent;
+      if (c2.end == cp) {
+        array[theApp.components.indexOf(c2)] = 2;
+      }
+      else {
+        array[theApp.components.indexOf(c2)] = 4;
+      }
+    }
+    return array;
+        
   }
 /* ------------------------
   Reflecting the touch changes into the circuit graph representation

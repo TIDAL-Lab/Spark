@@ -84,7 +84,7 @@ class agentModel {
         //frameSource = "http://spark-project.appspot.com/Resistor?i=${i}&r=${r}&v=${v}";
         frameSource = "models/resistor.html?i=${i}&r=${r}&v=${v}";
       }
-      print(frame.src);
+      //print(frame.src);
       if (!frame.src.endsWith(frameSource)) frame.src = frameSource; // update only if it is updated!
     }
   }

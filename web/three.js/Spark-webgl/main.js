@@ -25,9 +25,6 @@ var mouseFlag = 0; // this flag is used to distinguish a mouse drag from a mouse
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
-console.log('window half x is ' + windowHalfX);
-console.log('window half y is ' + windowHalfY);
-
 
 function doInit() {	
 	//components = circuit;
@@ -43,8 +40,7 @@ function doUpdate() {
 
 
 function init() {
-	console.log('this is where init starts');
-	console.log('# of components = ' + components.length);
+	console.log('init: # of components = ' + components.length);
 	sphere = THREE.ImageUtils.loadTexture( "textures/ball.png" );
 	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery3t.png" );
 	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );
@@ -63,8 +59,8 @@ function init() {
 	THREE.ImageUtils.crossOrigin = 'anonymous'; // enables using images from the image folder
 
 	// draw a sphere to show the center of screen
-	worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshPhongMaterial( {color: 0x000000} ));
-	scene.add (worldCenter);
+	// worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshPhongMaterial( {color: 0x000000} ));
+	// scene.add (worldCenter);
 	initComponents();
 
 
@@ -97,7 +93,7 @@ function init() {
 
 function update() {
 	//console.log('this is where update starts');
-	console.log('# of components = ' + components.length);
+	console.log('update: # of components = ' + components.length);
 	// remove all children of scene
 	for (c = scene.children.length - 1; c >= 0; c--) { 
 		var obj = scene.children[c];
@@ -105,8 +101,8 @@ function update() {
 	}
 
 	// draw a sphere to show the center of screen
-	worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial( {color: 0x000000} ));
-	scene.add (worldCenter);
+	// worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial( {color: 0x000000} ));
+	// scene.add (worldCenter);
 	initComponents();
 	scene.add(pointLight); // Add the light source to the scene.
 
@@ -116,9 +112,9 @@ function initComponents() {
 	electronGeometry = new THREE.Geometry();
 	for (k=0; k < components.length; k++) {
 		console.log('component ' + k + ' : ' + components[k].compType);
-		console.log('sx = ' + components[k].startPoint.x + ' and sy = ' + components[k].startPoint.y + 'and ex = ' + components[k].endPoint.x + ' and ey = ' + components[k].endPoint.y);
-		console.log('sz = ' + components[k].startPoint.z + ' and ez = ' + components[k].endPoint.z);
-		console.log('component length is ' + components[k].l);
+		// console.log('sx = ' + components[k].startPoint.x + ' and sy = ' + components[k].startPoint.y + 'and ex = ' + components[k].endPoint.x + ' and ey = ' + components[k].endPoint.y);
+		// console.log('sz = ' + components[k].startPoint.z + ' and ez = ' + components[k].endPoint.z);
+		// console.log('component length is ' + components[k].l);
 		
 		if (components[k].compType != "Battery") {
 			components[k].init(electronGeometry, k); // sends k as the component ID
@@ -135,6 +131,9 @@ function initComponents() {
 	scene.add ( electrons );
 
 	console.log('# of scene children are ' + scene.children.length);
+	// var v1 = new THREE.Vector3(1,0,0);
+	// var v2 = new THREE.Vector3(0,-1,0);
+	// console.log("test angle is " + v2.angleTo(v1));
 }
 
 
@@ -184,8 +183,7 @@ function updateElectrons() {
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
 		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
-																	// index for the components array
-
+																	// index for the components array																	
 	}
 	electrons.geometry.verticesNeedUpdate = true;
 }
@@ -213,7 +211,7 @@ function onDocumentMouseMove( event ) {
 		mouseFlag = 2; // indicates that a drag is happening
 		mouseX = event.clientX - windowHalfX;
  		mouseY = event.clientY - windowHalfY; 
- 		console.log('mouse drag');
+ 		
 	}
 
 }
@@ -223,7 +221,7 @@ function onDocumentMouseUp( event )
 {
 	if (mouseFlag == 2) { // a drag has happened
 		mouseFlag = 0; // reset the flag to 0
-		console.log('mouse up');
+		
 
 	}
 	if (mouseFlag == 1) { // it's a click, reset the flag to 0 and do nothing.

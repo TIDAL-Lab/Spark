@@ -119,7 +119,7 @@ class Help implements Touchable {
       num tx = event.touchX;
       num ty = event.touchY;
       if (tx >= x && (tx <= x + iw) && ty >= y && (ty <= y + ih)) {
-        print("lens contains touch");
+        //print("lens contains touch");
       }
       return (tx >= x && tx <= x + iw && ty >= y && ty <= y + ih);
     }

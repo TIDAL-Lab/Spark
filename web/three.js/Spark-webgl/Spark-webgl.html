@@ -84,18 +84,6 @@
 		pubnub.subscribe({
 		    channel: 'ebz',
 		    message: function(m){
-		    	console.log("******************************************************\n" + 
-		    		"Pubnub message = " + m +
-		    		"\n******************************************************");
-		    	if (m == 'update') {
-		        	doParse('update');
-		      	}
-		    }
-		});
-
-		pubnub.subscribe({
-		    channel: 'ebz',
-		    message: function(m){
 
 		    	doParse('update');
 		    }
@@ -104,7 +92,7 @@
 		function doParse(message){
 			console.log('this is where doParse starts');
 		   	var numComps;
-		    components = [];
+		    components = []; // this var is created in main.js 
 		    var tCircuit;
 			// create a new subclass of Parse.Object named Circuit
 		    var parseCircuit = Parse.Object.extend("Circuit");
@@ -124,7 +112,8 @@
 		              endx = 2 * result.get("endX");
 		              endy = 2 * result.get("endY");
 		              direction = result.get("direction");
-		              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction, null);
+		              connection = result.get("connection");
+		              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction, connection);
 		              components.push(tCircuit);        
 		      		});
 
@@ -133,25 +122,26 @@
 		    }).then(function(){
 
 		    	if (message == 'init') {
+		   //  		components = [];
+
+		   //  		// component inputs (type, current, resistance, volt, startx, starty, endx, endy, direction, connected)
+					// // [1, 1, 0]: component 1 is connected to me from my end point to its start point
+					// var comp0 = new Component("Wire", 0, 1, 0, -400, -200, 200, -200, 1, [1, 1, 0]);
+					// // [0, 0, 1]: component 0 is connected to me from my start point to its end point
+					// var comp1 = new Component("Wire", 0, 1, 0, 200, -200, 500, -200, 0, [0, 0, 1]); 
+					// // not connected
+					// // var comp0 = new Component("Wire", 0, 1, 0, -400, -200, -200, -200, 1, null);
+					// // var comp1 = new Component("Wire", 0, 1, 0, -100, -200, 100, -200, 0, null); 
+
+					// components.push(comp0);
+					// components.push(comp1);
 		    		doInit();
 		    	}
 		    	else { // message is update
 		    		doUpdate();
 		    	}
-		    	//doInit(Circuit);
-// component inputs (type, current, resistance, volt, startx, starty, endx, endy, direction, connected)
-//var Circuit = [];
-// [1, 1, 0]: component 1 is connected to me from my end point to its start point
-//var comp0 = new Component("Wire", 0, 1, 0.2, -800, -200, -200, -200, 1, [1, 1, 0]);
-// [0, 0, 1]: component 0 is connected to me from my start point to its end point
-//var comp1 = new Component("Wire", 0, 1, 0, -200, -200, 100, -200, 0, [0, 0, 1]); 
-// not connected
-// var comp0 = new Component("Wire", 0, 1, 0, -400, -200, -200, -200, 1, null);
-// var comp1 = new Component("Wire", 0, 1, 0, -100, -200, 100, -200, 0, null); 
+		    	
 
-// Circuit.push(comp0);
-// Circuit.push(comp1);
-//doInit(Circuit);
 		  
 		    });  
 		}

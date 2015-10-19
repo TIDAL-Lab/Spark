@@ -86,7 +86,7 @@ class Component implements Touchable {
     num angle = -atan2(end.x - start.x, end.y - start.y) + PI / 2;
 
     angle = angle * 180 / PI; //transform to radian
-    print("this is the angle: $angle");
+    //print("this is the angle: $angle");
     slider.style.transformOriginX = "0px";
     slider.style.transformOriginY = "0px";
     slider.style.transform = "rotate(${angle}deg) translate(10px, 25px)";
@@ -247,7 +247,7 @@ class Component implements Touchable {
     theApp.removeTouchable(this);
     theApp.removeTouchable(this.start);
     theApp.removeTouchable(this.end);
-    theApp.circuit.removeBranch(this);
+    
     
     theApp.components.remove(this);
     theApp.controlPoints.remove(this.start);
@@ -257,6 +257,8 @@ class Component implements Touchable {
 //      theApp.model1.component = null;
       theApp.model1.closeModel();
     }
+    theApp.circuit.removeBranch(this); // removing the branch from the circuit should be 
+                                      // the last thing to do, as it calls the sendDataToServer function
   }
   
   /** returns all the connected components
