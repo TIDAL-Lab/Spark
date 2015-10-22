@@ -1,0 +1,32 @@
+// TODO
+* [DONE] merge the two conditions into one code
+
+* fix the light bulb shade
+
+* add light rays to the bulbs!
+
+* burnt battery bug: when a burnt battery is in series with a working battery, the bulb lights up, which shoudln't
+
+* drag components from the toolbar in order to create a new one, instead of tapping on it
+
+* sliders bug: mouse interaction doesn't work. 
+
+* add "resisto" to the resistor
+
+* make the information button more visible
+
+* fix the content of help texts for control condition (it is 3 texts but should be 4)
+
+* highlight the magnifying glass
+
+* bug: when creating a new component, sometimes it creates 2!
+
+* fix the style of the model frame and probe
+
+* the trash has no sound!
+
+* improve the interaction with the sliders, it is not smooth enough 	
+
+* when reset --> the sliders need to be reset to 1
+
+* URGENT: issue with parallel circuit with battery v=4 and 3 resistors r=1 --> battery burns!

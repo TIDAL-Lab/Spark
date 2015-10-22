@@ -1,3 +1,6 @@
+THINGS TO FIX LATER:
+1. 
+
 *** notes on 9/14/2015
 1. I am studying how to run collision detection on particle systems. So far it seems that there is nothing good!
 2. I am studying raycasters in three.js
@@ -142,12 +145,29 @@ Link to how to flatten a nested array: http://www.christopherbiscardi.com/2014/0
 4. ISSUE: bouncing off the walls not working!
 
 
-*** notes on 10/11/2015
-1. DART OLD ISSUE: fix the singlewhere issue with the get edge code.
-2. DART OLD ISSUE: fix the issue with mixing the touch event and mouse event.
-   For example, creating two components.
-3. DART OLD ISSUE: fix the issue with changing the circuit configuration 
-when clicking/holding the click on a component or a control point!!
+*** notes on 10/14/2015
+Working on the Dart code to fix old issues (check dart code change log file)
 
+*** notes on 10/15/2015
+1. I tried to fix the issue with bouncing off the walls, apparently rotation the walls initially made the normal vectors working not as wanted
+	(I still don't understand what is going on!!)
+	But there is still issue with bouncing off the walls when the component is angled.
+2. I modified bouncing off the ions, so that it considers the cases where the angle between electron velocity and normal vector is 180 or 90 degrees
+	But still there are a rare cases where the electron stops moving when collide with an ion
+	--> needs to be fixed!
+	
+*** notes on 10/19/2015
+1. I have been working on the bounce back function which was not working correctly.
+	The problem was with the local space and world space. For example, the electron velocity was in world space,
+	but the face normals where in local space. The solution was to rotate the electron velocity with the reverse angle of component rotationAngle
+	which makes the electron velocity in the component space, and then calculating the bounce back angle.
+	
+2. I commented the type check in the parse code, because it sorted the components base on types and then rendered them
+	which messed up with reading the connected components!
 
-
+*** notes on 10/22/2015
+1. Working on making the junctions!
+2. I wanted to have the electrons bounce off the box from inside. I searched and found this link helpful:
+http://stackoverflow.com/questions/28664904/three-js-raycaster-collision-inside-of-cylinder
+	The problem is solved by chanding the side of box to be rendered from front to back.
+	

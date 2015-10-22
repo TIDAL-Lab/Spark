@@ -1,0 +1,37 @@
+THINGS TO FIX LATER:
+1. FIX THE PROBLEM WITH PUB SERVE
+2. FIX THE PROBLEM WITH SINGLEWHERE ERROR FOR GETTING AN EDGE
+3. FIX THE CODE FOR RESIGING THE WINDOW
+4. MAKE THE SLIDERS WORK BETTER; MAKE SURE THEY WORK CORRECTLY WITH MOUSE EVENTS
+6. FIX THE DELETE CODE: DELETE THE CONNECTED COMPONENTS WHEN THE DRAGGED COMPONENT IS NOT ON THE DELETEBOX, BUT THE CONNECTED CIRCUIT IS 
+
+*** notes on 02/19/2015
+1. merging the two conditions into one code
+	main.dart: added a condition switch
+	copied probe.html, probe.dart, and css/probeToolbar.css
+	copied a 2nd version of dart/model.dart --> now they are two files: agentModel.dart & lumpModel.dart
+	track where the model is called:
+	--> main.dart: if condition --> model
+	--> help.dart
+	style issues: fixed default.css --> #model1
+
+*** notes 02/27/2015
+
+1.Changing the brightness of light bulb
+	I changed the bulb-on and bulb-off colors
+	A drop shadow is added (it first draws bulb-off, then the shadow (with radius proportional with current)
+	and then bulb-on image.
+2. Adding a battery info page for condition = 0
+
+
+*** notes on 10/14/2015
+1. DART OLD ISSUE: fix the issue with mixing the touch event and mouse event.
+   For example, creating two components. (Update: Mike: this is windows 8 issue, cannot get fixed, just switch between the modes)
+2. DART OLD ISSUE: fix the issue with changing the circuit configuration 
+	when clicking/holding the click on a component or a control point!!
+	SOLVED(?): I don't know why but it seems that running pub serve interferes with running the code.
+	I unchecked the pub serve in manage launches and the weird things are all gone!!
+3. DART OLD ISSUE: slider change not updating the value
+	UPDATE: it workes with touch events, but I should later test it with the mouse events
+
+	
