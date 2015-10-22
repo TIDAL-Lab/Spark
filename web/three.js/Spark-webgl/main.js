@@ -40,12 +40,12 @@ function doUpdate() {
 
 
 function init() {
-	console.log('init: # of components = ' + components.length);
+	//console.log('init: # of components = ' + components.length);
 	sphere = THREE.ImageUtils.loadTexture( "textures/ball.png" );
 	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery3t.png" );
 	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );
-	container = document.createElement( 'div' );
-	document.body.appendChild( container );
+	//container = document.createElement( 'div' );
+	//document.body.appendChild( container );
 
 	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
 	//camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
@@ -61,6 +61,32 @@ function init() {
 	// draw a sphere to show the center of screen
 	// worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshPhongMaterial( {color: 0x000000} ));
 	// scene.add (worldCenter);
+/*	
+		var parent = new THREE.Object3D();
+		parent.position.set( 10, 0, 0 );
+		var child = new THREE.Object3D();
+		child.position.set( 2, 0, 0 );
+		var child2 = new THREE.Object3D();
+		child2.position.set( 5, 0, 0 );
+		parent.add( child );
+		parent.add( child2 );
+		scene.add( parent );	
+		
+		parent.updateMatrixWorld();
+		//scene.updateMatrixWorld();
+		var vector = new THREE.Vector3();
+		vector.setFromMatrixPosition( child.matrixWorld);
+		//console.log(vector);
+		console.log(parent.position);
+		console.log(child.position);
+		var vector2 = new THREE.Vector3();
+		vector2.copy(child.position);
+		console.log(parent.localToWorld( vector2 ) );
+		console.log(child.position);
+*/
+		
+		
+
 	initComponents();
 
 
@@ -69,7 +95,8 @@ function init() {
 	renderer.setClearColor ( 0x337586 ); //bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
-	container.appendChild( renderer.domElement );
+	// container.appendChild( renderer.domElement );
+	document.body.appendChild( renderer.domElement );
 
 	// Be aware that a light source is required for MeshPhongMaterial to work:
     pointLight = new THREE.PointLight(0xFFFFFF); // Set the color of the light source (white).
@@ -93,7 +120,7 @@ function init() {
 
 function update() {
 	//console.log('this is where update starts');
-	console.log('update: # of components = ' + components.length);
+	//console.log('update: # of components = ' + components.length);
 	// remove all children of scene
 	for (c = scene.children.length - 1; c >= 0; c--) { 
 		var obj = scene.children[c];
@@ -112,28 +139,23 @@ function initComponents() {
 	electronGeometry = new THREE.Geometry();
 	for (k=0; k < components.length; k++) {
 		console.log('component ' + k + ' : ' + components[k].compType);
-		// console.log('sx = ' + components[k].startPoint.x + ' and sy = ' + components[k].startPoint.y + 'and ex = ' + components[k].endPoint.x + ' and ey = ' + components[k].endPoint.y);
-		// console.log('sz = ' + components[k].startPoint.z + ' and ez = ' + components[k].endPoint.z);
-		// console.log('component length is ' + components[k].l);
-		
 		if (components[k].compType != "Battery") {
 			components[k].init(electronGeometry, k); // sends k as the component ID
+			console.log('j1: ' + components[k].walls[0].connectedComponentID 
+						+ ' j2: ' + components[k].walls[1].connectedComponentID);
+
 		}
 		else {
-			components[k].initForBattery(k);
-		}
-				
+			components[k].initBattery(k);
+		}				
 	}
-	console.log('# of electrons = ' + electronGeometry.vertices.length);
+
+
+	//console.log('# of electrons = ' + electronGeometry.vertices.length);
 	
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 	scene.add ( electrons );
-
-	console.log('# of scene children are ' + scene.children.length);
-	// var v1 = new THREE.Vector3(1,0,0);
-	// var v2 = new THREE.Vector3(0,-1,0);
-	// console.log("test angle is " + v2.angleTo(v1));
 }
 
 
@@ -153,7 +175,6 @@ function render() {
 	camera.position.x += ( mouseX - camera.position.x ) * 0.2; 	// originally was set to 0.05
 	camera.position.y += ( - mouseY - camera.position.y ) * 0.2;	// originally was set to 0.05
 
-
 	camera.lookAt( scene.position );
 
 	updateElectrons();
@@ -164,24 +185,10 @@ function render() {
 
 
 function updateElectrons() {
-	/*
-	var startIndex = 0
-
-	for (k=0; k < components.length; k++) {
-		
-		var endIndex = startIndex + components[k].electronCount; 
-
-		//var electronVertices = electrons.geometry.vertices.slice(startIndexElectrons, endIndexElectrons);
-		//components[k].updateElectrons(electronVertices); 
-
-		components[k].updateElectrons(electrons.geometry.vertices, startIndexElectrons, endIndexElectrons);
-		startIndex = endIndex; 
-
-	}
-	*/
 	var eVertices = electrons.geometry.vertices;
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
+		// if (k == 0) { console.log("electron 0 component ID: " + electron.componentID); }
 		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
 																	// index for the components array																	
 	}

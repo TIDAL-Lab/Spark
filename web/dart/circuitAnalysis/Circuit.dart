@@ -127,6 +127,11 @@ class Circuit {
   }
   
   /** create JSON data and send the string to the server
+   * this method is called in one of these occurances:
+   * 1. called by circuit.solve method, when a change in graph
+   * 2. called by circuit.addNewBranch method, when a new component is added
+   * 3. called by component.touchUp method, when componets are dragged OR components are deleted
+   * 4. called by controlpoint.touchup method, when components are dragged
    */
   void sendDataToServer() {
   
@@ -276,7 +281,7 @@ class Circuit {
     this.nodes.remove(n1);
     this.nodes.remove(n2);
     this.edges.remove(e);
-    sendDataToServer();    
+    //sendDataToServer(); // no need to call it here, send data to server is done in the touchup function    
   }
  
   

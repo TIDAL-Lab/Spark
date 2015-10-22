@@ -28,7 +28,6 @@ class Component implements Touchable {
   String ARImgSrc;
   ImageElement img;
   ImageElement ARImg;
-  ImageElement eyeImg;
   
   num iw;
   num ih;
@@ -72,11 +71,11 @@ class Component implements Touchable {
    
     img = new ImageElement();
     ARImg = new ImageElement();
-    setARImgSrc();
-    eyeImg = new ImageElement();
-    eyeImg.src = "images/eye.png";
- 
+    //setARImgSrc();
+    
     theApp.addTouchable(this);
+    theApp.components.add(this);
+    theApp.circuit.addNewBranch(this);
   }
   
   void setSlider () {   
@@ -252,13 +251,16 @@ class Component implements Touchable {
     theApp.components.remove(this);
     theApp.controlPoints.remove(this.start);
     theApp.controlPoints.remove(this.end);
+    theApp.circuit.removeBranch(this); // removing the branch from the circuit should be 
+                                      // the last thing to do, as it calls the sendDataToServer function
+    
     if (this == theApp.model1.component) { // if the model is being shown for this component
 //      document.querySelector("#model1").style.display = "none";
 //      theApp.model1.component = null;
       theApp.model1.closeModel();
     }
-    theApp.circuit.removeBranch(this); // removing the branch from the circuit should be 
-                                      // the last thing to do, as it calls the sendDataToServer function
+    
+
   }
   
   /** returns all the connected components
@@ -328,13 +330,14 @@ class Component implements Touchable {
     /* if the component is over the delete box area, remove it */
     num mx = min(start.x, end.x);
     num my = min(start.y, end.y);
-    num boxW = theApp.deleteBox.width / 7;
-    num boxH = theApp.deleteBox.height / 7;
+    num boxW = theApp.deleteBoxImg.width / 7;
+    num boxH = theApp.deleteBoxImg.height / 7;
     if (mx < boxW && my < boxH) {
       /* remove the component */
       removeConnectedComponents();
       Sounds.playSound("crunch");
       App.repaint();
+      theApp.circuit.sendDataToServer();
       return;
     }
     

@@ -42,7 +42,7 @@ class Toolbar {
     button = document.querySelector("$id #battery-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Battery"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Battery"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Battery"));
       
     }
@@ -50,21 +50,21 @@ class Toolbar {
     button = document.querySelector("$id #wire-button"); /* do not remove $id, it causes some errors! */
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Wire"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Wire"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Wire"));
     }
     
     button = document.querySelector("$id #resistor-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Resistor"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Resistor"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Resistor"));
     }
     
     button = document.querySelector("$id #bulb-button");
     if (button != null) {
       CssRect rect = button.borderEdge;
-      button.onMouseDown.listen((evt) => createComponent(rect, "Bulb"));
+      //button.onMouseDown.listen((evt) => createComponent(rect, "Bulb"));
       button.onTouchStart.listen((evt) => createComponent(rect, "Bulb"));
     }
       
@@ -99,7 +99,7 @@ class Toolbar {
     InputElement slider4 = document.querySelector("#bulb-slider");
     if (slider4 != null) {
     changeValue("bulb-value", double.parse(slider4.value));
-    slider4.onChange.listen((evt) => changeValue("bulb-value", double.parse(slider4.value)));
+    //slider4.onChange.listen((evt) => changeValue("bulb-value", double.parse(slider4.value)));
     slider4.onTouchMove.listen((e) => sliderMove(e, "#bulb-slider"));
     slider4.onTouchEnd.listen((e) => changeValue("bulb-value", double.parse(slider4.value)));
     }
@@ -112,29 +112,21 @@ class Toolbar {
       case 'Battery':
         InputElement slider = querySelector("#battery-slider");
         var voltage = double.parse(slider.value);
-        var battery = new Battery(cx - 50, cy - 100, cx + 50, cy - 100, voltage);
-        theApp.components.add(battery);
-        theApp.circuit.addNewBranch(battery);
+        new Battery(cx - 50, cy - 100, cx + 50, cy - 100, voltage);
         break;
       case 'Wire':
-        var wire = new Wire(cx - 50, cy - 100, cx + 50, cy - 100);
-        theApp.components.add(wire);
-        theApp.circuit.addNewBranch(wire);
+        new Wire(cx - 50, cy - 100, cx + 50, cy - 100);
         break;
       case 'Resistor':
         InputElement slider = querySelector("#resistor-slider");
         var resistance = double.parse(slider.value);
-        var resistor = new Resistor(cx - 50, cy - 100, cx + 50, cy - 100, resistance);
-        theApp.components.add(resistor);
-        theApp.circuit.addNewBranch(resistor);
+        new Resistor(cx - 50, cy - 100, cx + 50, cy - 100, resistance);
         break;
       case 'Bulb':
         InputElement slider = querySelector("#bulb-slider");
         var resistance = double.parse(slider.value);
         //var resistance = 1.0;
-        var bulb = new Bulb(cx - 50, cy - 100, cx + 50, cy - 100, resistance);
-        theApp.components.add(bulb);
-        theApp.circuit.addNewBranch(bulb);
+        new Bulb(cx - 50, cy - 100, cx + 50, cy - 100, resistance);
         break;
     }
   }

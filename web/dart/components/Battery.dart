@@ -33,9 +33,7 @@ class Battery extends Component  {
     resistance = 0.0;
     voltageDrop = v;    
     
-    //addSlider(x0, y0);
-    
-       
+    //addSlider(x0, y0);       
   }
     
     CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {

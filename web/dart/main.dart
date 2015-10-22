@@ -74,6 +74,31 @@ void initiate() {
     slider.onTouchMove.listen((e) => genericSliderTouch(e));
     slider.onTouchEnd.listen((e) => genericChangeValue(double.parse(slider.value)));
   }
+  
+  // set up a flag to switch between touch and mouse events
+  // this is a code Mike sent me, I need to integrate it into my code later
+  /**
+   * Is the given flag set to true in the URL query string?
+   */
+  bool isFlagSet(String name) {
+    return window.location.search.indexOf("${name}=true") > 0;
+  }
+
+
+
+  /**
+   * Binds a click event to a button
+   */
+  void bindClickEvent(String id, Function callback) {
+    Element element = querySelector("#${id}");
+    if (element != null) {
+      if (isFlagSet("debug")) {
+        element.onClick.listen(callback);
+      } else {
+        element.onTouchStart.listen(callback);
+      }
+    }
+  }
 }
 
 
@@ -92,13 +117,13 @@ class App extends TouchManager {
    Toolbar selectionBar; 
    Toolbar editionBar;
    var model1;
-   Component genericSliderComponent;
-   Help help;
-   Lens lens;
+   Component genericSliderComponent; //the component that is tapped on to change its value
+   Help help; // the help text
+   Lens lens; // the magnifying glass object
    int ARTagCounter;
-   ImageElement deleteBox;   
+   ImageElement deleteBoxImg;   
    int canvasMargin = 5;
-   Rectangle workingBox;
+   Rectangle workingBox; // the box for building circuits
    Rectangle containerBox;
    
    /* 
@@ -106,7 +131,7 @@ class App extends TouchManager {
     * 0 --> control condition: only circuit, no ABM model
     * 1 --> ABM + circuit model, with the NetTango model embedded in the canvas
     */
-   num condition = 0;  
+   num condition = 1;  
 
       
    App() {
@@ -130,8 +155,7 @@ class App extends TouchManager {
      selectionBar = new Toolbar(this, "div#selection-toolbar");
      editionBar = new Toolbar(this, "div#edition-toolbar");
      
-     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
-     workingBox = new Rectangle(canvasMargin, canvasMargin,width - 530, toolbarRect.top -(3*canvasMargin));
+     ARTagCounter = 0;
      
      /* 
       * set the model based on the condition
@@ -145,33 +169,37 @@ class App extends TouchManager {
        model1 = new agentModel(this, "div#model1");
      }
      
-
-     lens = new Lens(650, 300);
+     // instantiate lens and help objects
+     lens = new Lens(width/2, canvasMargin * 3);
      help = new Help(1100, 520);
 
-     ARTagCounter = 0;
      
-     // delete box 
-     deleteBox = new ImageElement();
-     deleteBox.src = "images/trash-bin.png";
-     deleteBox.onLoad.listen((event) { draw(); });
-
-//     num centerX = (width - 530)/2;
-//     num centerY = height/2;
+     
+     // initiate delete box 
+     deleteBoxImg = new ImageElement();
+     deleteBoxImg.src = "images/trash-bin.png";
+     deleteBoxImg.onLoad.listen((event) { draw(); });
+     
+     //set the working box
+     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
+     workingBox = new Rectangle(canvasMargin, canvasMargin,width * (2/3), toolbarRect.top -(3*canvasMargin));
      num centerX = workingBox.width / 2;
      num centerY = workingBox.height / 2;
+     
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
      
-     var battery = new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
-     components.add(battery);
-     circuit.addNewBranch(battery);
+     // create the first battery
+     new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
+
          
-     var t = 65;
+     //var t = 65;
    }
+   
+   
    /* Resize the window
     */
-   void resizeScreen() {
+   void resizeScreen() { // fix later
      width = window.innerWidth;
      height = window.innerHeight;
 
@@ -194,8 +222,8 @@ class App extends TouchManager {
      document.querySelector("#generic-slider").style.display = "none";
      model1.component = null;
      help.visible = false;
-     lens.x = 650;
-     lens.y = 300;
+     lens.x = width/2; // fix later
+     lens.y = canvasMargin * 3; // fix later
 
      num centerX = workingBox.width/2;
      num centerY = workingBox.height/2;
@@ -214,9 +242,7 @@ class App extends TouchManager {
      /* create the first battery */
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
-     var battery = new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
-     components.add(battery);
-     circuit.addNewBranch(battery);
+     new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
    }
 
    /* Draw */
@@ -246,9 +272,9 @@ class App extends TouchManager {
        drawGrids (margin, margin, width - (3*margin), rect.top.toInt() - (2*margin));
      }
      */     
-     num boxW = deleteBox.width / 7;
-     num boxH = deleteBox.height / 7;
-     ctx.drawImageScaled(deleteBox, 2 * canvasMargin, 2*canvasMargin, boxW, boxH);
+     num boxW = deleteBoxImg.width / 7;
+     num boxH = deleteBoxImg.height / 7;
+     ctx.drawImageScaled(deleteBoxImg, 2 * canvasMargin, 2*canvasMargin, boxW, boxH);
      
      /* redraw the components */
      for (Component c in components) {
@@ -266,11 +292,13 @@ class App extends TouchManager {
      /* make the lens on top of all the touchables */
      theApp.removeTouchable(theApp.lens);
      theApp.addTouchable(theApp.lens);
+     
      /* redraw the components of app*/
      theApp.draw();
-     //theApp.circuit.sendDataToServer();
+     
    }
-   
+ 
+
 }
 
 
@@ -285,8 +313,8 @@ class Screen implements Touchable {
    }
 
    bool touchDown(Contact event) { 
-     document.querySelector("#generic-slider").style.display = "none";
-     App.repaint();
+//     document.querySelector("#generic-slider").style.display = "none";
+//     App.repaint();
      return true;
    }
 

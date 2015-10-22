@@ -47,9 +47,9 @@ class TouchManager {
   void registerEvents(Element element) {
     parent = element;
     
-    element.onMouseDown.listen((e) => _mouseDown(e));
-    element.onMouseUp.listen((e) => _mouseUp(e));
-    element.onMouseMove.listen((e) => _mouseMove(e));
+    //element.onMouseDown.listen((e) => _mouseDown(e));
+    //element.onMouseUp.listen((e) => _mouseUp(e));
+    //element.onMouseMove.listen((e) => _mouseMove(e));
     //element.onMouseOut.listen((e) => _mouseExit(e));
     element.onTouchStart.listen((e) => _touchDown(e));
     element.onTouchMove.listen((e) => _touchDrag(e));
@@ -58,6 +58,8 @@ class TouchManager {
     // Prevent screen from dragging on ipad
     document.onTouchMove.listen((e) => e.preventDefault());
     
+    print("register events");
+/*    
     // Attempt to connect to the microsoft surface input stream
     try {
       var socket = new WebSocket("ws://localhost:405");
@@ -69,6 +71,7 @@ class TouchManager {
     catch (x) {
       print("unable to connect to surface.");
     }
+    */
   }
   
      
