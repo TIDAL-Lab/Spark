@@ -171,7 +171,7 @@ class App extends TouchManager {
      
      // instantiate lens and help objects
      lens = new Lens(width/2, canvasMargin * 3);
-     help = new Help(1100, 520);
+     help = new Help(770, 470);
 
      
      

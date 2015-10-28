@@ -61,6 +61,23 @@ function init() {
 	// draw a sphere to show the center of screen
 	// worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshPhongMaterial( {color: 0x000000} ));
 	// scene.add (worldCenter);
+
+	// var cube = new THREE.BoxGeometry(50, 200, 200);
+	// var cube_bsp = new ThreeBSP( cube );
+
+	// var sphere = new THREE.SphereGeometry(100, 32, 32);
+	// var sphere_bsp = new ThreeBSP( sphere );
+
+	// console.time('operation');
+	// var union = sphere_bsp.subtract( cube_bsp );
+	// console.timeEnd('operation');
+
+	// console.time('mesh');
+	// var mesh = new THREE.Mesh( union.toGeometry(), new THREE.MeshNormalMaterial );
+	// console.timeEnd('mesh');
+
+	// mesh.geometry.computeFaceNormals(); // highly recommended...
+	// scene.add(mesh);
 /*	
 		var parent = new THREE.Object3D();
 		parent.position.set( 10, 0, 0 );
@@ -147,9 +164,23 @@ function initComponents() {
 		}
 		else {
 			components[k].initBattery(k);
-		}				
+		}						
 	}
+	// var composite = new THREE.Geometry();
+	// for (k=0; k < components.length; k++) {
+	// 	components[k].boxMesh.updateMatrix();
+	// 	composite.merge(components[k].boxMesh.geometry, components[k].boxMesh.matrix);
+	// 	//THREE.GeometryUtils.merge(components[0].boxMesh.geometry, components[1].boxMesh.geometry);
+	// }
+	// var boxMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+	// boxMaterial.transparent = true;
+	// boxMaterial.opacity = 0.5;
+	// boxMaterial.depthWrite = false;
+	// composite.mergeVertices();
+	// var compositeMesh = new THREE.Mesh(composite, boxMaterial);
 
+	// scene.add(compositeMesh);
+	
 
 	//console.log('# of electrons = ' + electronGeometry.vertices.length);
 	

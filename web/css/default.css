@@ -58,7 +58,7 @@ body {
   height: 85px;
   border: none;
   position: fixed;
-  bottom: 200px;
+  bottom: 100px;
   right: 220px;
   outline: none;
   -webkit-animation: glowing 1500ms infinite;

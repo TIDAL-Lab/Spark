@@ -171,3 +171,6 @@ Working on the Dart code to fix old issues (check dart code change log file)
 http://stackoverflow.com/questions/28664904/three-js-raycaster-collision-inside-of-cylinder
 	The problem is solved by chanding the side of box to be rendered from front to back.
 	
+*** notes on 10/28/2015
+1. 	
+	
