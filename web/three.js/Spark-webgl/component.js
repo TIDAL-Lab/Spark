@@ -34,8 +34,9 @@ var velocity = 2;
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 var red = 0xD11919;
 var green = 0x008F00;
+var gray = 0x808080;
 
-function Component(type, current, res, volt, startX, startY, endX, endY, direction, connections) {
+function Component(type, current, res, volt, startX, startY, endX, endY, direction, connections, graphLabel) {
  	this.compType = type; // "wire", "resistor", "bulb", "battery"
   	this.I = current;
   	this.R = res;
@@ -43,6 +44,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.startPoint = new THREE.Vector3( startX, startY, 0.0 );
   	this.endPoint = new THREE.Vector3( endX, endY, 0.0 ); 
   	this.direction = direction; // 0 if v=0; 1 if from Start to End; -1 if from End to Start
+  	this.graphLabel = graphLabel;
   	this.ID;
   	this.electronCount; // Change it later
   	this.ionCount; //Change it later
@@ -52,6 +54,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.ions = [];
   	this.obstacles = [];
   	this.boxMesh;
+
 
 	var startToEnd = new THREE.Vector3( endX-startX, endY-startY, 0.0);
 	var xAxis = new THREE.Vector3(1, 0, 0);
@@ -87,7 +90,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.init = function( electronGeometry, ID ) {
   		this.ID = ID;		
 		this.createBox();
-  		// create electrons
+		if (this.compType != 'Battery') {
+			this.createElectrons(electronGeometry);
+		}
+	}
+
+	this.createElectrons = function( electronGeometry ) {
+		  		// create electrons
 		for ( i = 0; i < this.electronCount; i ++ ) {
 
 			var electron = new THREE.Vector3();
@@ -112,7 +121,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	}
 
-	// create the box and add walls and ions as the box children
 	this.createBox = function() {
 		var startX = this.startPoint.x, startY = this.startPoint.y;
 		var endX = this.endPoint.x, endY = this.endPoint.y;
@@ -126,12 +134,15 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		if (this.compType == "Resistor" || this.compType == "Bulb") {
 			var boxMaterial = new THREE.MeshBasicMaterial( { map: resistorImg, color: 0xCCCC00 } );
 		}
+		else if (this.compType == "Battery") {
+			var boxMaterial = new THREE.MeshBasicMaterial( { map: batteryImg } );
+		}
 		else {
 			var boxMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
 		}
 
 		boxMaterial.transparent = true;
-		boxMaterial.opacity = 0.5;
+		boxMaterial.opacity = 0.7;
 		boxMaterial.depthWrite = false;
 		this.boxMesh = new THREE.Mesh( boxGeom, boxMaterial );
 		
@@ -140,35 +151,32 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.boxMesh.rotation.z = this.rotationAngle;
 		this.boxMesh.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix
 
-		// now add the walls to the box
-		var wallMaterial = new THREE.MeshBasicMaterial( { color: 0x808080 } );
-        var junction1 = new THREE.Mesh( new THREE.BoxGeometry(junctionD, boxWidth, boxHeight), 
-										new THREE.MeshBasicMaterial( { color: red } ));
-		var junction2 = new THREE.Mesh( new THREE.BoxGeometry(junctionD, boxWidth, boxHeight), 
-										new THREE.MeshBasicMaterial( { color: red } ));		
-		var wall1 = new THREE.Mesh( new THREE.BoxGeometry(boxLength + 2 * junctionD, wallD, boxHeight), wallMaterial);
-		var wall2 = new THREE.Mesh( new THREE.BoxGeometry(boxLength + 2 * junctionD, wallD, boxHeight), wallMaterial);
+		// skip the rest of code from createBox2
+		// now add the junctions to the box	
+		var startJunction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 16, 16), 
+			new THREE.MeshBasicMaterial( { color: red } ));
+		var endJunction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 16, 16), 
+			new THREE.MeshBasicMaterial( { color: red } ));
 
-        this.walls = [
-                    junction1,
-                    junction2,
-                    wall1,
-                    wall2 ];
+		startJunction.material.transparent = true;
+		startJunction.material.opacity = 0.5;
+		startJunction.material.depthWrite = false;
 
-        // add the walls to the box
-       	for (i=0; i< this.walls.length; i++) {
-			this.boxMesh.add(this.walls[i]);
-			this.walls[i].connectedComponentID = -1; // to avoid the undefined variable
-		}
+		endJunction.material.transparent = true;
+		endJunction.material.opacity = 0.5;
+		endJunction.material.depthWrite = false;
+		// add the junctions to the box
+		this.boxMesh.add(startJunction);
+		this.boxMesh.add(endJunction);
 
-		this.walls[0].position.x = - (boxLength / 2 + junctionD / 2); 	// wall0 contains start point
-        this.walls[1].position.x = boxLength / 2 + junctionD / 2;		// wall1 contains end point	
-        this.walls[2].position.y = -(boxWidth / 2 + wallD / 2);			// wall2 is the wall with lower y
-        this.walls[3].position.y = boxWidth / 2 + wallD / 2;			// wall3 is the wall with higher y
 
-        //this.walls[0].material.side = THREE.DoubleSide;
-        //this.walls[1].material.side = THREE.DoubleSide;
-        
+		startJunction.connectedComponentID = -1; // to avoid the undefined variable
+		endJunction.connectedComponentID = -1; // to avoid the undefined variable
+
+		startJunction.position.x = - boxLength / 2;
+        endJunction.position.x = boxLength / 2;	
+        //this.boxMesh.updateMatrixWorld();
+
         // update the junctions
 		for (i=0; i < this.connections.length; i++) {
 			var obj = this.connections[i];
@@ -177,42 +185,25 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			var index;
 			if (code != -1 && code != 0) {			// if junction is connected
 				if (code == 1 || code == 3) {		// start junction is connected
-					index = 0;
+					startJunction.material.color.set(green);
+					startJunction.connectedComponentID = i;
+					startJunction.material.transparent = true;
+					startJunction.material.opacity = 0.5;
+					startJunction.material.depthWrite = false;
 				}
 				else {								// end junction is connected
-					index = 1;
+					endJunction.material.color.set(green);
+					endJunction.connectedComponentID = i;
+					endJunction.material.transparent = true;
+					endJunction.material.opacity = 0.5;
+					endJunction.material.depthWrite = false;
 				}
-				this.walls[index].material.color.set(green);
-				this.walls[index].connectedComponentID = i;
-				this.walls[index].material.transparent = true;
-				this.walls[index].material.opacity = 0.5;
-				// var alfa = components[i].rotationAngle - this.rotationAngle;
-				// var junctionL = Math.abs(boxWidth * Math.sin(alfa/2));
-				// var junctionW = Math.abs(boxWidth / Math.cos(alfa/2)); // think about alfa = 180!!
-				// this.walls[index].geometry = new THREE.BoxGeometry( junctionL, junctionW, boxHeight);	
-				
-				// if (index == 0) {
-				// 	this.walls[0].position.x = - boxLength / 2; 
-				// 	//this.walls[0].position.y = - (junctionW - this.w) / 2;
-				// 	this.walls[0].rotation.z = alfa/2;
-				// 	this.walls[0].position.y -= (junctionW - this.w);
-				// 	//this.walls[0].position.x += junctionL/2;
-				// }
-				// else {
-				// 	this.walls[1].position.x = boxLength / 2; 
-				// 	//this.walls[1].position.y = - (junctionW - this.w) / 2;
-				// 	this.walls[1].rotation.z = alfa/2;
-				// 	this.walls[1].position.y -= (junctionW - this.w);
-				// 	//this.walls[1].position.x -= junctionL/2;
-				// }
+
 			}
 		}
-        	
 
-				
-        // now create ions and add them to the box
-		if (this.compType != "Battery") { // no ions for battery
-			// create ions
+		if (this.compType != "Battery") {
+			// now create ions and add them to the box
 			var count = 0;
 			var d = 40;		
 			for ( i = 1; i < this.l/d; i ++ ) {
@@ -235,15 +226,21 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			}
 
 			this.ionCount = count;
+
+	  		//this.boxMesh.material.side = THREE.BackSide;
+	  		//this.obstacles.push(this.boxMesh);
+	  		for ( i = 0; i < this.ions.length; i ++ ) {
+	  			//this.obstacles.push(this.ions[i]);	
+	  		}
+
+	  		//this.obstacles = this.ions;
+	  		//this.obstacles.push(this.boxMesh);
+
 		}
-   
-  		this.obstacles = this.ions.concat(this.walls);
-  		//this.boxMesh.material.side = THREE.BackSide;
-  		//this.obstacles.push(this.boxMesh);
 		scene.add ( this.boxMesh );	
 	}
 
-	this.initBattery = function (ID) {
+/*	this.initBattery = function (ID) {
 		this.ID = ID;
 		var startX = this.startPoint.x, startY = this.startPoint.y;
 		var endX = this.endPoint.x, endY = this.endPoint.y;
@@ -261,12 +258,72 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		this.boxMesh.position.set(center.x, center.y, center.z);
 		this.boxMesh.rotation.z = this.rotationAngle;
-		this.boxMesh.updateMatrixWorld();	
-		scene.add ( this.boxMesh );	
+		this.boxMesh.updateMatrixWorld();
 
-	}
+				// now add the junctions to the box	
+		var startJunction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 16, 16), 
+			new THREE.MeshBasicMaterial( { color: red } ));
+		var endJunction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 16, 16), 
+			new THREE.MeshBasicMaterial( { color: red } ));
+
+		startJunction.material.transparent = true;
+		startJunction.material.opacity = 0.5;
+		startJunction.material.depthWrite = false;
+
+		endJunction.material.transparent = true;
+		endJunction.material.opacity = 0.5;
+		endJunction.material.depthWrite = false;
+		// add the junctions to the box
+		this.boxMesh.add(startJunction);
+		this.boxMesh.add(endJunction);
+
+
+		startJunction.connectedComponentID = -1; // to avoid the undefined variable
+		endJunction.connectedComponentID = -1; // to avoid the undefined variable
+
+		startJunction.position.x = - boxLength / 2;
+        endJunction.position.x = boxLength / 2;	
+        this.boxMesh.updateMatrixWorld();
+
+        // update the junctions
+		for (i=0; i < this.connections.length; i++) {
+			var obj = this.connections[i];
+			var key = i.toString();
+			var code = obj[key];
+			var index;
+			if (code != -1 && code != 0) {			// if junction is connected
+				if (code == 1 || code == 3) {		// start junction is connected
+					startJunction.material.color.set(green);
+					startJunction.connectedComponentID = i;
+					startJunction.material.transparent = true;
+					startJunction.material.opacity = 0.5;
+					startJunction.material.depthWrite = false;
+				}
+				else {								// end junction is connected
+					endJunction.material.color.set(green);
+					endJunction.connectedComponentID = i;
+					endJunction.material.transparent = true;
+					endJunction.material.opacity = 0.5;
+					endJunction.material.depthWrite = false;
+				}
+
+			}
+		}
+
+		scene.add ( this.boxMesh );	
+	}*/
 
 	this.updateElectron = function ( electron ) {
+		var obstacle = this.collision(electron);
+		if (obstacle == null) { 	// no colision
+			this.moveElectron(electron);
+		}
+		else {
+			this.bounceBack(electron, obstacle);
+		}
+	}
+
+	this.updateElectronOld = function ( electron ) {
 
 		var obstacle = this.collision(electron);
 		if (obstacle == null) { 	// no colision
@@ -275,6 +332,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		else {
 			switch(obstacle.object) {
 				case this.walls[0]: 	// collision with start junction
+					console.log('YAY! I see collision WITH START POINT');
 					if (obstacle.object.connectedComponentID != -1) {	// if connected
 						var n = obstacle.face.normal;
 						if (n.x == 1) { // if electron is inside the component, move it to the connected component
@@ -285,6 +343,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					else { this.bounceBack(electron, obstacle); } // not connected
 					break;
 				case this.walls[1]: 	// collision with end junction 
+					console.log('YAY! I see collision WITH END POINT');
 					if (obstacle.object.connectedComponentID != -1) {	// if connected
 						var n = obstacle.face.normal;
 						if (n.x == -1) { 	// if electron is inside the component, move it to the connected component
@@ -294,7 +353,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					}
 					else { this.bounceBack(electron, obstacle); }	// not connected
 					break;
+				case this.walls[2]:
+					console.log('YAY! I see collision WITH SIDE WALL BOTTOM');
+					this.bounceBack(electron, obstacle);
+					break; 
+				case this.walls[3]:
+					console.log('YAY! I see collision WITH SIDE WALL TOP');
+					this.bounceBack(electron, obstacle);
+					break;
 				default: 		// collision with the side walls or ions
+					console.log('YAY! I see collision WITH BOX');
 					this.bounceBack(electron, obstacle); 
 			}
 		}
@@ -309,8 +377,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			if (v > 8) {	// don't allow the speed to become more than 10, which is the distance for raycaster
 				
-				electron.velocity.x -= this.forceX;
-				electron.velocity.y -= this.forceY;
+				//electron.velocity.x -= this.forceX;
+				//electron.velocity.y -= this.forceY;
 			}
 
 			// move the electron

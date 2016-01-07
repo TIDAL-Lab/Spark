@@ -37,12 +37,13 @@ class Circuit {
   List<Node> nodes;
   //List<ConnectedGraph> graphs;
   List<Loop> loops;
-  num numCG;
+  num numCG = 0;
   num time;
   Matrix solution;
   List<Battery> burntBatteries;
   num maxCurrent = 10;
 
+  List<List<Component>> connectedComponents = new List<List<Component>>(); // this list is for sending the connection information to the webgl code
 
 /* ------------------------
   Constructor
@@ -52,6 +53,7 @@ class Circuit {
     //this.app = app;
     nodes = new List<Node>();
     edges = new List<Edge>();
+    
   }
   
 /* ------------------------
@@ -94,7 +96,7 @@ class Circuit {
       e.label = null;
     }
   }
-  
+   
   /** update the circuit variables of each component using the above solution. 
    */  
   void updateComponents () {
@@ -137,11 +139,12 @@ class Circuit {
   
     //var myObj = new JsArray();
     var myObj = [];
+    //findConnectedComponents();
+    var c, connectionArray, rowArray;
     for (Edge e in this.edges) {
-      
-      Component c = e.component;
-      var connectionArray = createConnectionArray(c); 
-      var rowArray = [];
+      c = e.component;
+      connectionArray = createConnectionArray(c); 
+      rowArray = [];
       for (int j = 0; j < connectionArray.length; j++) {
         if (connectionArray[j] == null) {connectionArray[j] = 0;}
         rowArray.add({
@@ -149,6 +152,7 @@ class Circuit {
           
         });
       }
+      
       var compObj = {'type': c.type,
                                           'voltageDrop': c.voltageDrop,
                                           'current': c.current,
@@ -160,7 +164,8 @@ class Circuit {
                                           'direction': c.direction,
                                           'innerWall':1,
                                           'tag': c.ARTag,
-                                          'connection': rowArray
+                                          'connection': rowArray,
+                                          'graphLabel': e.nodes[0].graphLabel
                                           };
       
         myObj.add(compObj);
@@ -179,6 +184,25 @@ class Circuit {
 
   }
   
+  /** find the connected components in the graph, create the data to be sent to Parse
+   * 
+   */
+  /*
+  void findConnectedComponents () {
+    connectedComponents = new List<List<Component>>();
+    print('number of connected graphs:');
+    print(this.numCG);
+    for (int i=0; i < this.numCG; i++) {
+      connectedComponents.add([]);    // add empty arrays as many as the number of connected graphs    
+    } 
+    var index;
+    for (Edge e in edges) {
+      index = e.nodes[0].graphLabel;
+      connectedComponents[index].add(e.component);      
+    }
+    print(connectedComponents);
+  }
+  */
   /** called to create the array of codes for the component connections status
   @param c    component
   @return     List<int>: -1 -> diagonal (cj is c)
@@ -239,6 +263,7 @@ class Circuit {
     
     n1.adjacents.add(n2);
     n2.adjacents.add(n1);
+    findSpanningForest();
     sendDataToServer();
   }
   
@@ -281,6 +306,7 @@ class Circuit {
     this.nodes.remove(n1);
     this.nodes.remove(n2);
     this.edges.remove(e);
+    findSpanningForest();
     //sendDataToServer(); // no need to call it here, send data to server is done in the touchup function    
   }
  
@@ -389,18 +415,18 @@ class Circuit {
       n.discoverTime = 0;
       n.parent = null;
     }
-    numCG = 0;
+    this.numCG = 0;
     time = 0;
     for (Node n in this.nodes) {
       if (!n.visited) {      
         DFSVisit(n);
-        numCG++;
+        this.numCG++;
       }
     }
   }
   
   void DFSVisit(Node u) {
-    u.graphLabel = numCG;
+    u.graphLabel = this.numCG;
     u.visited = true;
     u.discoverTime = time++;
     for (Node v in u.adjacents) {

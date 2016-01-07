@@ -172,5 +172,59 @@ http://stackoverflow.com/questions/28664904/three-js-raycaster-collision-inside-
 	The problem is solved by chanding the side of box to be rendered from front to back.
 	
 *** notes on 10/28/2015
-1. 	
+1. I am working on the CSG code, and how to create a union geometry for the whole circuit.
+(Note: I tried the three.js merge() function, but it seems that the merging function does not do what I am looking for,
+and the edges that each indivudal box has still exists after merging)
+2. I also tried to add an orbitcontrols.js library, mimicking a CSG example, but it does not function, I will fix it after I finish the CSG code!
+3. I fixed the controls; I just needed to use the source code (OrbitControls.js) from examples library, instead of copying it from the online example resource. 
+4. The CSG code is now partially working; I added a union shape, but when the ions are added to the obstacles array it becomes very slow.
+	Also, electrons get trapped on some of the union geometry walls, I need to understand why!
+	
+*** notes on 11/6/2015
+1. I am modifying the CSG code, the current main issues are:
+	a. when I have a combined mesh with a rotated wire, something wrong goes on with the face normal calculations and it causes some electrons to stop!
+	b. I need to add a code that electrons know to which component they belong at each tick, 
+	right now they always belong to the component they initiated from 	
+	c. the code does not distinguish that the components are actually "connected"! It simply creates a combined mesh no matter what! [FIXED]
+	
+	
+*** notes on 1/1/2016
+1. Working on sending the connected graph information to parse and webgl code:
+	in circuit.dart code, each graph node knows which connected graph it belongs to. That should be all I need!
+	update: for now, I decided to only send the graphLabel information. I figured that sending the connected components information might not be 
+	necessary.
+2. I changed the CSG code to consider the connected graphs. Now, there is one CSG composite mesh for each of the connected graphs
+	And instead of having one big obstacle for all the electrons, now only the composite mesh that the electron belongs to is the obstacle
+3. ISSUE: why when two components with no angles are connected, there is a tiny partial wall between them that the electrons bounce off!? 	
+	(I should add a sphere junction anyways)
+4. ISSUE: angled connected components --> some electrons stop moving at the edges. Is it because they pass the boundary of mesh?	
+
+*** notes on 1/2/2016
+1. I am adding sphere junctions to the components.
+	It seems that I need to merge the box mesh with the two sphere juctions (instead of adding the two as the children of boxMesh)
+I tried the CSG union function to unite [mesh, start juction, end juction], but there are two problems:
+	first, the code initially renders very slowly. I need to figure out why!
+	--> I tested different parts of code, and it seems the part that it adds the junctions (especially the end junction) makes it very slow
+		I don't understand how this is different from adding another box mesh!!
+		SOLVED: it seems that the rendering issue was because I set the sphere width and height segments to 60, 
+		I reduced it to 30 and it got much faster!
+	second, the junctions' positions are not updates based on the component, and they stay at the origin.
+
+*** notes on 1/3/2016
+1. ISSUE: the position of junctions for the CSG code:
+	I am trying to use the clone() function to solve the problem, but based on what I read online:
+	Mesh.clone() does not clone the Geometry and Material properties.
+	http://stackoverflow.com/questions/22360936/will-three-js-object3d-clone-create-a-deep-copy-of-the-geometry
+	I am lost! I don't understand why the cloned object cannot update it's matrix world to be the correct one :(
+	I tried many tricks, but still not successful!
+	PROBLEM SOLVED:
+	These are my findings, even though I am not 100% sure if I understood all this weird transformation issues!:
+	A. I had to clone the component.
+	B. The flag for recursive clone is true (default value is set to true), by component.clone() it also clones the junctions (children)
+		BUT, it does not copy the world matrix!
+	C. So I need to manually update the world matrix for the junctions, therefore I have to clone() the junctions too,
+		to avoid messing up with the possition of the original junctions.
+	D. To update teh world matrix for the junctions, I used this line of code:
+		clonedChild.applyMatrix(components[k].boxMesh.matrixWorld);
+	
 	

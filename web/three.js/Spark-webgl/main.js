@@ -9,10 +9,11 @@
  * Circuit-level and the level that shows interactions between electrons and ions as they move through circuit components.
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
+
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 var container;
-var camera, scene, renderer;
+var camera, scene, renderer, controls;
 var pointLight;
 var mouseX = 0, mouseY = 0;
 var sphere; //image element for particles
@@ -20,8 +21,7 @@ var batteryImg, resistorImg;
 var components = []; // an array of components
 var electrons, electronGeometry, electronMaterial;
 var raycaster;
-var worldCenter;
-var mouseFlag = 0; // this flag is used to distinguish a mouse drag from a mouse click
+var compositeMesh;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -40,176 +40,171 @@ function doUpdate() {
 
 
 function init() {
-	//console.log('init: # of components = ' + components.length);
 	sphere = THREE.ImageUtils.loadTexture( "textures/ball.png" );
 	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery3t.png" );
-	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );
+	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );	
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
 	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-	//camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
 	camera.position.z = 700;
 
 	scene = new THREE.Scene();
-	//scene.fog = new THREE.FogExp2( 0xffffff, 0.0007 );
 
 	raycaster = new THREE.Raycaster();
 	
-	THREE.ImageUtils.crossOrigin = 'anonymous'; // enables using images from the image folder
-
-	// draw a sphere to show the center of screen
-	// worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshPhongMaterial( {color: 0x000000} ));
-	// scene.add (worldCenter);
-
-	// var cube = new THREE.BoxGeometry(50, 200, 200);
-	// var cube_bsp = new ThreeBSP( cube );
-
-	// var sphere = new THREE.SphereGeometry(100, 32, 32);
-	// var sphere_bsp = new ThreeBSP( sphere );
-
-	// console.time('operation');
-	// var union = sphere_bsp.subtract( cube_bsp );
-	// console.timeEnd('operation');
-
-	// console.time('mesh');
-	// var mesh = new THREE.Mesh( union.toGeometry(), new THREE.MeshNormalMaterial );
-	// console.timeEnd('mesh');
-
-	// mesh.geometry.computeFaceNormals(); // highly recommended...
-	// scene.add(mesh);
-/*	
-		var parent = new THREE.Object3D();
-		parent.position.set( 10, 0, 0 );
-		var child = new THREE.Object3D();
-		child.position.set( 2, 0, 0 );
-		var child2 = new THREE.Object3D();
-		child2.position.set( 5, 0, 0 );
-		parent.add( child );
-		parent.add( child2 );
-		scene.add( parent );	
-		
-		parent.updateMatrixWorld();
-		//scene.updateMatrixWorld();
-		var vector = new THREE.Vector3();
-		vector.setFromMatrixPosition( child.matrixWorld);
-		//console.log(vector);
-		console.log(parent.position);
-		console.log(child.position);
-		var vector2 = new THREE.Vector3();
-		vector2.copy(child.position);
-		console.log(parent.localToWorld( vector2 ) );
-		console.log(child.position);
-*/
-		
-		
+	THREE.ImageUtils.crossOrigin = 'anonymous'; 	// enables using images from the image folder
 
 	initComponents();
 
-
 	renderer = new THREE.WebGLRenderer();
-	//renderer.setClearColor ( 0x005368 );
-	renderer.setClearColor ( 0x337586 ); //bluish background color
+	renderer.setClearColor ( 0x337586 ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	// container.appendChild( renderer.domElement );
 	document.body.appendChild( renderer.domElement );
 
 	// Be aware that a light source is required for MeshPhongMaterial to work:
-    pointLight = new THREE.PointLight(0xFFFFFF); // Set the color of the light source (white).
-    pointLight.position.set(100, 100, 250); // Position the light source at (x, y, z).
-    scene.add(pointLight); // Add the light source to the scene.
+    pointLight = new THREE.PointLight(0xFFFFFF); 	// Set the color of the light source (white).
+    pointLight.position.set(100, 100, 250); 		// Position the light source at (x, y, z).
+    scene.add(pointLight); 							// Add the light source to the scene.
 
 	//renderer.sortObjects = false; //this is to solve the rendering of transparent objects inside each other! 
 
-	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-	document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-
-	// need both for FF and Webkit - others I haven't tested
-  	document.addEventListener('DOMMouseScroll', onDocumentMouseWheel, false);
-  	document.addEventListener('mousewheel', onDocumentMouseWheel, false);
-
 	window.addEventListener( 'resize', onWindowResize, false );
+
+	// CONTROLS
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
 }
 
 function update() {
-	//console.log('this is where update starts');
-	//console.log('update: # of components = ' + components.length);
 	// remove all children of scene
 	for (c = scene.children.length - 1; c >= 0; c--) { 
 		var obj = scene.children[c];
 		scene.remove(obj);
 	}
-
-	// draw a sphere to show the center of screen
-	// worldCenter = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial( {color: 0x000000} ));
-	// scene.add (worldCenter);
 	initComponents();
-	scene.add(pointLight); // Add the light source to the scene.
+	scene.add(pointLight); 		// Add the light source to the scene.
 
 }
 
 function initComponents() {
 	electronGeometry = new THREE.Geometry();
+	var unsortedComponents = components;	// save a copy of original array of components
+	// Sort the components based on their graphLabel number in ascending order
+	components = components.sort(function(a, b) {
+    return (a.graphLabel - b.graphLabel);
+	});
 	for (k=0; k < components.length; k++) {
 		console.log('component ' + k + ' : ' + components[k].compType);
-		if (components[k].compType != "Battery") {
+		components[k].init(electronGeometry, k); // sends k as the component ID
+/*		if (components[k].compType != "Battery") {
 			components[k].init(electronGeometry, k); // sends k as the component ID
-			console.log('j1: ' + components[k].walls[0].connectedComponentID 
-						+ ' j2: ' + components[k].walls[1].connectedComponentID);
-
 		}
 		else {
 			components[k].initBattery(k);
-		}						
+		}		*/				
 	}
-	// var composite = new THREE.Geometry();
-	// for (k=0; k < components.length; k++) {
-	// 	components[k].boxMesh.updateMatrix();
-	// 	composite.merge(components[k].boxMesh.geometry, components[k].boxMesh.matrix);
-	// 	//THREE.GeometryUtils.merge(components[0].boxMesh.geometry, components[1].boxMesh.geometry);
-	// }
-	// var boxMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
-	// boxMaterial.transparent = true;
-	// boxMaterial.opacity = 0.5;
-	// boxMaterial.depthWrite = false;
-	// composite.mergeVertices();
-	// var compositeMesh = new THREE.Mesh(composite, boxMaterial);
 
-	// scene.add(compositeMesh);
+	// create a list of connected meshes, 
+	// each list contains the components that are connected as an array of [box, start, end] 
+	var connectedMeshes = []; // this is an array of array of meshes.
+							// Each element is an array of meshes that are connected		
+	var labelCounter = 0;	// keeping track of which connected graph
+	if ( components.length != 0 ) {
+		connectedMeshes[labelCounter] = new Array(); 
+	} 
+	console.log('graph labels: ');	
+	for (k=0; k < components.length; k++) {
+		var gl = components[k].graphLabel;
+		console.log(gl);
+		if ( gl != labelCounter ) { // start the next list of connected components
+			labelCounter++;
+			connectedMeshes[labelCounter] = new Array();
+		}
+		var clonedComponent = components[k].boxMesh.clone(); // flag is by default true -> recursively clone the children
+		connectedMeshes[labelCounter].push( clonedComponent );
+	}
 	
+	console.log('number of connected graphs: ' + connectedMeshes.length);
+	console.log(connectedMeshes);
+	
+	// Now, create a CSG union mesh
+	var compositeMeshes = new Array(connectedMeshes.length); // create an array of composite meshes, one for each connected graph
+															 // array length is equal to the number of CGs 	
+	var startIndex = 0;
+	for (m=0; m < compositeMeshes.length; m++) { // loop for the number of connected graphs
+		var clonedComponent = connectedMeshes[m][0];
+		var compositeBSP = createCSGComponent( clonedComponent ); //  
+		for (n=1; n < connectedMeshes[m].length; n++ ) { // loop inside each connected graph
+			//if ( components[k].compType != "Battery" ) {	// fix this later, what if components[0] is a battery?
+				compositeBSP = compositeBSP.union( createCSGComponent( connectedMeshes[m][n] ) );
+			//}
+		}
+		compositeMesh = compositeBSP.toMesh();
+		compositeMesh.geometry.computeFaceNormals(); // highly recommended...
+		compositeMesh.material = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+		compositeMesh.material.transparent = true;
+		compositeMesh.material.opacity = 0.7;
+		compositeMesh.material.depthWrite = false;
+		compositeMesh.material.side = THREE.BackSide;
 
-	//console.log('# of electrons = ' + electronGeometry.vertices.length);
-	
+		for (k=startIndex; k < startIndex + connectedMeshes[m].length; k++ ) {
+			components[k].obstacles.push(compositeMesh); // only add the composite mesh that the component belongs to as obstacle
+		} 
+		startIndex = startIndex + connectedMeshes[m].length;
+		compositeMeshes[m] = compositeMesh;
+
+		scene.add(compositeMesh);
+	}
+
+/*
+	var composite = new THREE.Geometry();
+	for (k=0; k < components.length; k++) {
+		components[k].boxMesh.updateMatrix();
+		composite.merge(components[k].boxMesh.geometry, components[k].boxMesh.matrix);
+		//THREE.GeometryUtils.merge(components[0].boxMesh.geometry, components[1].boxMesh.geometry);
+	}
+	var boxMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+	boxMaterial.transparent = true;
+	boxMaterial.opacity = 0.5;
+	boxMaterial.depthWrite = false;
+	composite.mergeVertices();
+	var compositeMesh = new THREE.Mesh(composite, boxMaterial);
+
+	scene.add(compositeMesh);
+*/	
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 	scene.add ( electrons );
 }
 
+function createCSGComponent( c ) {
+	var sj = c.children[0].clone();
+	sj.applyMatrix(c.matrixWorld);
+	var ej = c.children[1].clone();
+	ej.applyMatrix(c.matrixWorld);
+/*	console.log(c.matrixWorld);
+	console.log(sj.matrixWorld);
+	console.log(ej.matrixWorld);*/
+	var box = new ThreeBSP( c ); // meshes[0] is the component box 
+
+	box = box.union( new ThreeBSP( sj ) ); // unit it with the start junction
+	box = box.union( new ThreeBSP( ej ) ); // unit it with the end junction
+	return box;
+}
 
 function animate() {
 
 	requestAnimationFrame( animate );
 	render();
 	//stats.update();
-
+	//controls.update();
 }
 
 function render() {
 
-	//var time = Date.now() * 0.00005;
-
-	// rotate the camera with mouse drag
-	camera.position.x += ( mouseX - camera.position.x ) * 0.2; 	// originally was set to 0.05
-	camera.position.y += ( - mouseY - camera.position.y ) * 0.2;	// originally was set to 0.05
-
-	camera.lookAt( scene.position );
-
 	updateElectrons();
-
 	renderer.render( scene, camera );
 
 }
@@ -219,7 +214,6 @@ function updateElectrons() {
 	var eVertices = electrons.geometry.vertices;
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
-		// if (k == 0) { console.log("electron 0 component ID: " + electron.componentID); }
 		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
 																	// index for the components array																	
 	}
@@ -235,90 +229,5 @@ function onWindowResize() {
 	camera.updateProjectionMatrix();
 
 	renderer.setSize( window.innerWidth, window.innerHeight );
-
-}
-
-function onDocumentMouseDown( event )
-{
-	mouseFlag = 1;
-
-}
-
-function onDocumentMouseMove( event ) {
-	if (mouseFlag == 1) { // mouse down event is occured 
-		mouseFlag = 2; // indicates that a drag is happening
-		mouseX = event.clientX - windowHalfX;
- 		mouseY = event.clientY - windowHalfY; 
- 		
-	}
-
-}
-
-
-function onDocumentMouseUp( event )
-{
-	if (mouseFlag == 2) { // a drag has happened
-		mouseFlag = 0; // reset the flag to 0
-		
-
-	}
-	if (mouseFlag == 1) { // it's a click, reset the flag to 0 and do nothing.
-		mouseFlag = 0;
-	}
- 
-}
-
-// zoom in and out by mouse wheel event
-function onDocumentMouseWheel( event ) 
-{ 
-  var amount = 100; // parameter
-
-  // get wheel direction 
-   var d = ((typeof event.wheelDelta != "undefined")?(-event.wheelDelta):event.detail);
-    d = 100 * ((d>0)?1:-1);
-
-    // do calculations, I'm not using any three.js internal methods here, maybe there is a better way of doing this
-    // applies movement in the direction of (0,0,0), assuming this is where the camera is pointing
-    var cPos = camera.position;
-    var r = cPos.x*cPos.x + cPos.y*cPos.y;
-    var sqr = Math.sqrt(r);
-    var sqrZ = Math.sqrt(cPos.z*cPos.z + r);
-
-    var nx = cPos.x + ((r==0)?0:(d * cPos.x/sqr));
-    var ny = cPos.y + ((r==0)?0:(d * cPos.y/sqr));
-    var nz = cPos.z + ((sqrZ==0)?0:(d * cPos.z/sqrZ));
-
-    // verify we're applying valid numbers
-    if (isNaN(nx) || isNaN(ny) || isNaN(nz))
-      return;
-
-    cPos.x = nx;
-    cPos.y = ny;
-    cPos.z = nz;
-}
-
-function onDocumentTouchStart( event ) {
-
-	if ( event.touches.length === 1 ) {
-
-		event.preventDefault();
-
-		mouseX = event.touches[ 0 ].pageX - windowHalfX;
-		mouseY = event.touches[ 0 ].pageY - windowHalfY;
-
-	}
-
-}
-
-function onDocumentTouchMove( event ) {
-
-	if ( event.touches.length === 1 ) {
-
-		event.preventDefault();
-
-		mouseX = event.touches[ 0 ].pageX - windowHalfX;
-		mouseY = event.touches[ 0 ].pageY - windowHalfY;
-
-	}
 
 }

@@ -22,6 +22,7 @@
 		<script src="lib/three.js/build/three.min.js"></script>
 		<script src="lib/three.js/examples/js/Detector.js"></script>
 		<script src="lib/three.js/examples/js/libs/stats.min.js"></script>
+		<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>
 
 		<style>
 			body {
@@ -108,16 +109,16 @@
 		              compType = result.get("type");
 		              compVolt = result.get("voltageDrop");
 		              current = result.get("current");
-		              //current = 0.5;
 		              compRes = result.get("resistance");
 		              startx = 2 * result.get("startX");
 		              starty = 2 * result.get("startY");
 		              endx = 2 * result.get("endX");
 		              endy = 2 * result.get("endY");
 		              direction = result.get("direction");
+		              graphLabel = result.get("graphLabel");
 		              //direction = 1;
-		              connection = result.get("connection");
-		              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction, connection);
+		              connections = result.get("connection");
+		              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction, connections, graphLabel);
 		              components.push(tCircuit);        
 		      		});
 

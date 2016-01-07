@@ -41,7 +41,7 @@ class Component implements Touchable {
   
   ControlPoint start;
   ControlPoint end;
-  Edge edge;
+  //Edge edge;
   double resistance;
   double current;
   double voltageDrop;
