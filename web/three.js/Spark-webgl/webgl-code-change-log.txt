@@ -224,7 +224,13 @@ I tried the CSG union function to unite [mesh, start juction, end juction], but 
 		BUT, it does not copy the world matrix!
 	C. So I need to manually update the world matrix for the junctions, therefore I have to clone() the junctions too,
 		to avoid messing up with the possition of the original junctions.
-	D. To update teh world matrix for the junctions, I used this line of code:
+	D. To update the world matrix for the junctions, I used this line of code:
 		clonedChild.applyMatrix(components[k].boxMesh.matrixWorld);
 	
+*** notes on 2/2/2016
+1. Have been working on device motion
+	for now testing rotation component, trying to make it work for the rotation along the z axis
+	I started by reading articles on accelerometer data from JS and different events that handle this in JS
+2. I am testing a DeviceOrientationControls JS file I found in the library of three.js, trying to modify that code
+	I need to rotate the camera
 	

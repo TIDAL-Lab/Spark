@@ -23,6 +23,7 @@
 		<script src="lib/three.js/examples/js/Detector.js"></script>
 		<script src="lib/three.js/examples/js/libs/stats.min.js"></script>
 		<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>
+		<script src="lib/three.js/examples/js/controls/DeviceOrientationControls.js"></script>
 
 		<style>
 			body {
@@ -52,17 +53,36 @@
 		</style>
 	</head>
 	<body>
-<!--
-	<div id="info">
-		<a href="http://threejs.org" target="_blank">three.js</a> - Spark - particles system
+
+	<div class="main">
+	  <table>
+	    <tr>
+	      <td>Event Supported</td>
+	      <td id="dmEvent"></td>
+	    </tr>
+	    <tr>
+	      <td>acceleration</td>
+	      <td id="moAccel"></td>
+	    </tr>
+	    <tr>
+	      <td>acceleration+Gravity</td>
+	      <td id="moAccelGrav"></td>
+	    </tr>
+	    <tr>
+	      <td>rotationRate</td>
+	      <td id="moRotation"></td>
+	    </tr>
+	    <tr>
+	      <td>interval</td>
+	      <td id="moInterval"></td>
+	    </tr>
+	  </table>
 	</div>
 
--->
-
-	<input type="text" id="force"></input>
+<!-- 	<input type="text" id="force"></input>
     <input type="text" id="radius"></input>
     <input type="Button" onclick= "doParse()" value = "Activate"></input>
-    <input type="Button" onclick= "doPause()" value = "Pause"></input>
+    <input type="Button" onclick= "doPause()" value = "Pause"></input> -->
 
 	<!-- the following scripts are various classes in the code -->
 	<script src="component.js"></script>

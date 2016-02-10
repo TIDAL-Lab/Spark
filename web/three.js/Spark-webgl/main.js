@@ -13,7 +13,7 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 var container;
-var camera, scene, renderer, controls;
+var camera, scene, renderer, controls, deviceControls;
 var pointLight;
 var mouseX = 0, mouseY = 0;
 var sphere; //image element for particles
@@ -22,6 +22,7 @@ var components = []; // an array of components
 var electrons, electronGeometry, electronMaterial;
 var raycaster;
 var compositeMesh;
+var vZero = 0;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -74,7 +75,101 @@ function init() {
 	window.addEventListener( 'resize', onWindowResize, false );
 
 	// CONTROLS
-	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	//controls = new THREE.OrbitControls( camera, renderer.domElement );
+	//deviceControls = new THREE.DeviceOrientationControls( scene );
+
+	// testing the deviceMotionEvent
+	if (window.DeviceOrientationEvent) {
+ 		console.log("DeviceOrientation is supported");
+	}
+	if (window.DeviceMotionEvent) {
+ 		console.log("DeviceMotion is supported");
+	}
+	if (window.DeviceMotionEvent) {
+  		window.addEventListener('devicemotion', deviceMotionHandler, false);
+	} else {
+  		document.getElementById("dmEvent").innerHTML = "Not supported."
+	}
+	if (window.DeviceOrientationEvent) {
+  		// Listen for the event and handle DeviceOrientationEvent object
+  		window.addEventListener('deviceorientation', deviceOrientationHandler, false);
+	}
+
+}
+
+function deviceOrientationHandler(eventData) {
+	//console.log(eventData);
+	var alpha = Math.round(eventData.alpha);
+	var beta = Math.round(eventData.beta);
+	var gamma = Math.round(eventData.gamma);
+
+	//console.log(alpha + " " + beta + " " + gamma);
+	//console.log(gamma);
+	//rotateCameraPosition(alpha);
+}
+
+function rotateCameraPosition(alpha) {
+
+}
+
+function deg2rad(deg) {
+	return deg / 180.0 * Math.PI;
+}
+
+var xRotation = 0.0;
+var zRotation = 0.0;
+
+function deviceMotionHandler(eventData) {
+  var info, xyz = "[X, Y, Z]";
+  //console.log(eventData.rotationRate.alpha);
+
+  // Grab the acceleration from the results
+  var acceleration = eventData.acceleration;
+  info = xyz.replace("X", acceleration.x);
+  info = info.replace("Y", acceleration.y);
+  info = info.replace("Z", acceleration.z);
+  document.getElementById("moAccel").innerHTML = info;
+
+  // Grab the acceleration including gravity from the results
+  acceleration = eventData.accelerationIncludingGravity;
+  info = xyz.replace("X", acceleration.x.toFixed(2));
+  info = info.replace("Y", acceleration.y.toFixed(2));
+  info = info.replace("Z", acceleration.z.toFixed(2));
+  document.getElementById("moAccelGrav").innerHTML = info;
+
+  // Grab the rotation rate from the results
+  var rotation = eventData.rotationRate;
+  info = xyz.replace("X", Math.round(rotation.alpha));
+  info = info.replace("Y", Math.round(rotation.beta));
+  info = info.replace("Z", Math.round(rotation.gamma));
+  document.getElementById("moRotation").innerHTML = info;
+
+  zRotation += rotation.gamma * (eventData.interval / 1000.0);
+  var deltaZRotation = deg2rad(rotation.gamma * (eventData.interval / 1000.0)); 
+
+  xRotation += rotation.alpha * (eventData.interval / 1000.0);
+  var deltaXRotation = deg2rad(rotation.alpha * (eventData.interval / 1000.0));
+  //console.log(xRotation);
+
+  var deltaYRotation = deg2rad(rotation.beta * (eventData.interval / 1000.0));
+  camera.rotateOnAxis(new THREE.Vector3(0,0,1), deltaZRotation);
+  camera.rotateOnAxis(new THREE.Vector3(1,0,0), deltaXRotation);
+  camera.rotateOnAxis(new THREE.Vector3(0,1,0), deltaYRotation);
+
+  // // Grab the refresh interval from the results
+  info = eventData.interval;
+  document.getElementById("moInterval").innerHTML = info; 
+
+  var az = eventData.accelerationIncludingGravity.z;
+  //moveCameraPosition(az, eventData.interval);      
+}
+
+function moveCameraPosition(az, deltaT) {
+	var deltaZ = 0.5*(deltaT*0.001)*(deltaT*0.001)*(az-9.81)*100+(deltaT*0.001*vZero); // this is deltaZ in cm
+	vZero = vZero + (deltaT*0.001)*(az-9.81);
+	deltaZ = deltaZ * 10; // just a random constant
+	camera.position.z += deltaZ;
+	//renderer.render( scene, camera );
 }
 
 function update() {
@@ -199,7 +294,7 @@ function animate() {
 	requestAnimationFrame( animate );
 	render();
 	//stats.update();
-	//controls.update();
+	//deviceControls.update();
 }
 
 function render() {
