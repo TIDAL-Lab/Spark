@@ -234,3 +234,12 @@ I tried the CSG union function to unite [mesh, start juction, end juction], but 
 2. I am testing a DeviceOrientationControls JS file I found in the library of three.js, trying to modify that code
 	I need to rotate the camera
 	
+
+*** notes on 3/9/2016
+From the testings, it seemed that using the accelerometer data for detecting the motion is not a good option.
+So, we decided to go back to JSARoolkit.
+I am currently working on the AR, so far I could add a 3D shape on over a tag.
+1. now the goal is to add a particle system to the 3D object
+	I added the particle system to the box and it now works
+  	
+	

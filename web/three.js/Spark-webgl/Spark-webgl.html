@@ -25,6 +25,10 @@
 		<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>
 		<script src="lib/three.js/examples/js/controls/DeviceOrientationControls.js"></script>
 
+		<link href="lib/winjs/css/ui-light.css" rel="stylesheet" />
+		<script src="lib/winjs/js/base.js"></script>
+		<script src="lib/winjs/js/ui.js"></script>
+
 		<style>
 			body {
 				background-color: #005368;
@@ -61,11 +65,11 @@
 	      <td id="dmEvent"></td>
 	    </tr>
 	    <tr>
-	      <td>acceleration</td>
+	      <td>Init acceleration</td>
 	      <td id="moAccel"></td>
 	    </tr>
 	    <tr>
-	      <td>acceleration+Gravity</td>
+	      <td>Delta acceleration</td>
 	      <td id="moAccelGrav"></td>
 	    </tr>
 	    <tr>
@@ -88,6 +92,7 @@
 	<script src="component.js"></script>
 	<!-- the following scripts are the functional scripts for Spark -->
 	<script src="main.js"></script>
+	<script src="MotionDetection.js"></script>
 
 	<script type="text/javascript">
 
@@ -171,6 +176,53 @@
 		    });  
 		}
 
+		</script>
+
+		<!-- This part is the code that I am adding for motion detection, based on the three.js source code -->
+		
+<!-- 		<video id="monitor" autoplay style="display:none; width: 320px; height: 240px;"></video>
+
+		<div id="canvasLayers"   style="position: relative; width:320px; height:240px; float:right">
+		<canvas id="videoCanvas" width="320" height="240" style="z-index: 1; position: absolute; left:0px; top:0px; opacity:0.5;"></canvas>
+		<canvas id="layer2"     width="320" height="240" style="z-index: 2; position: absolute; left:0px; top:0px; opacity:0.5;"></canvas>
+		</div>
+		<canvas id="blendCanvas" style="display: none; position: relative; left: 320px; top: 240px; width: 320px; height: 240px;"></canvas>
+		<div id="messageError"></div>
+		<div id="messageArea" style="position: relative; left: 0px; top: 270px;"></div>
+		<div id="container" style="z-index: 2; position: absolute; left:0px; top:0px"></div> -->
+		<script>
+/*			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+			window.URL = window.URL || window.webkitURL;
+
+			var camvideo = document.getElementById('monitor');
+
+				if (!navigator.getUserMedia) 
+				{
+					document.getElementById('messageError').innerHTML = 
+						'Sorry. <code>navigator.getUserMedia()</code> is not available.';
+				}
+				navigator.getUserMedia({video: true}, gotStream, noStream);
+
+			function gotStream(stream) 
+			{
+				if (window.URL) 
+				{   camvideo.src = window.URL.createObjectURL(stream);   } 
+				else // Opera
+				{   camvideo.src = stream;   }
+
+				camvideo.onerror = function(e) 
+				{   stream.stop();   };
+
+				stream.onended = noStream;
+			}
+
+			function noStream(e) 
+			{
+				var msg = 'No camera available.';
+				if (e.code == 1) 
+				{   msg = 'User denied access to use camera.';   }
+				document.getElementById('errorMessage').textContent = msg;
+			}*/
 		</script>
 
 	</body>
