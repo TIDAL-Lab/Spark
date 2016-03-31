@@ -177,7 +177,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		startJunction.position.x = - boxLength / 2;
         endJunction.position.x = boxLength / 2;	
-        //this.boxMesh.updateMatrixWorld();
+        this.boxMesh.updateMatrixWorld();
 
         // update the junctions
 		for (i=0; i < this.connections.length; i++) {

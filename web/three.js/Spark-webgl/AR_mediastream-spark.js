@@ -106,10 +106,10 @@ function JsArInit() {
 
 
 
-/*            var component = components[0];
-            
-            component.boxMesh.setJsArMatrix(resultMatrix);
-            component.boxMesh.matrixWorldNeedsUpdate = true;*/
+            // for ( k=0; k < components.length; k++ ) {
+            //     components[k].boxMesh.setJsArMatrix(resultMatrix);
+            //     components[k].boxMesh.matrixWorldNeedsUpdate = true;
+            // }
 
 
 

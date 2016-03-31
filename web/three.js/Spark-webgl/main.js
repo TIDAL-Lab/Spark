@@ -26,7 +26,7 @@ var compositeMeshes;
 
 var allComponentsMesh;
 
-var ArFlag = false;
+var ArFlag = true;
 var cube;
 
 var windowHalfX = window.innerWidth / 2;
@@ -117,9 +117,10 @@ function initComponents() {
 		allComponentsMesh.add(components[k].boxMesh);
 	}
 
-	for ( k=0; k < components.length; k++ ) {
-		components[k].obstacles.push(allComponentsMesh); 
-	} 
+	allComponentsMesh.material.side = THREE.BackSide;
+	// for ( k=0; k < components.length; k++ ) {
+	// 	components[k].obstacles.push(allComponentsMesh); 
+	// } 
 	
 	
 	if (ArFlag) allComponentsMesh.matrixAutoUpdate = false;
