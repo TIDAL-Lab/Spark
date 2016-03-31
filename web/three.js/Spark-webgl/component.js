@@ -10,6 +10,18 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
+var electronSize = 15;
+var rectGeom, rectMesh;
+var ionGeometry = new THREE.SphereGeometry( 7, 16, 16 );
+var ionMaterial = new THREE.MeshBasicMaterial( {color: 0xCC0000 , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
+var junctionD = 6, wallD = 4;
+
+var velocity = 2;
+var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
+var red = 0xD11919;
+var green = 0x008F00;
+var gray = 0x808080;
+
  /*
  * component inputs:
  * type: "Wire", "Resistor", "Bulb", or "Battery"
@@ -21,20 +33,10 @@
  * endX: X coordinate of end point
  * endY: Y coordinate of end point
  * direction: 1 if from start to end, -1 if from end to start, 0 if no current
+ * connections: XXX
+ * graphlabel: XXX
 	
  */
-
-var electronSize = 15;
-var rectGeom, rectMesh;
-var ionGeometry = new THREE.SphereGeometry(7, 128, 128 );
-var ionMaterial = new THREE.MeshPhongMaterial( {color: 0xCC0000 , transparent: true} );
-var junctionD = 6, wallD = 4;
-//var boundingBox;
-var velocity = 2;
-var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
-var red = 0xD11919;
-var green = 0x008F00;
-var gray = 0x808080;
 
 function Component(type, current, res, volt, startX, startY, endX, endY, direction, connections, graphLabel) {
  	this.compType = type; // "wire", "resistor", "bulb", "battery"
@@ -108,7 +110,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			//translate the electron to be inside the component
 			this.boxMesh.localToWorld(electron); // this changes the position of electron from local to world
-		    var vX = Math.random() * velocity * 2 - velocity;
+			var vX = Math.random() * velocity * 2 - velocity;
 		    var vY = Math.sqrt( velocity * velocity - vX*vX);   // this results in a constant velocity 
 			electron.velocity = new THREE.Vector3(
 		    	vX,		// x
@@ -202,8 +204,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			}
 		}
 
+		// create ions and add them to the box
 		if (this.compType != "Battery") {
-			// now create ions and add them to the box
+			
 			var count = 0;
 			var d = 40;		
 			for ( i = 1; i < this.l/d; i ++ ) {
@@ -227,7 +230,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			this.ionCount = count;
 
-	  		//this.boxMesh.material.side = THREE.BackSide;
+	  		this.boxMesh.material.side = THREE.BackSide;
 	  		//this.obstacles.push(this.boxMesh);
 	  		for ( i = 0; i < this.ions.length; i ++ ) {
 	  			//this.obstacles.push(this.ions[i]);	
@@ -237,81 +240,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	  		//this.obstacles.push(this.boxMesh);
 
 		}
-		scene.add ( this.boxMesh );	
+		//if (ArFlag) this.boxMesh.matrixAutoUpdate = false;
+		//scene.add ( this.boxMesh );	
 	}
-
-/*	this.initBattery = function (ID) {
-		this.ID = ID;
-		var startX = this.startPoint.x, startY = this.startPoint.y;
-		var endX = this.endPoint.x, endY = this.endPoint.y;
-
-		var center = new THREE.Vector3( (startX + endX) / 2, (startY + endY) / 2, 0.0 );
-		var boxLength = Math.sqrt((endX - startX)*(endX - startX) + (endY - startY)*(endY - startY));
-		var boxWidth = this.w;
-		var boxHeight = 30;
-		var boxGeom = new THREE.BoxGeometry( boxLength, boxWidth, boxHeight);
-		var boxMaterial = new THREE.MeshBasicMaterial( { map: batteryImg } );
-		boxMaterial.transparent = true;
-		boxMaterial.opacity = 1;
-		boxMaterial.depthWrite = false;
-		this.boxMesh = new THREE.Mesh( boxGeom, boxMaterial );
-
-		this.boxMesh.position.set(center.x, center.y, center.z);
-		this.boxMesh.rotation.z = this.rotationAngle;
-		this.boxMesh.updateMatrixWorld();
-
-				// now add the junctions to the box	
-		var startJunction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 16, 16), 
-			new THREE.MeshBasicMaterial( { color: red } ));
-		var endJunction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 16, 16), 
-			new THREE.MeshBasicMaterial( { color: red } ));
-
-		startJunction.material.transparent = true;
-		startJunction.material.opacity = 0.5;
-		startJunction.material.depthWrite = false;
-
-		endJunction.material.transparent = true;
-		endJunction.material.opacity = 0.5;
-		endJunction.material.depthWrite = false;
-		// add the junctions to the box
-		this.boxMesh.add(startJunction);
-		this.boxMesh.add(endJunction);
-
-
-		startJunction.connectedComponentID = -1; // to avoid the undefined variable
-		endJunction.connectedComponentID = -1; // to avoid the undefined variable
-
-		startJunction.position.x = - boxLength / 2;
-        endJunction.position.x = boxLength / 2;	
-        this.boxMesh.updateMatrixWorld();
-
-        // update the junctions
-		for (i=0; i < this.connections.length; i++) {
-			var obj = this.connections[i];
-			var key = i.toString();
-			var code = obj[key];
-			var index;
-			if (code != -1 && code != 0) {			// if junction is connected
-				if (code == 1 || code == 3) {		// start junction is connected
-					startJunction.material.color.set(green);
-					startJunction.connectedComponentID = i;
-					startJunction.material.transparent = true;
-					startJunction.material.opacity = 0.5;
-					startJunction.material.depthWrite = false;
-				}
-				else {								// end junction is connected
-					endJunction.material.color.set(green);
-					endJunction.connectedComponentID = i;
-					endJunction.material.transparent = true;
-					endJunction.material.opacity = 0.5;
-					endJunction.material.depthWrite = false;
-				}
-
-			}
-		}
-
-		scene.add ( this.boxMesh );	
-	}*/
 
 	this.updateElectron = function ( electron ) {
 		var obstacle = this.collision(electron);
@@ -320,51 +251,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		}
 		else {
 			this.bounceBack(electron, obstacle);
-		}
-	}
-
-	this.updateElectronOld = function ( electron ) {
-
-		var obstacle = this.collision(electron);
-		if (obstacle == null) { 	// no colision
-			this.moveElectron(electron);
-		}
-		else {
-			switch(obstacle.object) {
-				case this.walls[0]: 	// collision with start junction
-					console.log('YAY! I see collision WITH START POINT');
-					if (obstacle.object.connectedComponentID != -1) {	// if connected
-						var n = obstacle.face.normal;
-						if (n.x == 1) { // if electron is inside the component, move it to the connected component
-							electron.componentID = obstacle.object.connectedComponentID;
-						}
-						else { this.moveElectron(electron); }  // electron is moving towards the component, let it in!
-					}
-					else { this.bounceBack(electron, obstacle); } // not connected
-					break;
-				case this.walls[1]: 	// collision with end junction 
-					console.log('YAY! I see collision WITH END POINT');
-					if (obstacle.object.connectedComponentID != -1) {	// if connected
-						var n = obstacle.face.normal;
-						if (n.x == -1) { 	// if electron is inside the component, move it to the connected component
-							electron.componentID = obstacle.object.connectedComponentID;
-						}
-						else { this.moveElectron(electron); } 	// electron is moving towards the component, let it in!
-					}
-					else { this.bounceBack(electron, obstacle); }	// not connected
-					break;
-				case this.walls[2]:
-					console.log('YAY! I see collision WITH SIDE WALL BOTTOM');
-					this.bounceBack(electron, obstacle);
-					break; 
-				case this.walls[3]:
-					console.log('YAY! I see collision WITH SIDE WALL TOP');
-					this.bounceBack(electron, obstacle);
-					break;
-				default: 		// collision with the side walls or ions
-					console.log('YAY! I see collision WITH BOX');
-					this.bounceBack(electron, obstacle); 
-			}
 		}
 	}
 
@@ -386,7 +272,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			electron.y += electron.velocity.y;
 	}
 	
-	this.bounceBack = function (electron, obstacle) {		// no use for type, remove it!
+	this.bounceBack = function (electron, obstacle) {
 		var n = obstacle.face.normal;
 		n.z = 0; // we just want the image of the normal vector on the XY plane with Z = 0
 		var localVelocity = new THREE.Vector3(); 

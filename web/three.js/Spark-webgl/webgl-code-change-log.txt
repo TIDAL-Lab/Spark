@@ -1,5 +1,11 @@
 THINGS TO FIX LATER:
-1. 
+1. [3/31/2016] why when the obstacles are disabled, the electrons only move to up, and not down?! fix this later
+2. [3/31/2016] I cannot use the camer on chrome, ask Mike to help you with this so that I can migrate back from firefox to chrome
+3. [3/31/2016] fix this error: TypeError: components[electron.componentID] is undefined
+			   everytime that the circuit is updated it gives this error before the components are updated, the code performs correctly
+			   but this error needs to be fixed later
+4. [3/31/2016] 			   
+
 
 *** notes on 9/14/2015
 1. I am studying how to run collision detection on particle systems. So far it seems that there is nothing good!
@@ -241,5 +247,24 @@ So, we decided to go back to JSARoolkit.
 I am currently working on the AR, so far I could add a 3D shape on over a tag.
 1. now the goal is to add a particle system to the 3D object
 	I added the particle system to the box and it now works
+	
+*** notes on 3/14/2016
+I am working on merging the AR code with my three.js code
+Issue: there are issues with updating matrices for components and their junctions, now that I am adding the AR code which needs to 
+control the updating matrix process, and therefore it messes with the code and things don't work the way that they should.
+These are the steps that I am taking to mitigate this problem:
+1. I created an allComponents mesh, which contains all the components as its children, so that helps with the updating issue
+Before adding the CSG code, I need to figure out how the camera works, because until now, it seems that I don't understand how to
+create a camera object that works properly!
+Issue solved: the parameter that I need to play with is the "markerWidth" parameter in the AR code.
+Issue: the overlay object (i.e., the circuit) is not a stable image, and it moves a lot even when the marker is held still. 
+I need to find a way to remove this visual effect.
+
+2. I am trying to add moving electrons to the code. I updated the three.js library, changed pointcould to points.
+there is a problem with the size of electrons, I am playing with the sizeAttenuation property of pointsmaterial...
+3. Another issue is with the collision code, which seems not working when the AR works!
+
+*** notes on 3/30/2016
+
   	
 	

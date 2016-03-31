@@ -1,4 +1,4 @@
-$(function () {
+function JsArTest() {
 	if (!Detector.webgl) {
 		$('#loading').hide();
 		$('#nowebgl').show();
@@ -63,13 +63,17 @@ $(function () {
     var cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
     cube.material.side = THREE.BackSide;
     
-    var sphereGeometry = new THREE.SphereGeometry(cubeWidth, 16, 16);
+    var sphereGeometry = new THREE.SphereGeometry(cubeWidth/2, 16, 16);
     // var cubeMaterial = new THREE.MeshBasicMaterial( { map: batteryImg } );
-    var sphereMaterial = new THREE.MeshBasicMaterial( { color: blue });
+    var sphereMaterial = new THREE.MeshBasicMaterial( { color: green });
     sphereMaterial.transparent = true;
     sphereMaterial.opacity = 0.9;
     sphereMaterial.depthWrite = false;
     var sphere = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
+    sphere.position.set(10, 0, 0);
+
+    var sphere2 = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
+    sphere2.position.set(-10, 0, 0);
     
     // now add the particle system (electrons)
     electronGeometry = new THREE.Geometry();
@@ -97,11 +101,13 @@ $(function () {
     var electronBall = THREE.ImageUtils.loadTexture( "textures/ball.png" );
     electronMaterial = new THREE.PointCloudMaterial( { size: 5, map: electronBall, color: blue , transparent: true } );
     electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
-    //cube.add(electrons);
+    cube.add(electrons);
+    cube.add(sphere);
+    cube.add(sphere2);
    
     cube.matrixAutoUpdate = false;
-    sphere.matrixAutoUpdate = false;
-    electrons.matrixAutoUpdate = false;
+    //sphere.matrixAutoUpdate = false;
+    //electrons.matrixAutoUpdate = false;
 
     $('#loading').hide();
     // Then put the scene together.
@@ -109,7 +115,7 @@ $(function () {
     overlayScene.add(ambientLight);
     //overlayScene.add(sphere);
     overlayScene.add(cube);
-    overlayScene.add( electrons );
+    //overlayScene.add( electrons );
     
     overlayScene.add(overlayCamera);
 
@@ -173,8 +179,8 @@ $(function () {
             cube.setJsArMatrix(resultMatrix);
             cube.matrixWorldNeedsUpdate = true;
 
-            electrons.setJsArMatrix(resultMatrix);
-            electrons.matrixWorldNeedsUpdate = true;
+            //electrons.setJsArMatrix(resultMatrix);
+            //electrons.matrixWorldNeedsUpdate = true;
         }
 
         // Render the three.js scenes (the input image first overlaid with the
@@ -185,7 +191,7 @@ $(function () {
         renderer.render(inputScene, inputCamera);
         renderer.render(overlayScene, overlayCamera);
     });
-});
+}
 
 function updateElectrons(electrons, box) {
     var eVertices = electrons.geometry.vertices;

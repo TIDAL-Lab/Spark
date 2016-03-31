@@ -73,6 +73,4 @@ function threshold(value)
 }
 
 // check if white region from blend overlaps area of interest (e.g. triggers)
-function checkAreas() 
-
-}
+function checkAreas() {}

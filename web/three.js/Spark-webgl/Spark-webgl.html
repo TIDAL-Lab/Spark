@@ -16,14 +16,19 @@
   		<script src="lib/pubnub-3.7.14.min.js"></script>
   		<script src="lib/underscore.js"></script>
 
-  		<script src="lib/ThreeCSG.js"></script>
-
   		<!-- the following scripts are the three.js scripts -->
-		<script src="lib/three.js/build/three.min.js"></script>
-		<script src="lib/three.js/examples/js/Detector.js"></script>
-		<script src="lib/three.js/examples/js/libs/stats.min.js"></script>
-		<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>
-		<script src="lib/three.js/examples/js/controls/DeviceOrientationControls.js"></script>
+		<script src="lib/three.js-r75/build/three.min.js"></script>
+		<script src="lib/three.js-r75/examples/js/Detector.js"></script>
+		<script src="lib/three.js-r75/examples/js/libs/stats.min.js"></script>
+		<script src="lib/three.js-r75/examples/js/controls/OrbitControls.js"></script>
+		<script src="lib/three.js-r75/examples/js/controls/DeviceOrientationControls.js"></script>
+
+		<!-- the following scripts are the JsArToolkit scripts -->
+		<script src="lib/THREE.JsArExtensions.js"></script>
+	    <script src="lib/jsFrames.min.js"></script>
+	    <script src="lib/JSARToolKit-master/JSARToolKit.min.js"></script>
+
+	    <script src="lib/ThreeCSG.js"></script>
 
 		<link href="lib/winjs/css/ui-light.css" rel="stylesheet" />
 		<script src="lib/winjs/js/base.js"></script>
@@ -58,172 +63,99 @@
 	</head>
 	<body>
 
-	<div class="main">
-	  <table>
-	    <tr>
-	      <td>Event Supported</td>
-	      <td id="dmEvent"></td>
-	    </tr>
-	    <tr>
-	      <td>Init acceleration</td>
-	      <td id="moAccel"></td>
-	    </tr>
-	    <tr>
-	      <td>Delta acceleration</td>
-	      <td id="moAccelGrav"></td>
-	    </tr>
-	    <tr>
-	      <td>rotationRate</td>
-	      <td id="moRotation"></td>
-	    </tr>
-	    <tr>
-	      <td>interval</td>
-	      <td id="moInterval"></td>
-	    </tr>
-	  </table>
-	</div>
+	    <div id="loading">Loading...</div>
+	      
+	    <div id="nowebgl">
+	      <p>I'm sorry, but there seems to be a problem with WebGL which this demo relies on.<br />
+	      Please check <a href="http://get.webgl.org/troubleshooting/">here for some troubleshooting information</a>.</p>
+	    </div>
 
-<!-- 	<input type="text" id="force"></input>
-    <input type="text" id="radius"></input>
-    <input type="Button" onclick= "doParse()" value = "Activate"></input>
-    <input type="Button" onclick= "doPause()" value = "Pause"></input> -->
+	    <video id="inputStream" width="320" height="240" autoplay="autoplay" style="display: none"></video>
+	    <img id="inputImage" width="320" height="240" src="static.png" style="display: none"/>
+	    <canvas id="inputCapture" width="320" height="240" style="display: none"></canvas>
+	    <canvas id="debugCanvas" width="320" height="240" style="display: none"></canvas>
 
-	<!-- the following scripts are various classes in the code -->
-	<script src="component.js"></script>
-	<!-- the following scripts are the functional scripts for Spark -->
-	<script src="main.js"></script>
-	<script src="MotionDetection.js"></script>
+	    <div id="result"></div>
 
-	<script type="text/javascript">
 
-		Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
-		doParse('init');
-		//listen for streamed messages
-		var pubnub = PUBNUB.init({
-			publish_key: 'demo',
-		    subscribe_key: 'demo'
-		 });
+	    <script src="AR_mediastream-spark.js"></script>
 
-		// pubnub.publish({
-		// 	channel: 'ebz',
-		//     message: '1'
-		// });
 
-		pubnub.subscribe({
-		    channel: 'ebz',
-		    message: function(m){
+	 
+		<!-- the following scripts are various classes in the code -->
+		<script src="component.js"></script>
+		<!-- the following scripts are the functional scripts for Spark -->
+		<script src="main.js"></script>
+		<script src="MotionDetection.js"></script>
 
-		    	doParse('update');
-		    }
-		});
+		<script type="text/javascript">
 
-		function doParse(message){
-			console.log('this is where doParse starts');
-		   	var numComps;
-		    components = []; // this var is created in main.js 
-		    var tCircuit;
-			// create a new subclass of Parse.Object named Circuit
-		    var parseCircuit = Parse.Object.extend("Circuit");
-		    var query = new Parse.Query(parseCircuit);
-		    //query.exists("type");// This determines if the field "type" is set for the instances and retrieves all 
-		  	//objects that have the "type" field set
-		  	query.find().then(function(results){
-		    	var promise = Parse.Promise.as();
-		    	_.each(results, function(result){
-		      	promise = promise.then(function(){
-		              compType = result.get("type");
-		              compVolt = result.get("voltageDrop");
-		              current = result.get("current");
-		              compRes = result.get("resistance");
-		              startx = 2 * result.get("startX");
-		              starty = 2 * result.get("startY");
-		              endx = 2 * result.get("endX");
-		              endy = 2 * result.get("endY");
-		              direction = result.get("direction");
-		              graphLabel = result.get("graphLabel");
-		              //direction = 1;
-		              connections = result.get("connection");
-		              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction, connections, graphLabel);
-		              components.push(tCircuit);        
-		      		});
+			Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
+			doParse('init');
+			//listen for streamed messages
+			var pubnub = PUBNUB.init({
+				publish_key: 'demo',
+			    subscribe_key: 'demo'
+			 });
 
-		    	});
-		        return promise;
-		    }).then(function(){
+			// pubnub.publish({
+			// 	channel: 'ebz',
+			//     message: '1'
+			// });
 
-		    	if (message == 'init') {
-		   //  		components = [];
+			pubnub.subscribe({
+			    channel: 'ebz',
+			    message: function(m){
 
-		   //  		// component inputs (type, current, resistance, volt, startx, starty, endx, endy, direction, connected)
-					// // [1, 1, 0]: component 1 is connected to me from my end point to its start point
-					// var comp0 = new Component("Wire", 0, 1, 0, -400, -200, 200, -200, 1, [1, 1, 0]);
-					// // [0, 0, 1]: component 0 is connected to me from my start point to its end point
-					// var comp1 = new Component("Wire", 0, 1, 0, 200, -200, 500, -200, 0, [0, 0, 1]); 
-					// // not connected
-					// // var comp0 = new Component("Wire", 0, 1, 0, -400, -200, -200, -200, 1, null);
-					// // var comp1 = new Component("Wire", 0, 1, 0, -100, -200, 100, -200, 0, null); 
+			    	doParse('update');
+			    }
+			});
 
-					// components.push(comp0);
-					// components.push(comp1);
-		    		doInit();
-		    	}
-		    	else { // message is update
-		    		doUpdate();
-		    	}
-		    	
+			function doParse(message){
+				console.log('this is where doParse starts');
+			   	var numComps;
+			    components = []; // this var is created in main.js 
+			    var tCircuit;
+				// create a new subclass of Parse.Object named Circuit
+			    var parseCircuit = Parse.Object.extend("Circuit");
+			    var query = new Parse.Query(parseCircuit);
+			    //query.exists("type");// This determines if the field "type" is set for the instances and retrieves all 
+			  	//objects that have the "type" field set
+			  	query.find().then(function(results){
+			    	var promise = Parse.Promise.as();
+			    	_.each(results, function(result){
+			      	promise = promise.then(function(){
+			              compType = result.get("type");
+			              compVolt = result.get("voltageDrop");
+			              current = result.get("current");
+			              compRes = result.get("resistance");
+			              startx = 2 * result.get("startX");
+			              starty = 2 * result.get("startY");
+			              endx = 2 * result.get("endX");
+			              endy = 2 * result.get("endY");
+			              direction = result.get("direction");
+			              graphLabel = result.get("graphLabel");
+			              //direction = 1;
+			              connections = result.get("connection");
+			              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy,direction, connections, graphLabel);
+			              components.push(tCircuit);        
+			      		});
 
-		  
-		    });  
-		}
+			    	});
+			        return promise;
+			    }).then(function(){
+			    	if (message == 'init') {
+			    		doInit();
+			    	}
+			    	else { // message is update
+			    		doUpdate();
+			    	}
+			    	
 
-		</script>
-
-		<!-- This part is the code that I am adding for motion detection, based on the three.js source code -->
-		
-<!-- 		<video id="monitor" autoplay style="display:none; width: 320px; height: 240px;"></video>
-
-		<div id="canvasLayers"   style="position: relative; width:320px; height:240px; float:right">
-		<canvas id="videoCanvas" width="320" height="240" style="z-index: 1; position: absolute; left:0px; top:0px; opacity:0.5;"></canvas>
-		<canvas id="layer2"     width="320" height="240" style="z-index: 2; position: absolute; left:0px; top:0px; opacity:0.5;"></canvas>
-		</div>
-		<canvas id="blendCanvas" style="display: none; position: relative; left: 320px; top: 240px; width: 320px; height: 240px;"></canvas>
-		<div id="messageError"></div>
-		<div id="messageArea" style="position: relative; left: 0px; top: 270px;"></div>
-		<div id="container" style="z-index: 2; position: absolute; left:0px; top:0px"></div> -->
-		<script>
-/*			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-			window.URL = window.URL || window.webkitURL;
-
-			var camvideo = document.getElementById('monitor');
-
-				if (!navigator.getUserMedia) 
-				{
-					document.getElementById('messageError').innerHTML = 
-						'Sorry. <code>navigator.getUserMedia()</code> is not available.';
-				}
-				navigator.getUserMedia({video: true}, gotStream, noStream);
-
-			function gotStream(stream) 
-			{
-				if (window.URL) 
-				{   camvideo.src = window.URL.createObjectURL(stream);   } 
-				else // Opera
-				{   camvideo.src = stream;   }
-
-				camvideo.onerror = function(e) 
-				{   stream.stop();   };
-
-				stream.onended = noStream;
+			  
+			    });  
 			}
 
-			function noStream(e) 
-			{
-				var msg = 'No camera available.';
-				if (e.code == 1) 
-				{   msg = 'User denied access to use camera.';   }
-				document.getElementById('errorMessage').textContent = msg;
-			}*/
 		</script>
-
 	</body>
 </html>
