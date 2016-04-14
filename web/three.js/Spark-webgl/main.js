@@ -10,8 +10,9 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+var ArFlag = true;
 
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container;
 var camera, scene, renderer, controls, deviceControls;
 var inputScene, inputCamera;
@@ -24,10 +25,10 @@ var electrons, electronGeometry, electronMaterial;
 var raycaster;
 var compositeMeshes;
 
-var allComponentsMesh;
 
-var ArFlag = true;
-var cube;
+var updateFlag = false;
+var markerDetectedFlag = false;
+var markerRoot;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -38,17 +39,11 @@ function doInit() {
 	animate();
 }
 
-function doUpdate() {	
-	update();
-	//if (ArFlag) JsArUpdate();
-	//render();
-}
-
-
 function init() {
-	sphere = new THREE.TextureLoader().load( "textures/ball.png" );
-	batteryImg = new THREE.TextureLoader().load( "textures/battery3t.png" ); // later: study the difference b/w ImageLoader and TexutreLoader
-	resistorImg = new THREE.TextureLoader().load( "textures/resistor2t.png" );	
+	//sphere = new THREE.TextureLoader().load( "textures/ball.png" ); // this works for three.js-r75 (latest revision) 
+	sphere = THREE.ImageUtils.loadTexture( "textures/ball.png" );
+	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery3t.png" ); // later: study the difference b/w ImageLoader and TexutreLoader
+	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );	
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
@@ -61,18 +56,18 @@ function init() {
 	//if (ArFlag) camera.position.z = -2000;
 	
 	
-	
-	scene = new THREE.Scene();
 	raycaster = new THREE.Raycaster();
-	THREE.ImageUtils.crossOrigin = 'anonymous'; 	// enables using images from the image folder
+	scene = new THREE.Scene();
+	
+	THREE.ImageUtils.crossOrigin = 'anonymous';  	// enables using images from the image folder
 
 	initComponents();
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setClearColor ( 0x337586 ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
-	//renderer.setSize( window.innerWidth, window.innerHeight );
-	renderer.setSize( inputWidth * 6 , inputHeight * 6 );
+	//renderer.setSize( window.innerWidth / 2 , window.innerHeight );
+	renderer.setSize( inputWidth * 2 , inputHeight * 2 );
 	
 	document.body.appendChild( renderer.domElement );
 
@@ -83,17 +78,6 @@ function init() {
 
 
 	window.addEventListener( 'resize', onWindowResize, false );
-}
-
-function update() {
-	// remove all children of scene
-	for (c = scene.children.length - 1; c >= 0; c--) { 
-		var obj = scene.children[c];
-		scene.remove(obj);
-	}
-	initComponents();
-	//scene.add(pointLight); 		// Add the light source to the scene.
-
 }
 
 function initComponents() {
@@ -108,26 +92,80 @@ function initComponents() {
 		components[k].init(electronGeometry, k); // sends k as the component ID				
 	}
 	//createConnectedMeshes();
+	//I tried adding "sizeAttenuation: false" for the pointsmaterial, but did not work
+	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: 0x000099 , transparent: true } );
+	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
-	electronMaterial = new THREE.PointsMaterial( { size: electronSize, sizeAttenuation: false, map: sphere, color: 0x000099 , transparent: true } );
-	electrons = new THREE.Points ( electronGeometry, electronMaterial );
-
-	allComponentsMesh = new THREE.Mesh();
+/*	allComponentsMesh = new THREE.Mesh();
 	for (k=0; k < components.length; k++) {
 		allComponentsMesh.add(components[k].boxMesh);
 	}
+	allComponentsMesh.add(electrons);
+	allComponentsMesh.material.side = THREE.BackSide;*/
 
-	allComponentsMesh.material.side = THREE.BackSide;
 	// for ( k=0; k < components.length; k++ ) {
 	// 	components[k].obstacles.push(allComponentsMesh); 
 	// } 
 	
 	
-	if (ArFlag) allComponentsMesh.matrixAutoUpdate = false;
-	if (ArFlag) electrons.matrixAutoUpdate = false;
-	
+	//if (ArFlag) allComponentsMesh.matrixAutoUpdate = false;
 	scene.add( electrons );
-	scene.add( allComponentsMesh );
+	//scene.add( allComponentsMesh );
+	if (ArFlag) scene.matrixAutoUpdate = false;
+}
+
+function doUpdate() {	
+	update();
+	//if (ArFlag) JsArUpdate();
+	//render();
+}
+
+function update() {
+	// remove all children of scene
+	for (c = scene.children.length-1; c >= 0; c--) { 
+		var obj = scene.children[c];
+		scene.remove(obj);
+	}
+	initComponents();
+	//scene.add(pointLight); 		// Add the light source to the scene.
+
+}
+
+function animate() {
+
+	requestAnimationFrame( animate );
+	if (!updateFlag) {
+		updateElectrons();
+	}
+	render(); 
+	//deviceControls.update();
+}
+
+function render() {
+ 	renderer.autoClear = false;
+	renderer.clear();
+	if (ArFlag) renderer.render(inputScene, inputCamera);
+	renderer.render( scene, camera );	
+}
+
+
+function updateElectrons() {
+	var eVertices = electrons.geometry.vertices;
+/*	var m = new THREE.Matrix4();
+	m = m.getInverse(scene.matrix)*/
+	for ( k = 0; k < eVertices.length; k++ ) {
+		var electron = eVertices[k];
+/*		// new code for AR (later check if I need to add the if (ArFlag) condition not to interfere with the non-AR condition)
+		var length = electron.velocity.length();
+
+		electron.velocity.transformDirection(m);
+		electron.velocity.multiplyScalar(length);
+		// end of new code for AR*/
+		//console.log('velocity: ' + Math.round(electron.velocity.x * 100)/100 + ' ' + Math.round(electron.velocity.y*100)/100 + ' ' + Math.round(electron.velocity.z/100)*100);
+		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
+																	// index for the components array																	
+	}
+	electrons.geometry.verticesNeedUpdate = true;
 }
 
 // create a list of connected meshes, 
@@ -196,32 +234,6 @@ function createCSGComponent( c ) {
 	box = box.union( new ThreeBSP( sj ) ); // unit it with the start junction
 	box = box.union( new ThreeBSP( ej ) ); // unit it with the end junction
 	return box;
-}
-
-function animate() {
-
-	requestAnimationFrame( animate );
-	render();
-	//deviceControls.update();
-}
-
-function render() {
-	renderer.autoClear = false;
-    renderer.clear();
-    if (ArFlag) renderer.render(inputScene, inputCamera);
-    renderer.render( scene, camera );
-	updateElectrons();
-}
-
-
-function updateElectrons() {
-	var eVertices = electrons.geometry.vertices;
-	for ( k = 0; k < eVertices.length; k++ ) {
-		var electron = eVertices[k];
-		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
-																	// index for the components array																	
-	}
-	electrons.geometry.verticesNeedUpdate = true;
 }
 
 function onWindowResize() {

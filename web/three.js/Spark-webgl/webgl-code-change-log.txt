@@ -264,7 +264,73 @@ I need to find a way to remove this visual effect.
 there is a problem with the size of electrons, I am playing with the sizeAttenuation property of pointsmaterial...
 3. Another issue is with the collision code, which seems not working when the AR works!
 
-*** notes on 3/30/2016
+*** notes on 4/6/2016
+1. I worked around the matrix update happenings in the code. It seems that I need to have one object3D (either allComponentsMesh or scene itself)
+	that contains all the objects in the scene, and then disable the matrix auto update for that parent object (e.g. scene.matrixAutoUpdate = false)
+	and then I just need to be worried about updating transforming the parent object using the JsAr result matrix. This means that I need to add the 
+	electrons to the parent object.
+2. Now that the problem is solved, I still need to solve the issue of electrons bouncing off the walls 
+ISSUE 1: the bounce back procedure does not work correctly (even with no AR)
+		SOLUTION: I fixed it for no AR condition
+		for AR condition: the problem is within the collision procedure where I used to update the localVelocity vector by this code:
+		localVelocity.applyAxisAngle(new THREE.Vector3(0, 0, -1), this.rotationAngle);
+		Now that the matrix is updated by scene matrix update (manually), the rotationAngle would not work any longer!
+		Issue: I detected that the problem is not with bouncing back, but one step earlier, the problem is that with AR added, there is no 
+		collision reported by the raycaster.
+		*** I think I need to play with the updateElectrons procedure, because I realized that everytime the scene matrix is updated by the JsAr
+		computations, the electron velocity is still untouched.
+	
+ISSUE 2: all the electrons move towards positive y coordinate, I need to fix this!	
+		SOLVED: adding this line: if ( Math.round(Math.random()) == 1 ) vY *= -1;
 
-  	
+3. I added the ions as obstacles, and it is working all fine (a while ago I significantly decreased the width & height segements of the
+	spheregeometry)		
+	
+*** notes on 4/11/2016
+1. Today, I am trying to fix the problem with running the code on chrome. Chrome browser worked fine before I added the AR code
+but after adding the JsAr code, it gave errors and I had to switch to firefox
+
+NOTE: when using chrome browser I have to use localhost (as a secure origin) 
+b/c chrome does not allow testing a feature on a server that does not have a valid certificate, according to this website:
+https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
+
+ISSUE 1: I get hundreds of this error on chrome: [.CommandBufferContext]RENDER WARNING: Render count or primcount is 0.
+	I googled and one person suggested that it is caused due to having meshes with no vertices or faces, and suggested using a checkMesh code
+	I used the checkMesh code but could not figure out what the problem is
+	NOT SOLVED YET :(
+	
+ISSUE 2: each time that I update the circuit and the update code runs in three.js, there are a few errors:
+	"Uncaught TypeError: Cannot read property 'updateElectron' of undefined"
+	I need to modify my update() procedure to mitigate this issue!
+	I tried adding a flag that when it is updating it does not render (and so update electrons) but it does not seem to work!
+	SOLVED: I figured that the issue is happening when executing the doParse code, where it parses the circuit object after each update from parse
+			so the solution is to setup a boolean (updateFlag) that becomes true when parsing (for update condition) starts, and ends when doUpdate()
+			is called. This way, I don't get the error any longer :)
+ISSUE 3: with accessing camera!
+	SOLVED: the issue was simply with chrome deprecating features on insecure origins; so I had to use the localhost
+	
+	topcode opencv library
+	websocket json
+	camera angled from top: perspective correction
+	magnetic helps with circuit configuration
+	
+*** notes on 4/12/2016
+
+ISSUE 1: electrons not bouncing off the walls
+
+ISSUE 2: size attenuation does not work for electrons
+
+FINDING: I figured out that using revision r75 of three.js was not a good idea, and I have to switch it back to the older version:
+		issues solved: 
+		1. no more "the object cannot be linked to the inspector without the toolbox error"
+		2. no more issue with electrons size attenuation
+		3.
+The changes that I needed to make in the code to go back to the older version:
+	1. changed the address to the library: lib/three.js-r75/ --> lib/three.js/
+	2. changed the particlesystem: points --> pointcloud
+	3. changed loading the images function: THREE.TextureLoader().load( "textures/ball.png" ) --> THREE.ImageUtils.loadTexture( "textures/ball.png" );
+	
+	
+
+	
 	

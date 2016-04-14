@@ -10,7 +10,7 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var electronSize = 15;
+var electronSize = 40;
 var rectGeom, rectMesh;
 var ionGeometry = new THREE.SphereGeometry( 7, 16, 16 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: 0xCC0000 , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
@@ -106,17 +106,22 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
 			electron.x = Math.random() * (this.l - 5) - (this.l - 5) /2; //the x coordinate changes based on component length 
 			electron.y = Math.random() * (this.w - 5) - (this.w - 5)/2; // component width 
+			// electron.x = 0;
+			// electron.z = 0;
 			electron.z = 0;
 
-			//translate the electron to be inside the component
-			this.boxMesh.localToWorld(electron); // this changes the position of electron from local to world
 			var vX = Math.random() * velocity * 2 - velocity;
 		    var vY = Math.sqrt( velocity * velocity - vX*vX);   // this results in a constant velocity 
+		    // I need to give a random sign to vY with 50-50 probability
+		    if ( Math.round(Math.random()) == 1 ) vY *= -1;
 			electron.velocity = new THREE.Vector3(
 		    	vX,		// x
 		    	vY,		//  
 		    	0);		// z
-
+		    //electron.velocity = new THREE.Vector3(0.5, 0.5, 0);
+			//translate the electron to be inside the component
+			this.boxMesh.localToWorld(electron); // this changes the position of electron from local to world
+			//this.boxMesh.localToWorld(electron.velocity);
 			electron.componentID = this.ID;
 			electronGeometry.vertices.push( electron );
 		}	
@@ -129,7 +134,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var center = new THREE.Vector3( (startX + endX) / 2, (startY + endY) / 2, 0.0 );
 
 		//var boxLength = startToEnd.length(); // computes the length of startToEnd vector
-		var boxLength = Math.sqrt((endX - startX)*(endX - startX) + (endY - startY)*(endY - startY));
+		//var boxLength = Math.sqrt((endX - startX)*(endX - startX) + (endY - startY)*(endY - startY));
+		var boxLength = this.l;
 		var boxWidth = this.w;
 		var boxHeight = 30;
 		var boxGeom = new THREE.BoxGeometry( boxLength, boxWidth, boxHeight);
@@ -177,7 +183,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		startJunction.position.x = - boxLength / 2;
         endJunction.position.x = boxLength / 2;	
-        this.boxMesh.updateMatrixWorld();
+        //this.boxMesh.updateMatrixWorld();
 
         // update the junctions
 		for (i=0; i < this.connections.length; i++) {
@@ -231,25 +237,24 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			this.ionCount = count;
 
 	  		this.boxMesh.material.side = THREE.BackSide;
-	  		//this.obstacles.push(this.boxMesh);
+	  		this.obstacles.push(this.boxMesh);
+
 	  		for ( i = 0; i < this.ions.length; i ++ ) {
 	  			//this.obstacles.push(this.ions[i]);	
 	  		}
 
-	  		//this.obstacles = this.ions;
-	  		//this.obstacles.push(this.boxMesh);
-
 		}
-		//if (ArFlag) this.boxMesh.matrixAutoUpdate = false;
-		//scene.add ( this.boxMesh );	
+		scene.add ( this.boxMesh );	
 	}
 
 	this.updateElectron = function ( electron ) {
 		var obstacle = this.collision(electron);
 		if (obstacle == null) { 	// no colision
 			this.moveElectron(electron);
+			//if (markerDetectedFlag) console.log('no obstacle!!');
 		}
 		else {
+			//if (markerDetectedFlag) console.log('there is an obstacle!!');
 			this.bounceBack(electron, obstacle);
 		}
 	}
@@ -277,8 +282,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		n.z = 0; // we just want the image of the normal vector on the XY plane with Z = 0
 		var localVelocity = new THREE.Vector3(); 
 		localVelocity.copy(electron.velocity);
-		localVelocity.applyAxisAngle(new THREE.Vector3(0, 0, -1), this.rotationAngle);
-		//this.boxMesh.worldToLocal(localVelocity);
+		//console.log('local velocity before: ' + localVelocity.x + ' ' + localVelocity.y + ' ' + localVelocity.z);
+		var length = localVelocity.length();
+		localVelocity.transformDirection(this.boxMesh.matrix.transpose()); //later: check why I needed to add transpose
+		localVelocity.multiplyScalar(length);
+		//localVelocity.applyAxisAngle(new THREE.Vector3(0, 0, -1), this.rotationAngle); //worked before adding AR
+		//console.log('local velocity after: ' + localVelocity.x + ' ' + localVelocity.y + ' ' + localVelocity.z);
+		//this.boxMesh.worldToLocal(localVelocity); // not working
 
 		var theta = localVelocity.angleTo(n);
 		var Beta = (2 * theta) - Math.PI ;
@@ -307,6 +317,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var collisions = raycaster.intersectObjects(this.obstacles);
 		// if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {	
+			if (markerDetectedFlag) console.log('collision is detected');
 		 	return collisions[0];
 		 }
 		 else {

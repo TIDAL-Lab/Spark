@@ -19,7 +19,8 @@ var inputHeight = 240;
 var inputCapture, inputTexture, inputPlane;
 
 function JsArInit() {
-    $('#loading').hide();
+/*    $('#loading').hide();
+    $('#nowebgl').hide(); // temporarily; later see what you should do with these two messages!*/
     threshold = 128;
 
 	// Set this to true and the JSARToolkit will output some debug information to
@@ -34,7 +35,7 @@ function JsArInit() {
     // ...this is what analyses the canvas images for AR markers
     // (You can adjust markerWidth so that your objects appear
     // the right size relative to your markers)
-    var markerWidth = 120;
+    var markerWidth = 180;
     parameters = new FLARParam( inputWidth, inputHeight );
     detector = new FLARMultiIdMarkerDetector(parameters, markerWidth);
 
@@ -85,6 +86,7 @@ function JsArInit() {
     // but it's mostly just requestAnimationFrame wrapped up with a
     // polyfill)
     jsFrames.registerAnimation(function () {
+        markerDetectedFlag = false;
         // Capture the current frame from the inputStream
         inputCapture.getContext('2d').drawImage(input, 0, 0, inputWidth, inputHeight);
 
@@ -95,27 +97,15 @@ function JsArInit() {
         // Use the imageReader to detect the markers
         // (The 2nd parameter is a threshold)
         if (detector.detectMarkerLite(imageReader, threshold) > 0) {
+            markerDetectedFlag = true;
             // If any markers were detected, get the transform matrix of the first one
             detector.getTransformMatrix(0, resultMatrix);
 
-            allComponentsMesh.setJsArMatrix(resultMatrix);
-            allComponentsMesh.matrixWorldNeedsUpdate = true;
             // and use it to transform our three.js object
-            electrons.setJsArMatrix(resultMatrix);
-            electrons.matrixWorldNeedsUpdate = true;
-
-
-
-            // for ( k=0; k < components.length; k++ ) {
-            //     components[k].boxMesh.setJsArMatrix(resultMatrix);
-            //     components[k].boxMesh.matrixWorldNeedsUpdate = true;
-            // }
-
-
+            scene.setJsArMatrix(resultMatrix);
+            scene.matrixWorldNeedsUpdate = true;
 
         }
-
-
 
     });
  }  

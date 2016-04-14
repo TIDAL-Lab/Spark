@@ -1,7 +1,7 @@
 function JsArTest() {
 	if (!Detector.webgl) {
 		$('#loading').hide();
-		$('#nowebgl').show();
+		$('#nowebgl').hide();
 		return;
 	}
     
