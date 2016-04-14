@@ -88,30 +88,22 @@ function initComponents() {
     return (a.graphLabel - b.graphLabel);
 	});
 	for (k=0; k < components.length; k++) {
-		//console.log('component ' + k + ' : ' + components[k].compType);
 		components[k].init(electronGeometry, k); // sends k as the component ID				
 	}
 	//createConnectedMeshes();
-	//I tried adding "sizeAttenuation: false" for the pointsmaterial, but did not work
+	//note: I tried adding "sizeAttenuation: false" for the pointsmaterial, but did not work
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
-/*	allComponentsMesh = new THREE.Mesh();
+	markerRoot = new THREE.Mesh();
 	for (k=0; k < components.length; k++) {
-		allComponentsMesh.add(components[k].boxMesh);
+		//scene.add(components[k].boxMesh);
+		markerRoot.add(components[k].boxMesh);
 	}
-	allComponentsMesh.add(electrons);
-	allComponentsMesh.material.side = THREE.BackSide;*/
-
-	// for ( k=0; k < components.length; k++ ) {
-	// 	components[k].obstacles.push(allComponentsMesh); 
-	// } 
-	
-	
-	//if (ArFlag) allComponentsMesh.matrixAutoUpdate = false;
-	scene.add( electrons );
-	//scene.add( allComponentsMesh );
-	if (ArFlag) scene.matrixAutoUpdate = false;
+	markerRoot.add(electrons);	
+	if (ArFlag) markerRoot.matrixAutoUpdate = false;
+	scene.add( markerRoot );
+	//if (ArFlag) scene.matrixAutoUpdate = false;
 }
 
 function doUpdate() {	

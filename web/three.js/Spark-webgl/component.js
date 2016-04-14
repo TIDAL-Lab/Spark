@@ -243,8 +243,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	  			//this.obstacles.push(this.ions[i]);	
 	  		}
 
-		}
-		scene.add ( this.boxMesh );	
+		}	
 	}
 
 	this.updateElectron = function ( electron ) {

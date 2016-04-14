@@ -102,8 +102,8 @@ function JsArInit() {
             detector.getTransformMatrix(0, resultMatrix);
 
             // and use it to transform our three.js object
-            scene.setJsArMatrix(resultMatrix);
-            scene.matrixWorldNeedsUpdate = true;
+            markerRoot.setJsArMatrix(resultMatrix);
+            markerRoot.matrixWorldNeedsUpdate = true;
 
         }
 
