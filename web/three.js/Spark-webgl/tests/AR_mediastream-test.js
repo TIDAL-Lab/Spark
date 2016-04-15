@@ -30,6 +30,8 @@ function JsArTest() {
     // (We need to give it the same projection matrix as the detector
     // so the overlay will line up with what the detector is 'seeing')
     var overlayCamera = new THREE.Camera();
+    //var overlayCamera = new THREE.PerspectiveCamera( 75, width / height, 1, 10000 );
+    //overlayCamera.position.z = -300;
     overlayCamera.setJsArMatrix(parameters);
 
     // Now, set up the rest of the overlay scene just like any other
@@ -51,7 +53,7 @@ function JsArTest() {
     var green = 0x008F00;
     var gray = 0x808080;
     var blue = 0x000099;
-    var batteryImg = THREE.ImageUtils.loadTexture( "textures/battery3t.png" );
+    var batteryImg = THREE.ImageUtils.loadTexture( "../textures/battery3t.png" );
     var cubeLength = 20;
     var cubeWidth = 10;
     var cubeGeometry = new THREE.BoxGeometry(cubeLength, cubeWidth, 5);
@@ -74,6 +76,9 @@ function JsArTest() {
 
     var sphere2 = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
     sphere2.position.set(-10, 0, 0);
+
+    var sphere3 = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
+    sphere3.position.set(0, 10, 300);
     
     // now add the particle system (electrons)
     electronGeometry = new THREE.Geometry();
@@ -98,13 +103,14 @@ function JsArTest() {
         electronGeometry.vertices.push( electron );
     }
 
-    var electronBall = THREE.ImageUtils.loadTexture( "textures/ball.png" );
+    var electronBall = THREE.ImageUtils.loadTexture( "../textures/ball.png" );
     electronMaterial = new THREE.PointCloudMaterial( { size: 5, map: electronBall, color: blue , transparent: true } );
     electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
     cube.add(electrons);
     cube.add(sphere);
     cube.add(sphere2);
-   
+
+
     cube.matrixAutoUpdate = false;
     //sphere.matrixAutoUpdate = false;
     //electrons.matrixAutoUpdate = false;
@@ -115,9 +121,8 @@ function JsArTest() {
     overlayScene.add(ambientLight);
     //overlayScene.add(sphere);
     overlayScene.add(cube);
-    //overlayScene.add( electrons );
-    
-    overlayScene.add(overlayCamera);
+    overlayScene.add(sphere3);
+
 
     // This is the canvas that we draw our input image on & pass
     // to the detector to analyse for markers...
@@ -193,7 +198,7 @@ function JsArTest() {
     });
 }
 
-function updateElectrons(electrons, box) {
+/*function updateElectrons(electrons, box) {
     var eVertices = electrons.geometry.vertices;
     for ( k = 0; k < eVertices.length; k++ ) {
         var electron = eVertices[k];
@@ -268,3 +273,4 @@ function moveElectron(electron) {
             electron.x += electron.velocity.x; 
             electron.y += electron.velocity.y;
     }  
+*/

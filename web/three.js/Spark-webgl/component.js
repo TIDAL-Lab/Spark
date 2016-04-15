@@ -307,7 +307,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}		
 
 	this.collision = function ( electron ) {
-		var ray = new THREE.Vector3(electron.velocity.x, electron.velocity.y, electron.velocity.z);
+		var ray = new THREE.Vector3(electron.velocity.x, electron.velocity.y, 0);
 		ray = ray.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
 		raycaster.set(electron, ray);
 		//var distance = 10;
@@ -316,7 +316,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var collisions = raycaster.intersectObjects(this.obstacles);
 		// if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {	
-			if (markerDetectedFlag) console.log('collision is detected');
+			if (markerDetectedFlag || !ArFlag) console.log('collision is detected');
 		 	return collisions[0];
 		 }
 		 else {

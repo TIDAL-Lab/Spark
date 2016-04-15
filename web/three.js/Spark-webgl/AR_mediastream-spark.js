@@ -14,8 +14,8 @@
 var parameters, detector;
 var imageReader, resultMatrix;
 var input;
-var inputWidth = 320;
-var inputHeight = 240;
+var width = 320;
+var height = 240;
 var inputCapture, inputTexture, inputPlane;
 
 function JsArInit() {
@@ -36,29 +36,34 @@ function JsArInit() {
     // (You can adjust markerWidth so that your objects appear
     // the right size relative to your markers)
     var markerWidth = 180;
-    parameters = new FLARParam( inputWidth, inputHeight );
+    parameters = new FLARParam( width, height );
     detector = new FLARMultiIdMarkerDetector(parameters, markerWidth);
 
     // The three.js camera for rendering the overlay on the input images
     // (We need to give it the same projection matrix as the detector
     // so the overlay will line up with what the detector is 'seeing')
     camera.setJsArMatrix(parameters);
-    
+    console.log(camera.getWorldDirection());
+    console.log(camera.position);
+
     // This is the canvas that we draw our input image on & pass
     // to the detector to analyse for markers...
     inputCapture = $('#inputCapture')[0];
 	
     // Set up another three.js scene that just draws the inputCapture...
     inputCamera = new THREE.Camera();
+    // inputCamera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+    // inputCamera.position.z = -700;
     inputScene = new THREE.Scene();
     inputTexture = new THREE.Texture(inputCapture);
     inputPlane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2, 0), new THREE.MeshBasicMaterial({ map: inputTexture }));
     inputPlane.material.depthTest = false;
-    inputPlane.material.depthWrite = false;
+    inputPlane.material.depthWrite = false; // EB: When drawing 2D overlays it can be useful to disable the depth writing in order to layer several things together without creating z-index artifacts.
     inputScene.add(inputPlane);
     inputScene.add(inputCamera);
 
     // This JSARToolkit object reads image data from the input canvas...
+    // EB: this is the raster object
     imageReader = new NyARRgbRaster_Canvas2D(inputCapture);
 
     // ...and we'll store matrix information about the detected markers here.
@@ -88,7 +93,7 @@ function JsArInit() {
     jsFrames.registerAnimation(function () {
         markerDetectedFlag = false;
         // Capture the current frame from the inputStream
-        inputCapture.getContext('2d').drawImage(input, 0, 0, inputWidth, inputHeight);
+        inputCapture.getContext('2d').drawImage(input, 0, 0, width, height);
 
         // then we need to tell the image reader and the input scene that the input has changed
         inputCapture.changed = true;
@@ -105,7 +110,15 @@ function JsArInit() {
             markerRoot.setJsArMatrix(resultMatrix);
             markerRoot.matrixWorldNeedsUpdate = true;
 
+/*            setTimeout(function() {
+                console.log(camera.getWorldDirection());
+                console.log(camera.position);
+            }, (3 * 1000));*/
+
         }
+        updateElectrons();
+        render();
+
 
     });
  }  

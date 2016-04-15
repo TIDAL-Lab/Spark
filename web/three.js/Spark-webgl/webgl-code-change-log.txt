@@ -330,7 +330,13 @@ The changes that I needed to make in the code to go back to the older version:
 	2. changed the particlesystem: points --> pointcloud
 	3. changed loading the images function: THREE.TextureLoader().load( "textures/ball.png" ) --> THREE.ImageUtils.loadTexture( "textures/ball.png" );
 	
-	
+*** notes on 4/15/2016	
+
+ISSUE 1: why when I add an object without applying the jsar transformation matrices, it does not render it on the screen?
+
+		It seems it is because of the camera, because the camera is not a perspective camera!!!
+		
+		
 
 	
 	

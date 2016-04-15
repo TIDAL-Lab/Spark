@@ -36,7 +36,7 @@ var windowHalfY = window.innerHeight / 2;
 function doInit() {	
 	init();
 	if (ArFlag) JsArInit();
-	animate();
+	//animate();
 }
 
 function init() {
@@ -47,13 +47,21 @@ function init() {
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
-	camera = new THREE.Camera();
+/*	camera = new THREE.Camera();
+	console.log(camera.getWorldDirection());
+	console.log(camera.position);
+*/
 	//camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
 	if (!ArFlag) {
-		camera = new THREE.PerspectiveCamera( 75, inputWidth / inputHeight, 1, 10000 );
+		//camera = new THREE.Camera();
+		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
 		camera.position.z = 700;
 	}
-	//if (ArFlag) camera.position.z = -2000;
+
+	if (ArFlag) {
+		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+		camera.position.z = -700;
+	}
 	
 	
 	raycaster = new THREE.Raycaster();
@@ -67,7 +75,7 @@ function init() {
 	renderer.setClearColor ( 0x337586 ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
 	//renderer.setSize( window.innerWidth / 2 , window.innerHeight );
-	renderer.setSize( inputWidth * 2 , inputHeight * 2 );
+	renderer.setSize( width * 2 , height * 2 );
 	
 	document.body.appendChild( renderer.domElement );
 
@@ -136,8 +144,12 @@ function animate() {
 function render() {
  	renderer.autoClear = false;
 	renderer.clear();
+	/* order of rendering matters: first inputScene, then 3D scene overlayed on the inputScene */
 	if (ArFlag) renderer.render(inputScene, inputCamera);
-	renderer.render( scene, camera );	
+	/* if it is no-AR condition, render the scene; but if it is Ar condition, 
+	wait until a marker is detected */
+	if ( (ArFlag && markerDetectedFlag) || (!ArFlag) ) renderer.render( scene, camera );
+
 }
 
 
