@@ -116,10 +116,8 @@ function JsArInit() {
             }, (3 * 1000));*/
 
         }
-        updateElectrons();
-        render();
 
-
+        render(); 
     });
  }  
 

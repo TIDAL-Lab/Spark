@@ -134,21 +134,22 @@ function update() {
 function animate() {
 
 	requestAnimationFrame( animate );
-	if (!updateFlag) {
-		updateElectrons();
-	}
 	render(); 
 	//deviceControls.update();
 }
 
 function render() {
+	if (!updateFlag) {
+        updateElectrons();
+    }
  	renderer.autoClear = false;
 	renderer.clear();
 	/* order of rendering matters: first inputScene, then 3D scene overlayed on the inputScene */
 	if (ArFlag) renderer.render(inputScene, inputCamera);
 	/* if it is no-AR condition, render the scene; but if it is Ar condition, 
 	wait until a marker is detected */
-	if ( (ArFlag && markerDetectedFlag) || (!ArFlag) ) renderer.render( scene, camera );
+	//if ( (ArFlag && markerDetectedFlag) || (!ArFlag) ) renderer.render( scene, camera );
+	renderer.render( scene, camera );
 
 }
 

@@ -157,7 +157,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		//transform the box
 		this.boxMesh.position.set(center.x, center.y, center.z);
 		this.boxMesh.rotation.z = this.rotationAngle;
-		this.boxMesh.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix
+		//this.boxMesh.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix
 
 		// skip the rest of code from createBox2
 		// now add the junctions to the box	
@@ -183,7 +183,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		startJunction.position.x = - boxLength / 2;
         endJunction.position.x = boxLength / 2;	
-        //this.boxMesh.updateMatrixWorld();
+        this.boxMesh.updateMatrixWorld();
 
         // update the junctions
 		for (i=0; i < this.connections.length; i++) {
@@ -236,7 +236,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			this.ionCount = count;
 
-	  		this.boxMesh.material.side = THREE.BackSide;
+	  		this.boxMesh.material.side = THREE.DoubleSide;
 	  		this.obstacles.push(this.boxMesh);
 
 	  		for ( i = 0; i < this.ions.length; i ++ ) {
@@ -313,7 +313,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		//var distance = 10;
 		raycaster.near = 0;
 		raycaster.far = 10;
-		var collisions = raycaster.intersectObjects(this.obstacles);
+		var collisions = raycaster.intersectObjects(this.obstacles, true);
 		// if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {	
 			if (markerDetectedFlag || !ArFlag) console.log('collision is detected');
