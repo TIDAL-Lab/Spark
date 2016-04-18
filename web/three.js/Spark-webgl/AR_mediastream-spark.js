@@ -43,9 +43,7 @@ function JsArInit() {
     // (We need to give it the same projection matrix as the detector
     // so the overlay will line up with what the detector is 'seeing')
     camera.setJsArMatrix(parameters);
-    console.log(camera.getWorldDirection());
-    console.log(camera.position);
-
+    
     // This is the canvas that we draw our input image on & pass
     // to the detector to analyse for markers...
     inputCapture = $('#inputCapture')[0];
@@ -109,11 +107,6 @@ function JsArInit() {
             // and use it to transform our three.js object
             markerRoot.setJsArMatrix(resultMatrix);
             markerRoot.matrixWorldNeedsUpdate = true;
-
-/*            setTimeout(function() {
-                console.log(camera.getWorldDirection());
-                console.log(camera.position);
-            }, (3 * 1000));*/
 
         }
 

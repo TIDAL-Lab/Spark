@@ -236,11 +236,11 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			this.ionCount = count;
 
-	  		this.boxMesh.material.side = THREE.DoubleSide;
+	  		this.boxMesh.material.side = THREE.BackSide;
 	  		this.obstacles.push(this.boxMesh);
 
 	  		for ( i = 0; i < this.ions.length; i ++ ) {
-	  			//this.obstacles.push(this.ions[i]);	
+	  			this.obstacles.push(this.ions[i]);	
 	  		}
 
 		}	
@@ -307,13 +307,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}		
 
 	this.collision = function ( electron ) {
-		var ray = new THREE.Vector3(electron.velocity.x, electron.velocity.y, 0);
-		ray = ray.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
-		raycaster.set(electron, ray);
+		var direction = new THREE.Vector3(electron.velocity.x, electron.velocity.y, 0);
+		direction.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
+		var origin = new THREE.Vector3();
+		origin.copy(electron);
+		origin.applyMatrix4(electrons.matrixWorld);
+		raycaster.set(origin, direction);
 		//var distance = 10;
 		raycaster.near = 0;
-		raycaster.far = 10;
-		var collisions = raycaster.intersectObjects(this.obstacles, true);
+		raycaster.far = 5;
+		var collisions = raycaster.intersectObjects(this.obstacles);
 		// if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {	
 			if (markerDetectedFlag || !ArFlag) console.log('collision is detected');

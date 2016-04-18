@@ -4,6 +4,7 @@ function JsArTest() {
 		$('#nowebgl').hide();
 		return;
 	}
+    $('#loading').hide();
     
     threshold = 128;
 
@@ -34,6 +35,8 @@ function JsArTest() {
     //overlayCamera.position.z = -300;
     overlayCamera.setJsArMatrix(parameters);
 
+    var raycaster = new THREE.Raycaster();
+
     // Now, set up the rest of the overlay scene just like any other
     // three.js scene...(renderer, light source, and 3D objects)
     var renderer = new THREE.WebGLRenderer();
@@ -53,7 +56,7 @@ function JsArTest() {
     var green = 0x008F00;
     var gray = 0x808080;
     var blue = 0x000099;
-    var batteryImg = THREE.ImageUtils.loadTexture( "../textures/battery3t.png" );
+    //var batteryImg = THREE.ImageUtils.loadTexture( "../textures/battery3t.png" );
     var cubeLength = 20;
     var cubeWidth = 10;
     var cubeGeometry = new THREE.BoxGeometry(cubeLength, cubeWidth, 5);
@@ -63,11 +66,10 @@ function JsArTest() {
     cubeMaterial.opacity = 0.9;
     cubeMaterial.depthWrite = false;
     var cube = new THREE.Mesh( cubeGeometry, cubeMaterial ); 
-    cube.material.side = THREE.BackSide;
+    // cube.material.side = THREE.DoubleSide;
     
-    var sphereGeometry = new THREE.SphereGeometry(cubeWidth/2, 16, 16);
-    // var cubeMaterial = new THREE.MeshBasicMaterial( { map: batteryImg } );
-    var sphereMaterial = new THREE.MeshBasicMaterial( { color: green });
+    var sphereGeometry = new THREE.SphereGeometry(cubeWidth/2, 14, 14);
+    var sphereMaterial = new THREE.MeshBasicMaterial( { color: gray });
     sphereMaterial.transparent = true;
     sphereMaterial.opacity = 0.9;
     sphereMaterial.depthWrite = false;
@@ -77,10 +79,11 @@ function JsArTest() {
     var sphere2 = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
     sphere2.position.set(-10, 0, 0);
 
-    var sphere3 = new THREE.Mesh( sphereGeometry, sphereMaterial ); 
-    sphere3.position.set(0, 10, 300);
+    var sphere3 = new THREE.Mesh( sphereGeometry, sphereMaterial );
+    //sphere.material.side = THREE.DoubleSide; 
+    //sphere3.position.set(0, 10, 300);
     
-    // now add the particle system (electrons)
+/*    // now add the particle system (electrons)
     electronGeometry = new THREE.Geometry();
     for ( i = 0; i < 20; i ++ ) {
 
@@ -105,23 +108,26 @@ function JsArTest() {
 
     var electronBall = THREE.ImageUtils.loadTexture( "../textures/ball.png" );
     electronMaterial = new THREE.PointCloudMaterial( { size: 5, map: electronBall, color: blue , transparent: true } );
-    electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
-    cube.add(electrons);
-    cube.add(sphere);
-    cube.add(sphere2);
+    electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );*/
+    //cube.add(electrons);
+    //cube.add(sphere);
+    //cube.add(sphere2);
 
-
-    cube.matrixAutoUpdate = false;
-    //sphere.matrixAutoUpdate = false;
-    //electrons.matrixAutoUpdate = false;
-
-    $('#loading').hide();
+ 
     // Then put the scene together.
     var overlayScene = new THREE.Scene();
     overlayScene.add(ambientLight);
-    //overlayScene.add(sphere);
-    overlayScene.add(cube);
-    overlayScene.add(sphere3);
+
+
+    var target = cube;
+    target.material.side = THREE.DoubleSide;
+    target.matrixAutoUpdate = false;
+    //sphere3.matrixAutoUpdate = false;
+    overlayScene.add(target);
+    // sphere3.visible = false;
+    // overlayScene.add(sphere3);
+
+
 
 
     // This is the canvas that we draw our input image on & pass
@@ -173,6 +179,7 @@ function JsArTest() {
         inputCapture.changed = true;
         inputTexture.needsUpdate = true;
 
+
         // Use the imageReader to detect the markers
         // (The 2nd parameter is a threshold)
         if (detector.detectMarkerLite(imageReader, threshold) > 0) {
@@ -181,11 +188,38 @@ function JsArTest() {
 
             // and use it to transform our three.js object
 
-            cube.setJsArMatrix(resultMatrix);
-            cube.matrixWorldNeedsUpdate = true;
+            target.setJsArMatrix(resultMatrix);
+            target.matrixWorldNeedsUpdate = true;
+            //target.updateMatrix();
+            // target.updateMatrixWorld();
 
-            //electrons.setJsArMatrix(resultMatrix);
-            //electrons.matrixWorldNeedsUpdate = true;
+            //sphere3.setJsArMatrix(resultMatrix);
+            //sphere3.matrixWorldNeedsUpdate = true;
+
+
+
+            
+            // create a ray
+            var direction = new THREE.Vector3(0.1, 1.0 , 0.0);
+            direction.normalize();
+            // var startPoint = new THREE.Vector3(0.0, 0.0, 0.0);
+            var startPoint = new THREE.Vector3();
+            startPoint.applyMatrix4(target.matrixWorld);
+            //startPoint.getPositionFromMatrix(target.matrixWorld);
+            raycaster.set( startPoint, direction );
+
+            raycaster.near = 0;
+            raycaster.far = 15;
+            var collision = raycaster.intersectObject(target);
+            if ( collision.length > 0 ) {  
+                console.log('collision: ' + collision.length);
+                //collision[ 1 ].face.color.set( green );
+             }
+            else { 
+                console.log('no collision');        
+            }
+
+
         }
 
         // Render the three.js scenes (the input image first overlaid with the
@@ -195,82 +229,8 @@ function JsArTest() {
         renderer.clear();
         renderer.render(inputScene, inputCamera);
         renderer.render(overlayScene, overlayCamera);
+
+
     });
 }
 
-/*function updateElectrons(electrons, box) {
-    var eVertices = electrons.geometry.vertices;
-    for ( k = 0; k < eVertices.length; k++ ) {
-        var electron = eVertices[k];
-        var obstacle = collision(electron, box);
-        if (obstacle == null) {     // no colision
-            moveElectron(electron);
-        }
-        else {
-            bounceBack(electron, obstacle);
-        }                                                                   
-    }
-    electrons.geometry.verticesNeedUpdate = true;
-}
-
-function collision( electron, box ) {
-        var ray = new THREE.Vector3(electron.velocity.x, electron.velocity.y, electron.velocity.z);
-        var raycaster = new THREE.Raycaster();
-        ray = ray.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
-        raycaster.set(electron, ray);
-        //var distance = 10;
-        raycaster.near = 0;
-        raycaster.far = 10;
-        var collisions = raycaster.intersectObject(box);
-        // if (collisions.length > 0 && collisions[0].distance <= distance) {
-        if ( collisions.length > 0 ) {  
-            return collisions[0];
-         }
-         else {
-            return null;
-         }
-    }
-
-function bounceBack(electron, obstacle) {       // no use for type, remove it!
-        var n = obstacle.face.normal;
-        n.z = 0; // we just want the image of the normal vector on the XY plane with Z = 0
-        var localVelocity = new THREE.Vector3(); 
-        localVelocity.copy(electron.velocity);
-        localVelocity.applyAxisAngle(new THREE.Vector3(0, 0, -1), this.rotationAngle);
-        //this.boxMesh.worldToLocal(localVelocity);
-
-        var theta = localVelocity.angleTo(n);
-        var Beta = (2 * theta) - Math.PI ;
-        var rotationAxis = new THREE.Vector3(); // 
-        rotationAxis.crossVectors( localVelocity, n );
-        if (Beta == Math.PI/2) {    // if velocity is tangential to the ion sphere
-            moveElectron(electron);
-        }
-        if (rotationAxis.length() == 0) {   // if Beta is 180 degrees the cross vector is zero, set rotation axis to z axis (sign does not matter anymore)
-            rotationAxis = (0,0,1);
-        }
-        else {
-            rotationAxis = rotationAxis.normalize(); 
-        }
-        //rotationAxis = rotationAxis.normalize();
-        electron.velocity.applyAxisAngle( rotationAxis, Beta );
-    }     
-
-function moveElectron(electron) {
-            // update velocity
-            //electron.velocity.x += this.forceX;
-            //electron.velocity.y += this.forceY;
-            var v = Math.sqrt(electron.velocity.x * electron.velocity.x + 
-                                electron.velocity.y * electron.velocity.y);
-
-            if (v > 8) {    // don't allow the speed to become more than 10, which is the distance for raycaster
-                
-                //electron.velocity.x -= this.forceX;
-                //electron.velocity.y -= this.forceY;
-            }
-
-            // move the electron
-            electron.x += electron.velocity.x; 
-            electron.y += electron.velocity.y;
-    }  
-*/

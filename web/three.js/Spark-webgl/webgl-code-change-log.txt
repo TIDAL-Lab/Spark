@@ -336,7 +336,46 @@ ISSUE 1: why when I add an object without applying the jsar transformation matri
 
 		It seems it is because of the camera, because the camera is not a perspective camera!!!
 		
+FINDING: I found out what caused this repeated error that I used to get when rendering: 
+		THREE.WebGLRenderer: Texture is not power of two. Texture.minFilter should be set to THREE.NearestFilter or THREE.LinearFilter. (  )
+		
+		Apparently this was due to rendering the inputScene, when I commented out renderer.render(inputScene, inputCamera) ,
+		the error went away.
+
+*** notes on 4/17/2016
+
+FINALLY: I figured out how to run the collision detection with AR condition!!!!!!!!!!!!!
+		
+		in a nutshell: I needed to add this line of code to the collision function:
+		origin.applyMatrix4(electrons.matrixWorld);
+		where, origin is the origin of ray casting, and as by each marker detection the matrixworld of electrons(points geometry) is updated
+		we need to update the origin with that transformation matrix.
+		So, this seems to work, except for a couple of issues:
+		
+ISSUE 1: now, there are electrons escaping from the component. I need to fix the collision effect to remove this issue
+
+ISSUE 2: the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
+		I need to fix this problem
+		temp solution: if (!ArFlag) electronSize = 10;
+		
+ISSUE 3: It seems that the electrons are now bouncing off the junction spheres from inside the box! I am confused why this happens!
+		well, it seems that it is becuase of setting the raycaster.intersectobjects(obstacles, true)
+		it sets the recursive flag to true and that causes the observed behavior
+		later, I think I want to set it back to false (i.e., removing it, the default value is false)
 		
 
-	
-	
+*** notes on 4/18/2016
+ISSUE 1: now, there are electrons escaping from the component. I need to fix the collision effect to remove this issue
+		by testing it, it seems that when I rotate the marker 90 degrees, almost all the electrons escape :(
+		
+		
+Now, I am trying to add the CSG code back!		
+
+ISSUES TO FIX LATER:
+
+ISSUE (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
+		I need to fix this problem
+		temp solution: if (!ArFlag) electronSize = 10;	
+		
+ISSUE (4/17/2016): jittering issue --> use a smoothing algorithm		
+		

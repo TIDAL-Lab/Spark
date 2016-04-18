@@ -36,7 +36,7 @@ var windowHalfY = window.innerHeight / 2;
 function doInit() {	
 	init();
 	if (ArFlag) JsArInit();
-	//animate();
+	if (!ArFlag) animate(); //for non-AR condition; for AR condition the jsFrames.registerAnimation() function is used 
 }
 
 function init() {
@@ -53,14 +53,14 @@ function init() {
 */
 	//camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
 	if (!ArFlag) {
-		//camera = new THREE.Camera();
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
 		camera.position.z = 700;
 	}
 
 	if (ArFlag) {
-		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
-		camera.position.z = -700;
+		camera = new THREE.Camera();
+		//camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+		//camera.position.z = -700;
 	}
 	
 	
@@ -100,6 +100,7 @@ function initComponents() {
 	}
 	//createConnectedMeshes();
 	//note: I tried adding "sizeAttenuation: false" for the pointsmaterial, but did not work
+	if (!ArFlag) electronSize = 10;
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
