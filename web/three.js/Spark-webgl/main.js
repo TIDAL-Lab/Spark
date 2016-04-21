@@ -10,11 +10,11 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var ArFlag = true;
+var ArFlag = false;
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container;
-var camera, scene, renderer, controls, deviceControls;
+var camera, scene, renderer, controls;
 var inputScene, inputCamera;
 var pointLight;
 var mouseX = 0, mouseY = 0;
@@ -32,6 +32,8 @@ var markerRoot;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
+
+var mouseFlag = 0; // this flag is used to distinguish a mouse drag from a mouse click
 
 function doInit() {	
 	init();
@@ -86,6 +88,10 @@ function init() {
 
 
 	window.addEventListener( 'resize', onWindowResize, false );
+
+	// CONTROLS
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	
 }
 
 function initComponents() {
@@ -137,6 +143,7 @@ function animate() {
 	requestAnimationFrame( animate );
 	render(); 
 	//deviceControls.update();
+	controls.update();
 }
 
 function render() {

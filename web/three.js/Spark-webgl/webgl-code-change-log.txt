@@ -368,8 +368,33 @@ ISSUE 3: It seems that the electrons are now bouncing off the junction spheres f
 ISSUE 1: now, there are electrons escaping from the component. I need to fix the collision effect to remove this issue
 		by testing it, it seems that when I rotate the marker 90 degrees, almost all the electrons escape :(
 		
+NEXT STEPS: fix issue 1 
+			make the electron moves in 3D (i.e., add the z component)
+			change ions to 3D too!
+			
+			
+*** notes on 4/19/2016
+To fix the above issues, I decided to keep the electrons and ions in 2D for now (I added the code for 3D velocity, but am not using it for now)
+Because it makes things complicated. Let's first get it run correctly with electrons moving in XY plane then I can extend it to XYZ
 		
-Now, I am trying to add the CSG code back!		
+*** notes on 4/20/2016
+1. I fixed the old bouncing code, now I am doing all the calculations in 3D; electrons are initiated in 3D (non-zero z) and their velocities are
+	also in 3D (non-zero vZ), and for mirroring the electron from the obstacles, I am using the built-in functions such as .reflect(), etc.
+	so no manual code for reflection calculations
+	these links became useful in making the above changes:
+	a. Three.js: Convert face normal from local space to world space
+	http://stackoverflow.com/questions/16268482/three-js-convert-face-normal-from-local-space-to-world-space
+	b. How to get a reflection vector? (I did not really use the formula in my code, but it helped)
+	http://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+	
+2. But still the electrons don't bounce off correctly in the AR condition
+
+3. I added the orbit controls back to the code, just to have a better sense of what is going on
+
+	
+		
+
+	
 
 ISSUES TO FIX LATER:
 
