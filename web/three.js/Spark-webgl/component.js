@@ -53,7 +53,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.h = 30; // height of box (i.e., depth of it in z direction)
   	this.ions = [];
   	this.obstacles = [];
-  	this.boxMesh;
+  	this.container;
   	this.force = new THREE.Vector3();
 
   	//this.force.x = direction * this.V * (endX - startX) / this.l; 
@@ -92,44 +92,40 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
   	this.init = function( electronGeometry, ID ) {
   		this.ID = ID;		
-		this.createBox();
+		this.createContainer();
 		if (this.compType != 'Battery') {
 			this.createElectrons(electronGeometry);
 		}
 	}
 
-	this.createBox = function() {
+	this.createContainer = function() {
 		var center = new THREE.Vector3( (this.startPoint.x + this.endPoint.x) / 2, 
 										(this.startPoint.y + this.endPoint.y) / 2, 
 										0.0 );
 
-		var boxGeom = new THREE.BoxGeometry( this.l, this.w, this.h);
+		// var containerGeometry = new THREE.BoxGeometry( this.l, this.w, this.h);
+		var containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 24); // radiusSegment = 12 (default value: 8)
+
 		if (this.compType == "Resistor" || this.compType == "Bulb") {
-			var boxMaterial = new THREE.MeshBasicMaterial( { map: resistorImg, color: 0xCCCC00 } );
+			var containerMaterial = new THREE.MeshBasicMaterial( { map: resistorImg, color: 0xCCCC00 } );
 		}
 		else if (this.compType == "Battery") {
-			var boxMaterial = new THREE.MeshBasicMaterial( { map: batteryImg } );
+			var containerMaterial = new THREE.MeshBasicMaterial( { map: batteryImg } );
 		}
 		else {
-			var boxMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+			var containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
 		}
 
-		boxMaterial.transparent = true;
-		boxMaterial.opacity = 0.7;
-		boxMaterial.depthWrite = false;
-		this.boxMesh = new THREE.Mesh( boxGeom, boxMaterial );
-
-		//transform the box
-		this.boxMesh.position.set(center.x, center.y, center.z);
-		this.boxMesh.rotation.z = this.rotationAngle;
-		//console.log(this.boxMesh.matrix.elements); // this shows that the matrix elements are not updated yet
-		this.boxMesh.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix for electrons
+		containerMaterial.transparent = true;
+		containerMaterial.opacity = 0.7;
+		containerMaterial.depthWrite = false;
+		this.container = new THREE.Mesh( containerGeometry, containerMaterial );
 
 		// now add the junctions to the box	
 		var startJunction = this.createJunction();
-		startJunction.position.x = - this.l / 2;
+		startJunction.position.y = - this.l / 2; // I changed this from x to y (from BoxGeometry)
 		var endJunction = this.createJunction();
-        endJunction.position.x = this.l / 2;	
+        endJunction.position.y = this.l / 2;	
 
         // update the junctions
 		for (i=0; i < this.connections.length; i++) {
@@ -159,6 +155,14 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// create ions and add them to the box
 		this.createIons();
 
+		//transform the box
+
+		this.container.position.set(center.x, center.y, center.z);
+		this.container.rotation.z = this.rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
+		//console.log(this.container.matrix.elements); // this shows that the matrix elements are not updated yet
+		this.container.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix for electrons
+
+
 	}
 
 	this.createJunction = function() {
@@ -169,7 +173,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		junction.material.depthWrite = false;
 
 		// add the junctions to the box
-		this.boxMesh.add(junction);
+		this.container.add(junction);
 
 		junction.connectedComponentID = -1; // to avoid the undefined variable
 
@@ -186,14 +190,14 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					var pos;
 					if ((i+j) % 3 == 0) {
 						pos = new THREE.Vector3();
-						pos.x = -this.l/2 + i * d; 
-						pos.y = -this.w/2 + j * d;
+						pos.y = -this.l/2 + i * d; // I switched the order of x & y (from BoxGeometry)
+						pos.x = -this.w/2 + j * d;
 						pos.z = 0;
 
 						var ion = new THREE.Mesh( ionGeometry, ionMaterial );
 						ion.position.set(pos.x, pos.y, pos.z);
 						this.ions.push(ion);
-						this.boxMesh.add(ion);
+						this.container.add(ion);
 						count++;
 					}				
 
@@ -202,8 +206,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			this.ionCount = count;
 
-	  		this.boxMesh.material.side = THREE.BackSide;
-	  		this.obstacles.push(this.boxMesh);
+	  		this.container.material.side = THREE.BackSide;
+	  		this.obstacles.push(this.container);
 
 	  		for ( i = 0; i < this.ions.length; i ++ ) {
 	  			this.obstacles.push(this.ions[i]);	
@@ -219,11 +223,19 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		for ( i = 0; i < this.electronCount; i ++ ) {
 
 			var electron = new THREE.Vector3();
-			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
+/*			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
 			electron.x = Math.random() * (this.l - 5) - (this.l - 5) /2; //the x coordinate changes based on component length 
 			electron.y = Math.random() * (this.w - 5) - (this.w - 5)/2; // component width 
 			//electron.z = 0.0;
-			electron.z = Math.random() * (this.h - 5) - (this.h - 5)/2; // component width
+			electron.z = Math.random() * (this.h - 5) - (this.h - 5)/2; // component width*/
+
+			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
+			electron.x = Math.random() * (this.w - 5) - (this.w - 5)/2; //the x coordinate changes based on component length 
+			electron.y = Math.random() * (this.l - 5) - (this.l - 5)/2; // component width 
+			//electron.z = 0.0;
+			//electron.z = Math.random() * (this.w - 5) - (this.w - 5)/2;
+			var zLimit = Math.sqrt((this.w - 5) * (this.w - 5) - (4*electron.x * electron.x));
+			electron.z = Math.random() * zLimit - zLimit/2; // calculations of random xz coordinate on a circle shape (cross section of a cylinder on xz plane)
 
 /*			// initiate a 2D velocity (no z direction)
 			var vX = Math.random() * velocity * 2 - velocity;
@@ -247,8 +259,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		    	vZ);		// z
 
 			//translate the electron to be inside the component
-			//this.boxMesh.localToWorld(electron); // this changes the position of electron from local to world
-			electron.applyMatrix4( this.boxMesh.matrixWorld );
+			//this.container.localToWorld(electron); // this changes the position of electron from local to world
+			electron.applyMatrix4( this.container.matrixWorld );
 			electron.componentID = this.ID;
 			electronGeometry.vertices.push( electron );
 		}	
@@ -257,11 +269,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 
 	this.updateElectron = function ( electron ) {
-		if (ArFlag) {
-			var length = electron.velocity.length();
-			electron.velocity.applyMatrix4( this.boxMesh.matrixWorld ).normalize();
-			electron.velocity.multiplyScalar(length);
-		}
+		//if (markerDetectedFlag) console.log(electron.velocity.x + ' ' + electron.velocity.y + ' ' + electron.velocity.z)
 		var obstacle = this.collision(electron);
 		if (obstacle == null) { 	// no colision
 			this.moveElectron(electron);
@@ -296,18 +304,31 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	// reflection formula:  r=d−2(d⋅n)n (where d is the ray, and n is a normalized normal, and d.n is a dot product)
 	
 	this.bounceBack = function( electron, obstacle ) {
-
+		// first, calculate the normal vector in world coordinate
+		var normalMatrix = new THREE.Matrix3().getNormalMatrix( this.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
 		var n = obstacle.face.normal;
-
-		var normalMatrix = new THREE.Matrix3().getNormalMatrix( this.boxMesh.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
 		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
-		// reverse the direction of normal for boxmesh, as the normal vector for the boxmesh is towards outside
-		if (obstacle.object == this.boxMesh) worldNormal.multiplyScalar( -1 );
-		//console.log(worldNormal.x + ' ' + worldNormal.y + ' ' + worldNormal.z);
+		if (obstacle.object == this.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
+		
+		// now calculate the reflection, non-AR condtion
+		if (!ArFlag) {
 		var reflection = electron.velocity.clone().reflect(worldNormal);
 		//console.log(reflection.x + ' ' + reflection.y + ' ' + reflection.z);
 		electron.velocity = reflection;
+		}
+		// calculate the reflection for AR condition
+		if (ArFlag) {
+			var length = electron.velocity.length();
+			var direction = new THREE.Vector3();
+			direction.copy(electron.velocity);
+			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
+			var reflection = direction.reflect(worldNormal);
+			var m = new THREE.Matrix4();
+			m = m.getInverse(electrons.matrixWorld)
+			reflection.transformDirection(m);
+			electron.velocity = reflection.multiplyScalar(length);
 
+		}	
 
 
 	 }
@@ -325,7 +346,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		localVelocity.copy(electron.velocity);
 		//localVelocity.applyMatrix4(electrons.matrixWorld); // apply JsAr transformations
 		var length = localVelocity.length();
-		localVelocity.transformDirection(this.boxMesh.matrix.transpose()); //later: check why I needed to add transpose
+		localVelocity.transformDirection(this.container.matrix.transpose()); //later: check why I needed to add transpose
 		localVelocity.multiplyScalar(length);
 		//localVelocity.applyAxisAngle(new THREE.Vector3(0, 0, -1), this.rotationAngle); //worked before adding AR
 
@@ -347,11 +368,17 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}		
 
 	this.collision = function ( electron ) {
-		var direction = new THREE.Vector3(electron.velocity.x, electron.velocity.y, electron.velocity.z);
-		direction.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
+		var direction = new THREE.Vector3();
+		direction.copy(electron.velocity);
+		direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
+		//direction.transformDirection(this.container.matrix.transpose());
+		//direction.applyMatrix4( this.container.matrixWorld );
+		//direction.applyMatrix4(electrons.matrixWorld);
+		//direction.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
 		var origin = new THREE.Vector3();
 		origin.copy(electron);
 		origin.applyMatrix4(electrons.matrixWorld);
+		//console.log(direction);
 		raycaster.set(origin, direction);
 		//var distance = 10;
 		raycaster.near = 0;

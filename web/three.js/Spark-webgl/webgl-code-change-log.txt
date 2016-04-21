@@ -391,8 +391,13 @@ Because it makes things complicated. Let's first get it run correctly with elect
 
 3. I added the orbit controls back to the code, just to have a better sense of what is going on
 
-	
-		
+4. I changed the container shape from box to cylinder. These are the list of changes that I made in the code:
+	a. boxMesh, boxGeom, and boxMaterial --> container, containerGeometry, and containerMaterial 	
+	b. this.container.rotation.z = this.rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
+	c. startJunction.position.y = - this.l / 2; // I changed this from x to y (from BoxGeometry) --> and the same for endJunction
+	d. pos.y = -this.l/2 + i * d; // I switched the order of x & y (from BoxGeometry)
+	   pos.x = -this.w/2 + j * d;
+	e. electron.x, electron.y, and electron.z: this.w, this.l, this.w with respect (from the box version: this.l, this.w, and this.d)
 
 	
 

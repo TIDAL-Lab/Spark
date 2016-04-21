@@ -112,8 +112,8 @@ function initComponents() {
 
 	markerRoot = new THREE.Mesh();
 	for (k=0; k < components.length; k++) {
-		//scene.add(components[k].boxMesh);
-		markerRoot.add(components[k].boxMesh);
+		//scene.add(components[k].container);
+		markerRoot.add(components[k].container);
 	}
 	markerRoot.add(electrons);	
 	if (ArFlag) markerRoot.matrixAutoUpdate = false;
@@ -198,7 +198,7 @@ function createConnectedMeshes() {
 			labelCounter++;
 			connectedMeshes[labelCounter] = new Array();
 		}
-		var clonedComponent = components[k].boxMesh.clone(); // flag is by default true -> recursively clone the children
+		var clonedComponent = components[k].container.clone(); // flag is by default true -> recursively clone the children
 		connectedMeshes[labelCounter].push( clonedComponent );
 	}
 	
