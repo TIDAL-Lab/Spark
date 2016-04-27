@@ -399,7 +399,34 @@ Because it makes things complicated. Let's first get it run correctly with elect
 	   pos.x = -this.w/2 + j * d;
 	e. electron.x, electron.y, and electron.z: this.w, this.l, this.w with respect (from the box version: this.l, this.w, and this.d)
 
+*** notes on 4/21/2016
+The collision detection and bouncing off code is finally working correctly! Yaaaay!
+Here a few summary notes for this victory!:
+1. I add all the component.container s and the electrons to a markerRoot object, and then apply the AR transformations on the markerRoot object	
+	here are the three lines of code for making the transformations happen:
+	when initiating the scene:    							markerRoot.matrixAutoUpdate = false;
+	then when animating through the AR marker detection:    markerRoot.setJsArMatrix(resultMatrix);
+															markerRoot.matrixWorldNeedsUpdate = true;
+2. for the collision detection code:
+	two items:
+	a. transform the direction of the ray according the electrons world matrix
+	b. transform the origin of ray according the electrons world matrix
 	
+3. bounce back code:
+	a. first, I changed the code: before, it computed the ray vector (electron velocity) in local space; but now, instead, it computes the 
+		obstacle's normal vector in world space:
+		var normalMatrix = new THREE.Matrix3().getNormalMatrix( this.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
+		var n = obstacle.face.normal;
+		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
+		if (obstacle.object == this.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
+	b. transform the direction of electron velocity according to the electrons world matrix
+	c. calculate the reflected vector
+	d. inverse the transformation applied in (b) to calculate the real direction of bounced electron:
+			var m = new THREE.Matrix4();
+			m = m.getInverse(electrons.matrixWorld)
+			reflection.transformDirection(m);
+			electron.velocity = reflection.multiplyScalar(length);
+
 
 ISSUES TO FIX LATER:
 

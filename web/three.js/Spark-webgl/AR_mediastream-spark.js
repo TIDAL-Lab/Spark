@@ -114,7 +114,3 @@ function JsArInit() {
     });
  }  
 
- function JsArAnimate() {
-
-} 
-

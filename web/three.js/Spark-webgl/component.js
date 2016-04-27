@@ -59,15 +59,14 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	//this.force.x = direction * this.V * (endX - startX) / this.l; 
   	//this.force.y = direction * this.V * (endY - startY) / this.l;
 
-  	// temp alternative for force
+  	// temp alternatives for force
 
   	this.force.x = 0.1 * direction * this.I * (endX - startX) / this.l; 
   	this.force.y = 0.0;
   	this.force.z = 0.0;
 
   	this.connections = connections;
-  	//this.connections = [].concat.apply([], connections); // this flattens the nested array of connection
-  	
+
   	// calculate the rotation angle of the component on the XY plane (-180 to 180 from +x axis)
 	var startToEnd = new THREE.Vector3( endX-startX, endY-startY, 0.0); // z is 0 (reading from Parse)
 	var xAxis = new THREE.Vector3(1, 0, 0);
@@ -156,13 +155,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.createIons();
 
 		//transform the box
-
 		this.container.position.set(center.x, center.y, center.z);
 		this.container.rotation.z = this.rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
-		//console.log(this.container.matrix.elements); // this shows that the matrix elements are not updated yet
 		this.container.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix for electrons
-
-
 	}
 
 	this.createJunction = function() {
@@ -212,14 +207,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	  		for ( i = 0; i < this.ions.length; i ++ ) {
 	  			this.obstacles.push(this.ions[i]);	
 	  		}
-
 		}	
-
 	}
 
-
 	this.createElectrons = function( electronGeometry ) {
-		  		// create electrons
 		for ( i = 0; i < this.electronCount; i ++ ) {
 
 			var electron = new THREE.Vector3();
@@ -269,7 +260,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 
 	this.updateElectron = function ( electron ) {
-		//if (markerDetectedFlag) console.log(electron.velocity.x + ' ' + electron.velocity.y + ' ' + electron.velocity.z)
 		var obstacle = this.collision(electron);
 		if (obstacle == null) { 	// no colision
 			this.moveElectron(electron);
@@ -280,9 +270,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.moveElectron = function (electron) {
-			// update velocity
-			electron.velocity.x += this.force.x;
-			electron.velocity.y += this.force.y;
+		// update velocity
+		electron.velocity.x += this.force.x;
+		electron.velocity.y += this.force.y;
 /*			var v = Math.sqrt(electron.velocity.x * electron.velocity.x + 
 								electron.velocity.y * electron.velocity.y);
 
@@ -292,16 +282,17 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 				//electron.velocity.y -= this.force.y;
 			}
 */
-			// move the electron
-			electron.x += electron.velocity.x; 
-			electron.y += electron.velocity.y;
-			electron.z += electron.velocity.z;
+		// move the electron
+		electron.x += electron.velocity.x; 
+		electron.y += electron.velocity.y;
+		electron.z += electron.velocity.z;
 	}
 	
-	// here instead of computing the ray vector in local space, I am computing the face normal
-	// in world coordinates and then I use the .direct() method to calculate the reflection of 
-	// the ray. 
-	// reflection formula:  r=d−2(d⋅n)n (where d is the ray, and n is a normalized normal, and d.n is a dot product)
+	/* here instead of computing the ray vector in local space, I am computing the face normal
+	* in world coordinates and then I use the .reflect() method to calculate the reflection of 
+	* the ray. 
+	* reflection formula:  r=d−2(d⋅n)n (where d is the ray, and n is a normalized normal, and d.n is a dot product)
+	*/
 	
 	this.bounceBack = function( electron, obstacle ) {
 		// first, calculate the normal vector in world coordinate
@@ -313,9 +304,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// now calculate the reflection, non-AR condtion
 		if (!ArFlag) {
 		var reflection = electron.velocity.clone().reflect(worldNormal);
-		//console.log(reflection.x + ' ' + reflection.y + ' ' + reflection.z);
 		electron.velocity = reflection;
 		}
+
 		// calculate the reflection for AR condition
 		if (ArFlag) {
 			var length = electron.velocity.length();
@@ -327,7 +318,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			m = m.getInverse(electrons.matrixWorld)
 			reflection.transformDirection(m);
 			electron.velocity = reflection.multiplyScalar(length);
-
 		}	
 
 
@@ -371,14 +361,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var direction = new THREE.Vector3();
 		direction.copy(electron.velocity);
 		direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
-		//direction.transformDirection(this.container.matrix.transpose());
-		//direction.applyMatrix4( this.container.matrixWorld );
-		//direction.applyMatrix4(electrons.matrixWorld);
-		//direction.normalize(); // sends a normalized ray in the direction of moving particle and detect obstacles
 		var origin = new THREE.Vector3();
 		origin.copy(electron);
 		origin.applyMatrix4(electrons.matrixWorld);
-		//console.log(direction);
 		raycaster.set(origin, direction);
 		//var distance = 10;
 		raycaster.near = 0;
@@ -386,7 +371,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var collisions = raycaster.intersectObjects(this.obstacles);
 		// if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {	
-			//if (markerDetectedFlag || !ArFlag) console.log('collision is detected');
 		 	return collisions[0];
 		 }
 		 else {

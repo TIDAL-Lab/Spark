@@ -10,7 +10,7 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var ArFlag = false;
+var ArFlag = true;
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container;
@@ -28,7 +28,7 @@ var compositeMeshes;
 
 var updateFlag = false;
 var markerDetectedFlag = false;
-var markerRoot;
+var markerRoot;  // the parent object of all the components and electrons for AR transformations
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -49,11 +49,6 @@ function init() {
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
-/*	camera = new THREE.Camera();
-	console.log(camera.getWorldDirection());
-	console.log(camera.position);
-*/
-	//camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
 	if (!ArFlag) {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
 		camera.position.z = 700;
@@ -61,8 +56,6 @@ function init() {
 
 	if (ArFlag) {
 		camera = new THREE.Camera();
-		//camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
-		//camera.position.z = -700;
 	}
 	
 	
@@ -105,25 +98,21 @@ function initComponents() {
 		components[k].init(electronGeometry, k); // sends k as the component ID				
 	}
 	//createConnectedMeshes();
-	//note: I tried adding "sizeAttenuation: false" for the pointsmaterial, but did not work
 	if (!ArFlag) electronSize = 10;
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: 0x000099 , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
 	markerRoot = new THREE.Mesh();
 	for (k=0; k < components.length; k++) {
-		//scene.add(components[k].container);
-		markerRoot.add(components[k].container);
+		markerRoot.add(components[k].container); // add all the components to the parent object
 	}
 	markerRoot.add(electrons);	
 	if (ArFlag) markerRoot.matrixAutoUpdate = false;
 	scene.add( markerRoot );
-	//if (ArFlag) scene.matrixAutoUpdate = false;
 }
 
 function doUpdate() {	
 	update();
-	//if (ArFlag) JsArUpdate();
 	//render();
 }
 
@@ -134,8 +123,6 @@ function update() {
 		scene.remove(obj);
 	}
 	initComponents();
-	//scene.add(pointLight); 		// Add the light source to the scene.
-
 }
 
 function animate() {
@@ -164,25 +151,17 @@ function render() {
 
 function updateElectrons() {
 	var eVertices = electrons.geometry.vertices;
-/*	var m = new THREE.Matrix4();
-	m = m.getInverse(scene.matrix)*/
+
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
-/*		// new code for AR (later check if I need to add the if (ArFlag) condition not to interfere with the non-AR condition)
-		var length = electron.velocity.length();
-
-		electron.velocity.transformDirection(m);
-		electron.velocity.multiplyScalar(length);
-		// end of new code for AR*/
-		//console.log('velocity: ' + Math.round(electron.velocity.x * 100)/100 + ' ' + Math.round(electron.velocity.y*100)/100 + ' ' + Math.round(electron.velocity.z/100)*100);
 		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
 																	// index for the components array																	
 	}
 	electrons.geometry.verticesNeedUpdate = true;
 }
 
-// create a list of connected meshes, 
-// each list contains the components that are connected as an array of [box, start, end] 
+/* create a list of connected meshes, 
+ each list contains the components that are connected as an array of [box, start, end] */
 function createConnectedMeshes() {
 	var connectedMeshes = []; // this is an array of array of meshes.
 							// Each element is an array of meshes that are connected		
