@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Spark Electricity Model</title>
+   <meta name="apple-mobile-web-app-capable" content="yes" />
+   <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+      <link rel="stylesheet" href="css/toolbar.css" />
+   <link rel="stylesheet" href="css/default.css" />
+</head>
+<body>
+  <script src="https://cdn.pubnub.com/pubnub-3.7.14.min.js"></script>     
+  <script src="js/dart.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.2.19.min.js"></script>
+  <script src="js/underscore.js"></script>
+  
+    <script>
+      var pubnub = PUBNUB.init({
+         publish_key: 'demo',
+         subscribe_key: 'demo'
+     });
+      Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
+      var deleteParse = function(myObj){
+        
+        this.doDeleteParse = function(){
+          var parseCircuit = Parse.Object.extend("Circuit");
+          var a_Circuit = new Parse.Query(parseCircuit);
+          a_Circuit.exists("type");
+
+          
+            a_Circuit.find().then(function(Circuits){
+              var promise = Parse.Promise.as(); //can hold an array of promises, one for each Circuit in Circuits
+              _.each(Circuits, function(Circuit){ //iterate through every Circuit in Circuits
+                promise = promise.then(function(){
+                  return Circuit.destroy();
+                  
+                });
+                
+              });
+                
+                return promise;
+              }).then(function(Circuit){
+                  
+                  var promise = Parse.Promise.as();
+                  _.each(myObj, function(anObj){
+                    promise = promise.then(function(){
+                      var parseCircuit = Parse.Object.extend("Circuit");
+                      var a_Circuit = new parseCircuit();
+                      a_Circuit.set("type", anObj.type);
+                      a_Circuit.set("voltageDrop", anObj.voltageDrop);
+                      a_Circuit.set("current", anObj.current);
+                      a_Circuit.set("resistance", anObj.resistance);
+                      a_Circuit.set("startX", anObj.startX);
+                      a_Circuit.set("startY", anObj.startY);
+                      a_Circuit.set("endX", anObj.endX);
+                      a_Circuit.set("endY", anObj.endY);
+                      a_Circuit.set("direction", anObj.direction);
+                      a_Circuit.set("innerwall", anObj.innerWall);
+                      a_Circuit.set("tag",anObj.tag);
+                      a_Circuit.set("connection", anObj.connection);
+                      a_Circuit.set("graphLabel", anObj.graphLabel);
+                      return a_Circuit.save();
+                     
+                    });
+                    
+                  });
+                  return promise;
+              
+            }).then(function(Circuit){
+                pubnub.publish({
+                  channel: 'ebz',
+                  message: 'update'
+               });
+              
+            });
+              
+
+         
+        } 
+      }
+      
+     
+      </script>
+
+   <div id="selection-toolbar" class="toolbar">
+     <button id="battery-button"></button>
+     <button id="resistor-button"/></button>
+     <button id="wire-button" /></button>
+     <button id="bulb-button" /></button>
+   </div>
+   
+   <div id="content">
+      <canvas id="foreground" style="position: absolute;" ></canvas>
+   </div>
+   
+   <div id="sliders" class="component-slider">
+     
+   </div>
+   
+   <input id="generic-slider" type="range" style="position: absolute; display: none;">
+<!--   
+   <form id="sampleform" method="post" action="models/wire.html">
+    <input type="hidden" name="v" value="0.002"/>
+   </form>
+-->
+   <div id="model1" style="display: none;">
+      <iframe id="model-frame"></iframe>
+      <button class="close-button"></button>
+      <button class = "help-button"></button>
+   </div>
+<!--   
+    <div id="model2">
+      <iframe id="model-frame" src="models/resistor.html"></iframe>
+      <button class="close-button"></button>
+   </div>
+-->   
+   <div id="slider-toolbar" class="toolbar">
+     <input id="battery-slider" type="range" min="2" max="4.0" step="1" value="2.0">
+     <input id="resistor-slider" type="range" min="1" max="3" step="1" value="1">
+     <input id="wire-slider" type="range" min="1" max="5" step="0.5" value="1" hidden="true">
+     <input id="bulb-slider" type="range" min="1" max="3" step="0.5" value="1" hidden="true">
+   </div>
+
+   <div id="values" class="toolbar">
+     <p id="battery-value"></p>
+     <p id="resistor-value"></p>
+     <p id="wire-value" hidden="true"></p>
+     <p id="bulb-value" hidden="true"></p> 
+   </div>
+
+   <div id="edition-toolbar" class="toolbar">  
+     <button id="reset-button"></button>   
+     
+   </div>
+   
+
+<!--
+ <button id="grid-button"/> 
+   <div oncontextmenu="javascript:alert('success!');return false;">
+    Lorem Ipsum
+   </div>
+
+-->
+
+
+   <script src="dart/main.dart" type="application/dart"></script>
+   <script type="text/javascript">
+      window.oncontextmenu = function(event) {
+         event.preventDefault();
+         event.stopPropagation();
+         return false;
+      };
+   </script>
+
+
+</body>
+</html>

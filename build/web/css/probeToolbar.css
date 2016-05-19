@@ -1,0 +1,59 @@
+@charset "utf-8";
+
+* { 
+   -webkit-user-select: none; 
+   -webkit-tap-highlight-color: rgba(0,0,0,0);    
+}
+
+.toolbar {
+   background-color: rgba(0, 0, 0, 0.4);
+   border-radius: 10px;
+   border: 2px solid white;
+   position: absolute;
+   width: 230px;
+   height: 230px;
+   top: 120px;
+   left: 120px;
+   text-align: center;
+   padding: 2px;
+   z-index: 2;
+}
+p {
+   outline: none;
+   color: rgb(255, 255, 255);
+   border: none;
+   width: 155px;
+   height: 20px;
+   border-radius: 2px;
+   margin-left: 5px;
+   margin-right: 5px;
+   font-family: Arial, Helvetica, sans-serif;
+   font-size:16px;
+   display: inline-block;
+}
+.bigText {
+   outline: none;
+   color: rgb(255, 255, 155);
+   border: none;
+   width: 220px;
+   height: 20px;
+   border-radius: 1px;
+   margin-left: 5px;
+   margin-right: 5px;
+   font-family: Arial, Helvetica, sans-serif;
+   font-size:24px;
+   
+   display: inline-block;
+}
+
+button {
+   outline: none;
+   border: none;
+   width: 30px;
+   height: 30px;
+   border-radius: 2px;
+   margin-left: 5px;
+   margin-right: 5px;
+   display: inline-block;
+}
+

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title> Spark - three.js particles</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<!--
+		<script src="lib/webgl-utils.js"></script>
+    	<script src="lib/webgl-debug.js"></script>
+    	<script src="lib/cuon-utils.js"></script>
+    	<script src="lib/cuon-matrix-quat.js"></script> 
+    -->
+  		<script src="lib/jquery.min.js"></script>
+  		<script src="lib/parse-1.2.19.min.js"></script>
+  		<script src="lib/pubnub-3.7.14.min.js"></script>
+  		<script src="lib/underscore.js"></script>
+
+  		<!-- the following scripts are the three.js scripts -->
+		<script src="lib/three.js/build/three.min.js"></script>
+		<script src="lib/three.js/examples/js/Detector.js"></script>
+		<script src="lib/three.js/examples/js/libs/stats.min.js"></script>
+		<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>
+		<script src="lib/three.js/examples/js/controls/DeviceOrientationControls.js"></script>
+
+		<!-- the following scripts are the JsArToolkit scripts -->
+		<script src="lib/THREE.JsArExtensions.js"></script>
+	    <script src="lib/jsFrames.min.js"></script>
+	    <script src="lib/JSARToolKit-master/JSARToolKit.min.js"></script>
+
+	    <script src="lib/ThreeCSG.js"></script>
+
+		<link href="lib/winjs/css/ui-light.css" rel="stylesheet" />
+		<script src="lib/winjs/js/base.js"></script>
+		<script src="lib/winjs/js/ui.js"></script>
+
+		<style>
+			body {
+				background-color: #005368;
+				margin: 0px;
+				overflow: hidden;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				font-weight: bold;
+				text-align:center;
+			}
+
+			a {
+				color:#0078ff;
+			}
+
+			#info {
+				color: #fff;
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				z-index: 100;
+			}
+
+
+		</style>
+	</head>
+	<body>
+
+<!-- 	    <div id="loading">Loading...</div>
+	      
+	    <div id="nowebgl">
+	      <p>I'm sorry, but there seems to be a problem with WebGL which this demo relies on.<br />
+	      Please check <a href="http://get.webgl.org/troubleshooting/">here for some troubleshooting information</a>.</p>
+	    </div> -->
+
+	    <video id="inputStream" width="320" height="240" autoplay="autoplay" style="display: none"></video>
+	    <img id="inputImage" width="320" height="240" src="tests/static.png" style="display: none"/>
+	    <canvas id="inputCapture" width="320" height="240" style="display: none"></canvas>
+	    <canvas id="debugCanvas" width="320" height="240" style="display: none"></canvas>
+
+	    <div id="result"></div>
+
+
+	    <script src="AR_mediastream-spark.js"></script>
+
+
+	 
+		<!-- the following scripts are various classes in the code -->
+		<script src="component.js"></script>
+		<!-- the following scripts are the functional scripts for Spark -->
+		<script src="main.js"></script>
+		<script src="MotionDetection.js"></script>
+
+		<script type="text/javascript">
+
+			Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
+			doParse('init');
+			//listen for streamed messages
+			var pubnub = PUBNUB.init({
+				publish_key: 'demo',
+			    subscribe_key: 'demo'
+			 });
+
+			// pubnub.publish({
+			// 	channel: 'ebz',
+			//     message: '1'
+			// });
+
+			pubnub.subscribe({
+			    channel: 'ebz',
+			    message: function(m){
+
+			    	doParse('update');
+			    }
+			});
+
+			function doParse(message){
+				// if updating the circuit, set a boolean to pause the rendering while the circuit object is being parsed
+				if (message != 'init') updateFlag = true; 
+			   	var numComps;
+			    components = []; // this var is created in main.js 
+			    var tCircuit;
+				// create a new subclass of Parse.Object named Circuit
+			    var parseCircuit = Parse.Object.extend("Circuit");
+			    var query = new Parse.Query(parseCircuit);
+			    //query.exists("type");// This determines if the field "type" is set for the instances and retrieves all 
+			  	//objects that have the "type" field set
+			  	query.find().then(function(results){
+			    	var promise = Parse.Promise.as();
+			    	_.each(results, function(result){
+			      	promise = promise.then(function(){
+			              compType = result.get("type");
+			              compVolt = result.get("voltageDrop");
+			              current = result.get("current");
+			              compRes = result.get("resistance");
+			              startx = 2 * result.get("startX");
+			              starty = 2 * result.get("startY");
+			              endx = 2 * result.get("endX");
+			              endy = 2 * result.get("endY");
+			              direction = result.get("direction");
+			              graphLabel = result.get("graphLabel");
+			              //direction = 1;
+			              connections = result.get("connection");
+			              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy, direction, connections, graphLabel);
+			              components.push(tCircuit);        
+			      		});
+
+			    	});
+			        return promise;
+			    }).then(function(){
+			    	if (message == 'init') {
+			    		doInit();
+			    	}
+			    	else { // message is update
+			    		updateFlag = false; //sets the boolean to resume rendering the scene
+			    		doUpdate();
+			    	}
+			    	
+
+			  
+			    });  
+			}
+
+		</script>
+	</body>
+</html>

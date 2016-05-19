@@ -125,6 +125,7 @@ class App extends TouchManager {
    int canvasMargin = 5;
    Rectangle workingBox; // the box for building circuits
    Rectangle containerBox;
+   ImageElement markerImg;
    
    /* 
     * condition is the study condition
@@ -190,7 +191,12 @@ class App extends TouchManager {
      var voltage = double.parse(slider.value);
      
      // create the first battery
-     new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
+     new Battery(centerX - 50, centerY - 50, centerX + 50, centerY - 50, voltage);
+     
+     // create a JsAr tag
+     markerImg = new ImageElement();
+     markerImg.src = "images/marker2.png";
+     markerImg.onLoad.listen((event) { draw(); });     
 
          
      //var t = 65;
@@ -275,6 +281,12 @@ class App extends TouchManager {
      num boxW = deleteBoxImg.width / 7;
      num boxH = deleteBoxImg.height / 7;
      ctx.drawImageScaled(deleteBoxImg, 2 * canvasMargin, 2*canvasMargin, boxW, boxH);
+     
+     num centerX = workingBox.width / 2;
+     num centerY = workingBox.height / 2;
+     num markerW = markerImg.width / 5;
+     num markerH = markerImg.height / 5;
+     ctx.drawImageScaled(markerImg, centerX-markerW/2, centerY-markerH/2, markerW, markerH);
      
      /* redraw the components */
      for (Component c in components) {
