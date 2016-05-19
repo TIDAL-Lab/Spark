@@ -14,14 +14,14 @@
 var parameters, detector;
 var imageReader, resultMatrix;
 var input;
-var width = 320;
-var height = 240;
+var videoWidth = 320;
+var videoHeight = 240;
 var inputCapture, inputTexture, inputPlane;
 
 function JsArInit() {
 /*    $('#loading').hide();
     $('#nowebgl').hide(); // temporarily; later see what you should do with these two messages!*/
-    threshold = 128;
+    threshold = 128;  //threshold was set to 128 in the demo code 
 
 	// Set this to true and the JSARToolkit will output some debug information to
 	// the console and copy a visualisation of its analysis results to the
@@ -35,8 +35,8 @@ function JsArInit() {
     // ...this is what analyses the canvas images for AR markers
     // (You can adjust markerWidth so that your objects appear
     // the right size relative to your markers)
-    var markerWidth = 180;
-    parameters = new FLARParam( width, height );
+    var markerWidth = 120;
+    parameters = new FLARParam( videoWidth, videoHeight );
     detector = new FLARMultiIdMarkerDetector(parameters, markerWidth);
 
     // The three.js camera for rendering the overlay on the input images
@@ -50,8 +50,7 @@ function JsArInit() {
 	
     // Set up another three.js scene that just draws the inputCapture...
     inputCamera = new THREE.Camera();
-    // inputCamera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
-    // inputCamera.position.z = -700;
+
     inputScene = new THREE.Scene();
     inputTexture = new THREE.Texture(inputCapture);
     inputPlane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2, 0), new THREE.MeshBasicMaterial({ map: inputTexture }));
@@ -91,7 +90,7 @@ function JsArInit() {
     jsFrames.registerAnimation(function () {
         markerDetectedFlag = false;
         // Capture the current frame from the inputStream
-        inputCapture.getContext('2d').drawImage(input, 0, 0, width, height);
+        inputCapture.getContext('2d').drawImage(input, 0, 0, videoWidth, videoHeight);
 
         // then we need to tell the image reader and the input scene that the input has changed
         inputCapture.changed = true;
