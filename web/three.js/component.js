@@ -129,12 +129,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		}
 		else {
 			var containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+			containerMaterial.transparent = false;
+			containerMaterial.opacity = 0.7;
+			//containerMaterial.depthTest = false;
+			containerMaterial.depthWrite = false;
 		}
 
-		containerMaterial.transparent = false;
-		containerMaterial.opacity = 0.7;
-		//containerMaterial.depthTest = false;
-		containerMaterial.depthWrite = false;
+
 		this.container = new THREE.Mesh( containerGeometry, containerMaterial );
 
 		// now add the junctions to the box	
@@ -307,7 +308,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					// TEMP: for now, I assume that no more than one battery connected together
 					if (connectedComponent.compType == "Battery") {
 						if ( connectedComponent.startJunction.connectedComponentID == this.ID ) {
-							// if the other end of battery is also connected to another component,
+							// if the other end of battery is also connected to another component & it is a closed loop
 							// then transfer the electron to the other side
 							if (connectedComponent.endJunction.connectedComponentID != -1
 								&& this.force.length() != 0.0) {
@@ -372,15 +373,31 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.passFromBattery = function( thisElectron, firstJunction, secondJunction, battery ) {
+
+			if (ArFlag) {  //AR condition
+
+			}
+			else {   // non AR condition
+
+			}
 			var pushVector = new THREE.Vector3();
 			pushVector.subVectors(secondJunction.position, firstJunction.position);
 			var length = pushVector.length();  // TEST: 1.01
-     		pushVector.transformDirection(battery.container.matrixWorld); //normalized
-			pushVector.multiplyScalar(length); 
+     		pushVector.transformDirection(battery.container.matrixWorld); //normalized 
+/*			if (ArFlag) {
+				var temp = new THREE.Vector3();
+				temp.copy(electron);
+				temp.transformDirection(electrons.matrixWorld);
+				temp.add(pushVector);
+				var m = new THREE.Matrix4();
+				m = m.getInverse(electrons.matrixWorld);
+				temp.transformDirection(m);
+				electron = temp;
+				//pushVector.transformDirection(electrons.matrixWorld);
+			}*/
+			pushVector.multiplyScalar(length);
 			thisElectron.add(pushVector);
-			thisElectron.componentID = secondJunction.connectedComponentID;
-
-
+			thisElectron.componentID = secondJunction.connectedComponentID;	
 	}
 
 	this.moveElectron = function (electron) {
@@ -437,7 +454,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
 			var reflection = direction.reflect(worldNormal);
 			var m = new THREE.Matrix4();
-			m = m.getInverse(electrons.matrixWorld)
+			m = m.getInverse(electrons.matrixWorld);
 			reflection.transformDirection(m);
 			electron.velocity = reflection.multiplyScalar(length);
 		}	

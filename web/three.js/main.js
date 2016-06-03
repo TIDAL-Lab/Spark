@@ -70,8 +70,8 @@ function init() {
 	renderer = new THREE.WebGLRenderer();
 	renderer.setClearColor ( 0x337586 ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
-	//renderer.setSize( window.innerWidth / 2 , window.innerHeight );
-	renderer.setSize( width * 2 , height * 2 );
+	renderer.setSize( window.innerWidth , window.innerHeight );
+	//renderer.setSize( width * 2 , height * 2 );
 	
 	document.body.appendChild( renderer.domElement );
 
