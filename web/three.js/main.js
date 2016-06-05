@@ -110,6 +110,9 @@ function initComponents() {
 	for (k=0; k < components.length; k++) {
 		components[k].init(electronGeometry, k); // sends k as the component ID				
 	}
+	for (k=0; k < components.length; k++) {
+		components[k].updateJunctions();
+	}
 	
 	if (!ArFlag) electronSize = 10;
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: 0x000099 , transparent: true } );

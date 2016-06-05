@@ -461,7 +461,7 @@ Things that I am going to fix today:
 	notes: I think the issue is with the passFromBattery function and the way it works with matrix transformations
 	I tried transforming the two junction positions by battery world matrix, but it did not work, I should not do this.
 	
-*** notes on 6/2/2016
+*** notes on 6/4/2016
 1. made the inputscene (the one that camera captures) opaque, just to make it look better!
 	inputPlane.material.opacity = 0.3;
 
@@ -477,8 +477,14 @@ Things that I am going to fix today:
 			now, I have to check if the list of connected components is empty or not
 	b. then I have to write code for when electron is moving to a connected components, it looks at the list of connected
 		components and picks one component to move to based on a probablity
-		which depends on the force (potential difference) of the connected components
+		which is proportional to the current of the connected components
 		i.e., the larger the force, the higher the probability of moving to that component.
+
+*** notes on 6/5/2016
+1. I wrote code for forming a list of currents for each junction when the components are initialized.
+	the list considers the direction of current: whether it's leaving the junction (positive) or coming to the junction (negative)
+
+
 
 
 ISSUES TO FIX LATER:
@@ -494,4 +500,8 @@ ISSUE003 (5/11/2016): figure out why sorting the components based on graphLabel 
 ISSUE004 (5/11/2016): figure out junctions with more than 2 components connected
 
 ISSUE005 (5/19/2016): make it work with more than one connected battery
+
+ISSUE006 (6/5/2016): the electrons pass from battery either from + to - or - to + I should fix this later
+					and i might need to consider the direction of current flow to let the electrons go from one side to the other
+					
 		

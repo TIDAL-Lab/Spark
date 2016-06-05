@@ -41,9 +41,9 @@ var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it
 
 function Component(type, current, res, volt, startX, startY, endX, endY, direction, connections, graphLabel) {
  	this.compType = type; // "wire", "resistor", "bulb", "battery"
-  	this.I = current;
+  	this.current = current;
   	this.R = res;
-  	this.V = volt;
+  	this.volt = volt;
   	this.startPoint = new THREE.Vector3( startX, startY, 0.0 );
   	this.endPoint = new THREE.Vector3( endX, endY, 0.0 ); 
   	this.direction = direction; // 0 if v=0; 1 if from Start to End; -1 if from End to Start
@@ -103,8 +103,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	this.computeForce = function() {
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
-	  	this.force.y = this.direction * this.V; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
-	  	if (this.compType == "Wire") { this.force.y *= 1000; }
+	  	this.force.y = this.direction * this.volt; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
+	  	//if (this.compType == "Wire") { this.force.y *= 1000; }
 	  	this.force.z = 0.0;
 	}
 
@@ -154,21 +154,27 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			if (code != -1 && code != 0) {			// if junction is connected
 				if (code == 1 || code == 3) {		// start junction is connected
 					startJunction.material.color.set(green);
-					startJunction.connectedComponentID = i;
+					//startJunction.connectedComponentID = i;
+					startJunction.connectedComponentIDs.push(i);
+					startJunction.connectedComponents.push(components[i]);
+					//startJunction.currents.push(components[i].I);
 				}
 				else {								// end junction is connected
 					endJunction.material.color.set(green);
-					endJunction.connectedComponentID = i;
+					//endJunction.connectedComponentID = i;
+					endJunction.connectedComponentIDs.push(i);
+					endJunction.connectedComponents.push(components[i]);
 				}
 
 			}
 		}
-
 	    // add the junctions to the box
 	    this.startJunction = startJunction;
 		this.container.add(this.startJunction);
 		this.endJunction = endJunction;
 		this.container.add(this.endJunction);
+		// console.log("component " + this.ID + ": ")
+		// console.log(this.startJunction.connectedComponentIDs);
 
 		// create ions and add them to the box
 		if (this.compType != "Battery") { this.createIons(); }
@@ -194,9 +200,33 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		junction.material.depthWrite = false;
 		junction.material.side = THREE.BackSide;
 
-		junction.connectedComponentID = -1; // to avoid the undefined variable
+		//junction.connectedComponentID = -1;
+		junction.connectedComponentIDs = [];
+		junction.connectedComponents = [];
+		junction.currents = [];
+
+
 		junction.position.y = yPos;
 		return junction;
+	}
+
+	this.updateJunctions = function() {
+		this.formJunctionCurrents( this.startJunction );
+		this.formJunctionCurrents( this.endJunction );
+	} 
+	this.formJunctionCurrents = function ( junction ) {
+		for ( i = 0; i < junction.connectedComponents.length; i ++ ) {
+			var component = junction.connectedComponents[i];
+			if (component.startJunction.connectedComponentIDs.includes(this.ID)) {  //connected component is connected by
+																				  // its start junction
+				junction.currents.push( component.current * component.direction ); 
+			}
+			else {  //connected component is connected by its end junction, so I need to multiply it by -1 to get to correct direction
+				junction.currents.push( component.current * component.direction * -1 );
+
+			}
+		}
+		console.log("component " + this.ID + ": " + junction.currents);
 	}
 
 	this.createIons = function() {		
@@ -298,66 +328,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			
 			if ( obstacle.object == this.startJunction || 
 				 obstacle.object == this.endJunction ) {
-				var thisJunction = obstacle.object;
-				if (thisJunction.connectedComponentID != -1) { // if it is connected to another component, change the electron's component ID
+				if ( obstacle.object.connectedComponentIDs.length > 0 ) { // if it is connected to another component, change the electron's component ID
 															   // and wait for it to move next time
-					var connectedComponent = components[thisJunction.connectedComponentID];
-					
-					//first check if the connected component is a battery
-					// TEMP: for now, I assume that no more than one battery connected together
-					if (connectedComponent.compType == "Battery") {
-						if ( connectedComponent.startJunction.connectedComponentID == this.ID ) {
-							// if the other end of battery is also connected to another component & it is a closed loop
-							// then transfer the electron to the other side
-							if (connectedComponent.endJunction.connectedComponentID != -1
-								&& this.force.length() != 0.0) {
-								this.passFromBattery( electron, connectedComponent.startJunction, connectedComponent.endJunction, connectedComponent);
-								//electron.componentID = thisJunction.connectedComponentID;
-								var nextComponent = components[electron.componentID];
-								var nextObstacle = nextComponent.collision(electron);
-								if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
-									if ( nextObstacle.object == nextComponent.startJunction 
-										|| nextObstacle.object == nextComponent.endJunction ) {
-										this.bounceBack(electron, nextObstacle);
-									}
-								}
-                            }
-							else {  // if the battery is not connected from the other side, bounce back the electron
-								this.bounceBack(electron, obstacle);
-							}
-						}
-						else {     //it is connected to battery's end junction
-							if (connectedComponent.startJunction.connectedComponentID != -1
-								&& this.force.length() != 0.0 ) {
-								this.passFromBattery( electron, connectedComponent.endJunction, connectedComponent.startJunction, connectedComponent);
-								//electron.componentID = thisJunction.connectedComponentID;
-								var nextComponent = components[electron.componentID];
-								var nextObstacle = nextComponent.collision(electron);
-								if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
-									if ( nextObstacle.object == nextComponent.startJunction 
-										|| nextObstacle.object == nextComponent.endJunction ) {
-										this.bounceBack(electron, nextObstacle);
-									}
-								}
-							}
-							else { // if the battery is not connected from the other side, bounce back the electron
-								this.bounceBack(electron, obstacle);
-							}
-						}
-
-					}
-
-					else {   // if the connected component is not a battery
-						electron.componentID = thisJunction.connectedComponentID;
-						var nextObstacle = connectedComponent.collision(electron);
-						if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
-							if ( nextObstacle.object == connectedComponent.startJunction 
-								|| nextObstacle.object == connectedComponent.endJunction ) {
-								this.bounceBack(electron, obstacle);
-							}
-						}	
-					}
-
+				    this.collideConnectedJunction( electron, obstacle );
 				}
 				else {   // if the junction is not connected, bounce back the electron
 
@@ -369,6 +342,80 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			}
 			
 		}
+	}
+
+	this.collideConnectedJunction = function( electron, obstacle ) {
+		var thisJunction = obstacle.object;
+		var connectedComponent = this.findNextComponent( electron, thisJunction );		
+
+		//first check if the connected component is a battery
+		// TEMP: for now, I assume that no more than one battery connected together
+		if (connectedComponent.compType == "Battery") {
+			if ( connectedComponent.startJunction.connectedComponentIDs[0] == this.ID ) {
+				// if the other end of battery is also connected to another component & it is a closed loop
+				// then transfer the electron to the other side
+				if (connectedComponent.endJunction.connectedComponentIDs.length > 0
+					&& this.force.length() != 0.0) {
+					this.passFromBattery( electron, connectedComponent.startJunction, connectedComponent.endJunction, connectedComponent);
+					//electron.componentID = thisJunction.connectedComponentID;
+					var nextComponent = components[electron.componentID];
+					var nextObstacle = nextComponent.collision(electron);
+					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
+						if ( nextObstacle.object == nextComponent.startJunction 
+							|| nextObstacle.object == nextComponent.endJunction ) {
+							this.bounceBack(electron, nextObstacle);
+						}
+					}
+                }
+				else {  // if the battery is not connected from the other side (or is connected but I=0)
+						//	 bounce back the electron
+					this.bounceBack(electron, obstacle);
+				}
+			}
+			else {     //it is connected to battery's end junction
+				if (connectedComponent.startJunction.connectedComponentIDs.length > 0
+					&& this.force.length() != 0.0 ) {
+					this.passFromBattery( electron, connectedComponent.endJunction, connectedComponent.startJunction, connectedComponent);
+					//electron.componentID = thisJunction.connectedComponentID;
+					var nextComponent = components[electron.componentID];
+					var nextObstacle = nextComponent.collision(electron);
+					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
+						if ( nextObstacle.object == nextComponent.startJunction 
+							|| nextObstacle.object == nextComponent.endJunction ) {
+							this.bounceBack(electron, nextObstacle);
+						}
+					}
+				}
+				else { // if the battery is not connected from the other side, bounce back the electron
+					this.bounceBack(electron, obstacle);
+				}
+			}
+
+		}
+
+		else {   // if the connected component is not a battery
+			electron.componentID = thisJunction.connectedComponentIDs[0];
+			var nextObstacle = connectedComponent.collision(electron);
+			if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
+				if ( nextObstacle.object == connectedComponent.startJunction 
+					|| nextObstacle.object == connectedComponent.endJunction ) {
+					this.bounceBack(electron, obstacle);
+				}
+			}	
+		}
+
+
+	}
+
+	this.findNextComponent = function( electron, thisJunction ) {
+
+
+
+		var nextComponent = thisJunction.connectedComponents[0];
+
+
+		return nextComponent;
+
 	}
 
 	this.passFromBattery = function( thisElectron, firstJunction, secondJunction, battery ) {
@@ -391,7 +438,69 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			thisElectron.add(pushVector);
 		}	
 
-		thisElectron.componentID = secondJunction.connectedComponentID;	
+		thisElectron.componentID = secondJunction.connectedComponentIDs[0];	
+	}
+
+	this.collideConnectedJunctionOld = function( electron, obstacle ) {
+		var thisJunction = obstacle.object;
+		var connectedComponent = components[thisJunction.connectedComponentID];
+		//var connectedComponent = components[thisJunction.connectedComponentIDs[0]];
+		//first check if the connected component is a battery
+		// TEMP: for now, I assume that no more than one battery connected together
+		if (connectedComponent.compType == "Battery") {
+			if ( connectedComponent.startJunction.connectedComponentID == this.ID ) {
+				// if the other end of battery is also connected to another component & it is a closed loop
+				// then transfer the electron to the other side
+				if (connectedComponent.endJunction.connectedComponentID != -1
+					&& this.force.length() != 0.0) {
+					this.passFromBattery( electron, connectedComponent.startJunction, connectedComponent.endJunction, connectedComponent);
+					//electron.componentID = thisJunction.connectedComponentID;
+					var nextComponent = components[electron.componentID];
+					var nextObstacle = nextComponent.collision(electron);
+					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
+						if ( nextObstacle.object == nextComponent.startJunction 
+							|| nextObstacle.object == nextComponent.endJunction ) {
+							this.bounceBack(electron, nextObstacle);
+						}
+					}
+                }
+				else {  // if the battery is not connected from the other side, bounce back the electron
+					this.bounceBack(electron, obstacle);
+				}
+			}
+			else {     //it is connected to battery's end junction
+				if (connectedComponent.startJunction.connectedComponentID != -1
+					&& this.force.length() != 0.0 ) {
+					this.passFromBattery( electron, connectedComponent.endJunction, connectedComponent.startJunction, connectedComponent);
+					//electron.componentID = thisJunction.connectedComponentID;
+					var nextComponent = components[electron.componentID];
+					var nextObstacle = nextComponent.collision(electron);
+					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
+						if ( nextObstacle.object == nextComponent.startJunction 
+							|| nextObstacle.object == nextComponent.endJunction ) {
+							this.bounceBack(electron, nextObstacle);
+						}
+					}
+				}
+				else { // if the battery is not connected from the other side, bounce back the electron
+					this.bounceBack(electron, obstacle);
+				}
+			}
+
+		}
+
+		else {   // if the connected component is not a battery
+			electron.componentID = thisJunction.connectedComponentID;
+			var nextObstacle = connectedComponent.collision(electron);
+			if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
+				if ( nextObstacle.object == connectedComponent.startJunction 
+					|| nextObstacle.object == connectedComponent.endJunction ) {
+					this.bounceBack(electron, obstacle);
+				}
+			}	
+		}
+
+
 	}
 
 	this.moveElectron = function (electron) {
