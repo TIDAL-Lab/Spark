@@ -195,7 +195,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		junction.material.side = THREE.BackSide;
 
 		junction.connectedComponentID = -1; // to avoid the undefined variable
-		
 		junction.position.y = yPos;
 		return junction;
 	}
@@ -373,31 +372,26 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.passFromBattery = function( thisElectron, firstJunction, secondJunction, battery ) {
+		var pushVector = new THREE.Vector3();
+		pushVector.subVectors(secondJunction.position, firstJunction.position);
+		var length = pushVector.length();  // TEST: 1.01
+ 		pushVector.transformDirection(battery.container.matrixWorld); //normalized 
+		pushVector.multiplyScalar(length);
 
-			if (ArFlag) {  //AR condition
-
-			}
-			else {   // non AR condition
-
-			}
-			var pushVector = new THREE.Vector3();
-			pushVector.subVectors(secondJunction.position, firstJunction.position);
-			var length = pushVector.length();  // TEST: 1.01
-     		pushVector.transformDirection(battery.container.matrixWorld); //normalized 
-/*			if (ArFlag) {
-				var temp = new THREE.Vector3();
-				temp.copy(electron);
-				temp.transformDirection(electrons.matrixWorld);
-				temp.add(pushVector);
-				var m = new THREE.Matrix4();
-				m = m.getInverse(electrons.matrixWorld);
-				temp.transformDirection(m);
-				electron = temp;
-				//pushVector.transformDirection(electrons.matrixWorld);
-			}*/
-			pushVector.multiplyScalar(length);
+		if (ArFlag) {  //AR condition
+			// first transform the electron position with the world matrix, move it to the next component
+			// then use inverse matrix to transform the position back to the electrons local position
+			thisElectron.applyMatrix4(electrons.matrixWorld);
 			thisElectron.add(pushVector);
-			thisElectron.componentID = secondJunction.connectedComponentID;	
+			var m = new THREE.Matrix4();
+			m = m.getInverse(electrons.matrixWorld);
+			thisElectron.applyMatrix4(m);
+		}
+		else {   // non-AR condition
+			thisElectron.add(pushVector);
+		}	
+
+		thisElectron.componentID = secondJunction.connectedComponentID;	
 	}
 
 	this.moveElectron = function (electron) {

@@ -442,16 +442,56 @@ I am working on resistor/bulb and battery
 	I sorted the components (I added this before for the purpose of using CSG, but it is not necessary anymore), so
 	I commented it and the problem is solved, but I don't understand why!!!
 	
+*** notes on 5/18/2016
+Things that I am going to fix today:
+1. figure out why some electrons stuck in junctions.
+	OBSERVATION: it seems that the electrons get stuck in the start junction, also they move weird in the start junction
+	I compared start and end junctions, and strangely it seems that when I rotate the half sphere for start junction
+	that causes the issue!! I tested rotating the end junction instead and as a result electrons stuck in the end junctions!
+	SOLUTION: not rotate the junctions and instead create two half spheres with different thetaStart (0 and PI/2)
+2. fix the battery related code
+	FIXED: the issue was that I was using the next components world matrix to transform, but instead I should use the 
+	battery's matrix.
+
+*** notes on 6/2/2016
+1. fix the camera canvas size on surface:
+	I keep the height and width of inputscene untouched and then play with the renderer size
+2. ISSUE: In non-AR condition a complete circuit works almost fine, but in AR condition the electrons are not correctly transferred
+	to the other side of battery.
+	notes: I think the issue is with the passFromBattery function and the way it works with matrix transformations
+	I tried transforming the two junction positions by battery world matrix, but it did not work, I should not do this.
+	
+*** notes on 6/2/2016
+1. made the inputscene (the one that camera captures) opaque, just to make it look better!
+	inputPlane.material.opacity = 0.3;
+
+2. still working on the issue with the passFromBattery function for non-AR condition:
+	FIXED: i needed to first transform the electron position with the electrons world matrix, add the push vector to it
+			and then transform electron position back to the local matrix for electrons.
+			
+3. working on ISSUE004: make it work for junctions with moer than two connected components
+	plan:
+	a. right now junctions has a filed called "connectedComponentID" which is a number value
+		I have to change that to an array to consider more than one connections
+		a.a. instead of checking (connectedComponentID != -1) that indicates the junction is not connected
+			now, I have to check if the list of connected components is empty or not
+	b. then I have to write code for when electron is moving to a connected components, it looks at the list of connected
+		components and picks one component to move to based on a probablity
+		which depends on the force (potential difference) of the connected components
+		i.e., the larger the force, the higher the probability of moving to that component.
+
 
 ISSUES TO FIX LATER:
 
-ISSUE (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
+ISSUE001 (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
 		I need to fix this problem
 		temp solution: if (!ArFlag) electronSize = 10;	
 		
-ISSUE (4/17/2016): jittering issue --> use a smoothing algorithm	
+ISSUE002 (4/17/2016): jittering issue --> use a smoothing algorithm	
 
-ISSUE (5/11/2016): figure out why sorting the components based on graphLabel messed up with code	
+ISSUE003 (5/11/2016): figure out why sorting the components based on graphLabel messed up with code	
 
-ISSUE (5/11/2016): figure out junctions with more than 2 components
+ISSUE004 (5/11/2016): figure out junctions with more than 2 components connected
+
+ISSUE005 (5/19/2016): make it work with more than one connected battery
 		

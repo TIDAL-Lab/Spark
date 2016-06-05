@@ -53,10 +53,14 @@ function JsArInit() {
     // inputCamera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
     // inputCamera.position.z = -700;
     inputScene = new THREE.Scene();
+    //inputScene.fog = new THREE.Fog(0xffffff, 10, 60);
+
     inputTexture = new THREE.Texture(inputCapture);
     inputPlane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2, 0), new THREE.MeshBasicMaterial({ map: inputTexture }));
     inputPlane.material.depthTest = false;
     inputPlane.material.depthWrite = false; // EB: When drawing 2D overlays it can be useful to disable the depth writing in order to layer several things together without creating z-index artifacts.
+    inputPlane.material.transparent =true;
+    inputPlane.material.opacity = 0.3;
     inputScene.add(inputPlane);
     inputScene.add(inputCamera);
 
