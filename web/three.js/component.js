@@ -157,7 +157,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					//startJunction.connectedComponentID = i;
 					startJunction.connectedComponentIDs.push(i);
 					startJunction.connectedComponents.push(components[i]);
-					//startJunction.currents.push(components[i].I);
 				}
 				else {								// end junction is connected
 					endJunction.material.color.set(green);
@@ -205,20 +204,24 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		junction.connectedComponents = [];
 		junction.currents = [];
 
+		junction.outComponents = [];
+		junction.outCurrents = [];
+		junction.probabilities = [];
 
 		junction.position.y = yPos;
 		return junction;
 	}
 
 	this.updateJunctions = function() {
-		this.formJunctionCurrents( this.startJunction );
-		this.formJunctionCurrents( this.endJunction );
+		this.formJunctionCurrents( this.startJunction, "start" );
+		this.formJunctionCurrents( this.endJunction, "end" );
 	} 
-	this.formJunctionCurrents = function ( junction ) {
+	this.formJunctionCurrents = function ( junction, string ) {  // REMOVE STRING: it's only for testing
 		for ( i = 0; i < junction.connectedComponents.length; i ++ ) {
 			var component = junction.connectedComponents[i];
-			if (component.startJunction.connectedComponentIDs.includes(this.ID)) {  //connected component is connected by
+			if (component.startJunction.connectedComponents.includes(this)) {  //connected component is connected by
 																				  // its start junction
+				//var current = component.current * component.direction;																  
 				junction.currents.push( component.current * component.direction ); 
 			}
 			else {  //connected component is connected by its end junction, so I need to multiply it by -1 to get to correct direction
@@ -226,7 +229,44 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			}
 		}
-		console.log("component " + this.ID + ": " + junction.currents);
+
+/*		// TEST
+		if (this.ID == 0) { this.current = 1.5; junction.currents = [0.4, 0.1, 1];}
+		if (this.ID == 1) { this.current = 0.4; junction.currents = [-1.5, 0.1, 1];}
+		if (this.ID == 2) { this.current = 0.1; junction.currents = [-1.5, 0.4, 1];}
+		if (this.ID == 3) { this.current = 1; junction.currents = [-1.5, 0.4, 0.1];}
+
+		console.log("component " + this.ID + " " + string + ": " + junction.currents);*/
+
+		for (i=0; i < junction.connectedComponents.length; i++) {
+			if ( this.current != 0.0 && junction.currents[i] > 0.0 ) { // LATER: should it be this.current > 0.0 too? to avoid going back?
+				junction.outComponents.push(junction.connectedComponents[i]);
+				junction.outCurrents.push(junction.currents[i]);
+			} 
+			if (this.current == 0.0 && junction.currents[i] == 0.0 ) {
+				junction.outComponents.push(junction.connectedComponents[i]);
+				//junction.outCurrents.push(junction.currents[i]);
+				junction.probabilities.push(1); // there is the same probability for going to each branch
+			}
+		}
+		console.log("out " + this.ID + " " + string + ": " + junction.outCurrents);
+		if (this.current != 0.0) {
+			var norm = Math.min.apply( Math, junction.outCurrents );
+			junction.probabilities = junction.outCurrents.map(function(a) {
+	    							return (a/norm);
+								});
+		}
+
+		for (i=1; i < junction.probabilities.length; i++) {  // start from the second element
+			junction.probabilities[i] += junction.probabilities[i-1];
+		}
+		console.log("prob " + this.ID + " " + string + ": " + junction.probabilities);
+
+		// var c = this.findNextComponent(junction);
+		// if (c != null) {console.log("next " + this.ID + " " + string + ": " + c.ID);}
+		// else {console.log("next " + this.ID + " " + string + ": " + c);}
+
+
 	}
 
 	this.createIons = function() {		
@@ -346,75 +386,92 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	this.collideConnectedJunction = function( electron, obstacle ) {
 		var thisJunction = obstacle.object;
-		var connectedComponent = this.findNextComponent( electron, thisJunction );		
+		//var connectedComponent = thisJunction.connectedComponents[0];
+		var nextComponent = this.findNextComponent( thisJunction );
+		if ( nextComponent == null ) {this.bounceBack(electron, obstacle);}	
+		else {
 
-		//first check if the connected component is a battery
-		// TEMP: for now, I assume that no more than one battery connected together
-		if (connectedComponent.compType == "Battery") {
-			if ( connectedComponent.startJunction.connectedComponentIDs[0] == this.ID ) {
-				// if the other end of battery is also connected to another component & it is a closed loop
-				// then transfer the electron to the other side
-				if (connectedComponent.endJunction.connectedComponentIDs.length > 0
-					&& this.force.length() != 0.0) {
-					this.passFromBattery( electron, connectedComponent.startJunction, connectedComponent.endJunction, connectedComponent);
-					//electron.componentID = thisJunction.connectedComponentID;
-					var nextComponent = components[electron.componentID];
-					var nextObstacle = nextComponent.collision(electron);
-					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
-						if ( nextObstacle.object == nextComponent.startJunction 
-							|| nextObstacle.object == nextComponent.endJunction ) {
-							this.bounceBack(electron, nextObstacle);
+			//first check if the connected component is a battery
+			// TEMP: for now, I assume that no more than one battery connected together
+			if (nextComponent.compType == "Battery") {
+				if ( nextComponent.startJunction.connectedComponentIDs[0] == this.ID ) {
+					// if the other end of battery is also connected to another component & it is a closed loop
+					// then transfer the electron to the other side
+					if (nextComponent.endJunction.connectedComponentIDs.length > 0
+						&& this.force.length() != 0.0) {
+						this.passFromBattery( electron, nextComponent.startJunction, nextComponent.endJunction, nextComponent);
+						//electron.componentID = thisJunction.connectedComponentID;
+						var afterComponent = components[electron.componentID];
+						var afterObstacle = afterComponent.collision(electron);
+						if (afterObstacle != null) {    // this is to avoid electrons stucking in overlap area
+							if ( afterObstacle.object == afterComponent.startJunction 
+								|| afterObstacle.object == afterComponent.endJunction ) {
+								this.bounceBack(electron, afterObstacle);
+							}
 						}
-					}
-                }
-				else {  // if the battery is not connected from the other side (or is connected but I=0)
-						//	 bounce back the electron
-					this.bounceBack(electron, obstacle);
-				}
-			}
-			else {     //it is connected to battery's end junction
-				if (connectedComponent.startJunction.connectedComponentIDs.length > 0
-					&& this.force.length() != 0.0 ) {
-					this.passFromBattery( electron, connectedComponent.endJunction, connectedComponent.startJunction, connectedComponent);
-					//electron.componentID = thisJunction.connectedComponentID;
-					var nextComponent = components[electron.componentID];
-					var nextObstacle = nextComponent.collision(electron);
-					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
-						if ( nextObstacle.object == nextComponent.startJunction 
-							|| nextObstacle.object == nextComponent.endJunction ) {
-							this.bounceBack(electron, nextObstacle);
-						}
+	                }
+					else {  // if the battery is not connected from the other side (or is connected but I=0)
+							//	 bounce back the electron
+						this.bounceBack(electron, obstacle);
 					}
 				}
-				else { // if the battery is not connected from the other side, bounce back the electron
-					this.bounceBack(electron, obstacle);
+				else {     //it is connected to battery's end junction
+					if (nextComponent.startJunction.connectedComponentIDs.length > 0
+						&& this.force.length() != 0.0 ) {
+						this.passFromBattery( electron, nextComponent.endJunction, nextComponent.startJunction, nextComponent);
+						//electron.componentID = thisJunction.connectedComponentID;
+						var afterComponent = components[electron.componentID];
+						var afterObstacle = afterComponent.collision(electron);
+						if (afterObstacle != null) {    // this is to avoid electrons stucking in overlap area
+							if ( afterObstacle.object == afterComponent.startJunction 
+								|| afterObstacle.object == afterComponent.endJunction ) {
+								this.bounceBack(electron, afterObstacle);
+							}
+						}
+					}
+					else { // if the battery is not connected from the other side, bounce back the electron
+						this.bounceBack(electron, obstacle);
+					}
 				}
+
 			}
 
-		}
-
-		else {   // if the connected component is not a battery
-			electron.componentID = thisJunction.connectedComponentIDs[0];
-			var nextObstacle = connectedComponent.collision(electron);
-			if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
-				if ( nextObstacle.object == connectedComponent.startJunction 
-					|| nextObstacle.object == connectedComponent.endJunction ) {
-					this.bounceBack(electron, obstacle);
-				}
-			}	
+			else {   // if the connected component is not a battery
+				electron.componentID = thisJunction.connectedComponentIDs[0];
+				var nextObstacle = nextComponent.collision(electron);
+				if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
+					if ( nextObstacle.object == nextComponent.startJunction 
+						|| nextObstacle.object == nextComponent.endJunction ) {
+						this.bounceBack(electron, obstacle);
+					}
+				}	
+			}
 		}
 
 
 	}
 
-	this.findNextComponent = function( electron, thisJunction ) {
+	this.findNextComponent = function( junction ) {
+		if (junction.probabilities.length == 0) {
+			//console.log("bug");
+			return null;
+		}
+		else {
+			//console.log("alright");
+			var diceMax = junction.probabilities[junction.probabilities.length - 1]; // set diceMax to the last element of probabilites
+			var diceRoll = Math.floor(Math.random() * diceMax); // floor(random(max-min)) + min
+			//console.log("diceRoll: " + diceRoll);
+			//console.log("prob= " + junction.probabilities);
+			// console.log("length: " + junction.outComponents.length);
+			if (diceRoll < junction.probabilities[0]) {return junction.outComponents[0];}
+			else {
+				for (i=1; i < junction.probabilities.length; i++) {
+					if (diceRoll < junction.probabilities[i] ) {return junction.outComponents[i];} 
+				} 
+			}
 
-
-
-		var nextComponent = thisJunction.connectedComponents[0];
-
-
-		return nextComponent;
+			// var nextComponent = junction.connectedComponents[0];
+		}
 
 	}
 

@@ -70,8 +70,8 @@ function init() {
 	renderer = new THREE.WebGLRenderer();
 	renderer.setClearColor ( 0x337586 ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
-	//renderer.setSize( window.innerWidth , window.innerHeight );
-	renderer.setSize( width * 2 , height * 2 );
+	renderer.setSize( window.innerWidth , window.innerHeight );
+	//renderer.setSize( width * 2 , height * 2 );
 	
 	document.body.appendChild( renderer.domElement );
 
@@ -96,7 +96,8 @@ function init() {
 	window.addEventListener( 'resize', onWindowResize, false );
 
 	// CONTROLS
-	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	//controls = new THREE.OrbitControls( camera, renderer.domElement );
+	controls = new THREE.EditorControls( camera, renderer.domElement );
 	
 }
 
@@ -148,7 +149,7 @@ function animate() {
 	requestAnimationFrame( animate );
 	render(); 
 	//deviceControls.update();
-	controls.update();
+	//controls.update();
 }
 
 function render() {
