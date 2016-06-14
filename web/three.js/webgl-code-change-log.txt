@@ -484,24 +484,26 @@ Things that I am going to fix today:
 1. I wrote code for forming a list of currents for each junction when the components are initialized.
 	the list considers the direction of current: whether it's leaving the junction (positive) or coming to the junction (negative)
 
-*** notes on 6/9/2016
+*** notes on 6/14/2016
+I paused working on the branching effect and instead adding some new features to the electron model interface:
+1. I am adding an ammeter
 
 
 ISSUES TO FIX LATER:
 
-ISSUE001 (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
+TODO001 (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
 		I need to fix this problem
 		temp solution: if (!ArFlag) electronSize = 10;	
 		
-ISSUE002 (4/17/2016): jittering issue --> use a smoothing algorithm	
+TODO002 (4/17/2016): jittering issue --> use a smoothing algorithm	
 
-ISSUE003 (5/11/2016): figure out why sorting the components based on graphLabel messed up with code	
+TODO003 (5/11/2016): figure out why sorting the components based on graphLabel messed up with code	
 
-ISSUE004 (5/11/2016): figure out junctions with more than 2 components connected
+TODO004 (5/11/2016): figure out junctions with more than 2 components connected
 
-ISSUE005 (5/19/2016): make it work with more than one connected battery
+TODO005 (5/19/2016): make it work with more than one connected battery
 
-ISSUE006 (6/5/2016): the electrons pass from battery either from + to - or - to + I should fix this later
+TODO006 (6/5/2016): the electrons pass from battery either from + to - or - to + I should fix this later
 					and i might need to consider the direction of current flow to let the electrons go from one side to the other
 					
-		
+TODO007 (6/14/2016): 

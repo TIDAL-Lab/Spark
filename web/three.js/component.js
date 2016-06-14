@@ -62,6 +62,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
    	this.connections = connections;
 
+   	this.ammeter;
+
    	console.log(this.compType + " :");
    	console.log(this.direction);
 
@@ -179,6 +181,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		if (this.compType != "Battery") { this.createIons(); }
 		this.container.material.side = THREE.BackSide;  // for collision detection code
   		this.obstacles.push(this.container); // for collision detection code
+  		//this.obstacles.push(this.startJunction);
+  		//this.obstacles.push(this.endJunction);
 
 		//transform the box
 		this.container.position.set(center.x, center.y, center.z);
@@ -377,11 +381,22 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					this.bounceBack(electron, obstacle);
 				}
 			}
+			else if (obstacle.object == this.ammeter) {
+				this.collideAmmeter(electron, obstacle);
+			}
 			else {  // the obstacle is either component walls or ions, so bounce it back
 				this.bounceBack(electron, obstacle);
 			}
 			
 		}
+	}
+
+
+	this.collideAmmeter = function ( electron, obstacle ) {
+		var n = obstacle.face.normal;      //the normal vector in local coordinates is either (0,1,0) or (0,-1,0)
+		this.ammeter.count += n.y; 
+		this.moveElectron(electron);
+		console.log(this.ammeter.count);
 	}
 
 	this.collideConnectedJunction = function( electron, obstacle ) {

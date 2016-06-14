@@ -26,6 +26,8 @@ var electrons, electronGeometry, electronMaterial;
 var raycaster;
 var compositeMesh;
 
+var clock;
+
 
 var updateFlag = false;
 var markerDetectedFlag = false;
@@ -62,6 +64,8 @@ function init() {
 	
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
+	
+	clock = new THREE.Clock();  //the clock automatically starts when instantiated
 	
 	THREE.ImageUtils.crossOrigin = 'anonymous';  	// enables using images from the image folder
 
@@ -158,6 +162,15 @@ function render() {
     }
  	renderer.autoClear = false;
 	renderer.clear();
+
+	for (i=0; i < components.length; i++) { 
+		if ( components[i].ammeter != null ) {
+			var delta = clock.getDelta();
+			var time = clock.getElapsedTime(); // time is in seconds
+			//console.log(delta);
+
+		}
+	}
 	/* order of rendering matters: first inputScene, then 3D scene overlayed on the inputScene */
 	if (ArFlag) renderer.render(inputScene, inputCamera);
 	/* if it is no-AR condition, render the scene; but if it is Ar condition, 

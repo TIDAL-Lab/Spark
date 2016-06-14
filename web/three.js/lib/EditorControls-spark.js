@@ -125,43 +125,25 @@ THREE.EditorControls = function ( object, domElement ) {
 			objects.push(components[k].container); // add all the components to the parent object
 		}
 		var intersects = raycaster.intersectObjects( objects );
-		for ( var i = 0; i < intersects.length; i++ ) {
-			var thisObject = intersects[ i ].object; 
+		//for ( var i = 0; i < intersects.length; i++ ) {
+			var thisObject = intersects[ 0 ].object; 
 			var index = objects.indexOf(thisObject);
-			thisObject.material.color.set( 0xFF9900 );
-			//console.log(intersects[ i ].object);
-			//console.log(index);
+			//thisObject.material.color.set( 0xFF9900 );
+			var thisComponent = components[index]
 			console.log("selected component is a: " + components[index].compType);
-			console.log("V: " + components[index].volt + " I: " + components[index].current + " R: " + components[index].R);
-			// ctx.fillStyle = "rgb(0, 0, 0)";
-   //  		ctx.textAlign = 'left';
-   //  		ctx.textBaseline = 'top';
-   //  		ctx.font = '12px sans-serif'; /* other fonts: verdana */
-    
-   //  		ctx.fillText("R = ${resistance}", -20,-22);
-	
-		}
-/*		var pointer3D = new THREE.Vector3();
-		pointer3D.x = pointer.x;
-		//pointer3D.x = 2 * (pointer.x / width) - 1;
-		pointer3D.y = pointer.y;
-		pointer3D.z = 0.0;
-		console.log(pointer3D);
-  		// mouseVector.x = 2 * (e.clientX / SCREEN_WIDTH) - 1;
-  		// mouseVector.y = 1 - 2 * ( e.clientY / SCREEN_HEIGHT );
-  		//var raycaster = projector.pickingRay( pointer3D.clone(), object );
-  		var raycaster = new THREE.Raycaster();
-  		var direction = pointer;
-  		raycaster.set(object.position, direction);
-  		raycaster.near = 0;
+			console.log("V: " + thisComponent.volt + " I: " + thisComponent.current + " R: " + thisComponent.R);
 
-  		var intersects = raycaster.intersectObjects( objects );
-	    for( var i = 0; i < intersects.length; i++ ) {
-	    	var intersection = intersects[ i ],
-	    	obj = intersection.object;
-	    	console.log("Intersected object", obj);
-	  	}
-*/
+	        var ammeterGeometry = new THREE.CylinderGeometry( thisComponent.w * 0.52, thisComponent.w * 0.52, standardLength/5, 24, 1, false);
+	        var ammeterMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
+	        ammeterMaterial.transparent = true;
+		    ammeterMaterial.opacity = 0.6;
+	        thisComponent.ammeter = new THREE.Mesh( ammeterGeometry, ammeterMaterial );
+	        thisComponent.container.add(thisComponent.ammeter);
+	        //thisComponent.ammeter.startTime = clock.getElapsedTime();
+	        thisComponent.ammeter.count = 0; 
+	        
+
+		//}
 		
 	}
 
