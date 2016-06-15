@@ -63,6 +63,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
    	this.connections = connections;
 
    	this.ammeter;
+   	this.measureOn = false;
+   	this.text2;
+   	this.time = clock.getElapsedTime();
+   	//this.time2 = 0;
 
    	console.log(this.compType + " :");
    	console.log(this.direction);
@@ -93,6 +97,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		this.ID = ID;
   		this.computeForce();		
 		this.createContainer();
+		this.createAmmeter();
 		// transform the force vector
 		var length = this.force.length();
 		this.force.transformDirection(this.container.matrixWorld); //normalized
@@ -100,6 +105,21 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		//if (this.compType != 'Battery') {
 			this.createElectrons(electronGeometry);
 		//}
+	}
+
+	this.createAmmeter = function() {
+		var cylinderGeometry = new THREE.CylinderGeometry( this.w * 0.52, this.w * 0.52, standardLength/5, 24, 1, false);
+	    var boxGeometry = new THREE.BoxGeometry(standardLength/5, standardLength/5, standardLength/5);
+        var ammeterMaterial = new THREE.MeshBasicMaterial( { color: 0xFF9900 } );  // or darkGreen
+
+        this.ammeter = new THREE.Mesh( cylinderGeometry, ammeterMaterial );
+        //var object2 = new THREE.Mesh( boxGeometry, ammeterMaterial );
+        //object2.position.set(-this.w*0.52 - standardLength/10, 0, 0);
+        //object1.add(object2);
+        this.ammeter.count = 0;
+
+        ammeterMaterial.transparent = true;
+	    ammeterMaterial.opacity = 0.6;
 	}
 
 	this.computeForce = function() {
@@ -181,8 +201,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		if (this.compType != "Battery") { this.createIons(); }
 		this.container.material.side = THREE.BackSide;  // for collision detection code
   		this.obstacles.push(this.container); // for collision detection code
-  		//this.obstacles.push(this.startJunction);
-  		//this.obstacles.push(this.endJunction);
+  		this.obstacles.push(this.startJunction);
+  		this.obstacles.push(this.endJunction);
 
 		//transform the box
 		this.container.position.set(center.x, center.y, center.z);
@@ -301,7 +321,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.ionCount = count;
 
   		for ( i = 0; i < this.ions.length; i ++ ) {
-  			//this.obstacles.push(this.ions[i]);	
+  			this.obstacles.push(this.ions[i]);	
   		}	
 	}
 
@@ -384,6 +404,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			else if (obstacle.object == this.ammeter) {
 				this.collideAmmeter(electron, obstacle);
 			}
+/*			else if (this.ammeter != null && obstacle.object == this.ammeter.children[0]) { 
+				this.moveElectron(electron);     // do nothing for the sprite text label!
+				console.log("weird");
+			}*/
 			else {  // the obstacle is either component walls or ions, so bounce it back
 				this.bounceBack(electron, obstacle);
 			}
@@ -393,10 +417,22 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 
 	this.collideAmmeter = function ( electron, obstacle ) {
-		var n = obstacle.face.normal;      //the normal vector in local coordinates is either (0,1,0) or (0,-1,0)
-		this.ammeter.count += n.y; 
 		this.moveElectron(electron);
-		console.log(this.ammeter.count);
+		var n = obstacle.face.normal;      //the normal vector in local coordinates is either (0,1,0) or (0,-1,0)
+		var now = clock.getElapsedTime();
+		var delta = now - this.time;
+		this.ammeter.count += n.y; 
+		//this.ammeter.count += n.y/delta;
+		this.time = now; 
+		this.text2 = " rate = " + this.ammeter.count.toFixed() + " ";
+
+		this.ammeter.remove(this.ammeter.children[1]);
+		var spriteText2 = makeTextSprite( this.text2, 
+			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
+		spriteText2.position.set(-this.w, standardLength/5, 0);
+			
+		this.ammeter.add( spriteText2 );
+
 	}
 
 	this.collideConnectedJunction = function( electron, obstacle ) {
@@ -682,7 +718,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		//var distance = 10;
 		raycaster.near = 0;
 		raycaster.far = 5;
-		var collisions = raycaster.intersectObjects(this.obstacles, true);
+		var collisions = raycaster.intersectObjects(this.obstacles, false);
 		// if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {
 			//console.log(collisions[0].faceIndex);	
@@ -691,6 +727,51 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		 else {
 		 	return null;
 		 }
+	}
+
+	this.dblClicked = function () {
+		if (this.measureOn == false) {
+			this.measureOn = true;
+			console.log("selected component is a: " + this.compType);
+			console.log("V: " + this.volt + " I: " + this.current + " R: " + this.R);
+
+
+	        //this.ammeter = object1;
+	        this.container.add(this.ammeter);
+	        this.obstacles.push(this.ammeter);
+
+	        
+	        
+	        // Add text
+	        var randomColor = Math.floor( Math.random() * 255 );  // instead of r: 255
+			var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
+				{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
+			spriteText1.position.set(-this.w, -standardLength/5, 0);
+
+			this.text2 = " rate = " + this.ammeter.count.toFixed() + " ";
+			var spriteText2 = makeTextSprite( this.text2, 
+				{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
+			spriteText2.position.set(-this.w, standardLength/5, 0);
+			
+		    this.ammeter.add( spriteText1 );
+		    this.ammeter.add( spriteText2 );
+
+
+
+
+	        // spritey.updateMatrixWorld();
+	        //thisComponent.ammeter.startTime = clock.getElapsedTime();
+	        
+	    }
+	    else { // it is already measuring, so remove the ammeter
+	    	this.measureOn = false;
+	    	this.container.remove(this.ammeter);
+	    	this.ammeter.remove(this.ammeter.children[1]);
+	    	this.ammeter.remove(this.ammeter.children[0]);
+	    	this.obstacles.pop(this.ammeter);
+
+
+	    }
 	}
 
 }

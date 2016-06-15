@@ -126,22 +126,14 @@ THREE.EditorControls = function ( object, domElement ) {
 		}
 		var intersects = raycaster.intersectObjects( objects );
 		//for ( var i = 0; i < intersects.length; i++ ) {
+		if (intersects.length != 0) {
 			var thisObject = intersects[ 0 ].object; 
 			var index = objects.indexOf(thisObject);
 			//thisObject.material.color.set( 0xFF9900 );
-			var thisComponent = components[index]
-			console.log("selected component is a: " + components[index].compType);
-			console.log("V: " + thisComponent.volt + " I: " + thisComponent.current + " R: " + thisComponent.R);
+			var thisComponent = components[index]; 
 
-	        var ammeterGeometry = new THREE.CylinderGeometry( thisComponent.w * 0.52, thisComponent.w * 0.52, standardLength/5, 24, 1, false);
-	        var ammeterMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
-	        ammeterMaterial.transparent = true;
-		    ammeterMaterial.opacity = 0.6;
-	        thisComponent.ammeter = new THREE.Mesh( ammeterGeometry, ammeterMaterial );
-	        thisComponent.container.add(thisComponent.ammeter);
-	        //thisComponent.ammeter.startTime = clock.getElapsedTime();
-	        thisComponent.ammeter.count = 0; 
-	        
+			thisComponent.dblClicked();
+		}
 
 		//}
 		
