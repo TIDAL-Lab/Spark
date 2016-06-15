@@ -27,6 +27,7 @@ var raycaster;
 var compositeMesh;
 
 var clock = new THREE.Clock();
+var ticks = 0;
 
 
 var updateFlag = false;
@@ -171,6 +172,7 @@ function render() {
 
 
 function updateElectrons() {
+	ticks++;
 	var eVertices = electrons.geometry.vertices;
 
 	for ( k = 0; k < eVertices.length; k++ ) {

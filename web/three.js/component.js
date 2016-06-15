@@ -108,7 +108,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.createAmmeter = function() {
-		var cylinderGeometry = new THREE.CylinderGeometry( this.w * 0.52, this.w * 0.52, standardLength/5, 24, 1, false);
+		var cylinderGeometry = new THREE.CylinderGeometry( this.w * 0.52, this.w * 0.52, standardLength/10, 24, 1, false);
 	    var boxGeometry = new THREE.BoxGeometry(standardLength/5, standardLength/5, standardLength/5);
         var ammeterMaterial = new THREE.MeshBasicMaterial( { color: 0xFF9900 } );  // or darkGreen
 
@@ -120,13 +120,36 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
         ammeterMaterial.transparent = true;
 	    ammeterMaterial.opacity = 0.6;
+
+	    this.ammeter.visible = false;
+
+    	        //this.ammeter = object1;
+        this.container.add(this.ammeter);
+        this.obstacles.push(this.ammeter);
+
+        
+        
+        // Add text
+        var randomColor = Math.floor( Math.random() * 255 );  // instead of r: 255
+		var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
+			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
+		spriteText1.position.set(-this.w, -standardLength/5, 0);
+
+		this.text2 = " rate = " + this.ammeter.count.toFixed() + " ";
+		this.text2 = " rate = " + " ";
+		var spriteText2 = makeTextSprite( this.text2, 
+			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
+		spriteText2.position.set(-this.w, standardLength/5, 0);
+		
+	    this.ammeter.add( spriteText1 );
+	    this.ammeter.add( spriteText2 );
 	}
 
 	this.computeForce = function() {
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
 	  	this.force.y = this.direction * this.volt; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
-	  	//if (this.compType == "Wire") { this.force.y *= 1000; }
+	  	if (this.compType == "Wire") { this.force.y *= 100; }
 	  	this.force.z = 0.0;
 	}
 
@@ -384,6 +407,18 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 
 	this.updateElectron = function ( electron ) {
+		if ( ticks % 100 == 0) {
+			var rate = this.ammeter.count/(ticks-10);
+			this.text2 = " rate = " + Math.abs(rate.toFixed(2)) + " ";
+
+			this.ammeter.remove(this.ammeter.children[1]);
+			var spriteText2 = makeTextSprite( this.text2, 
+				{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
+			spriteText2.position.set(-this.w, standardLength/5, 0);
+			
+			this.ammeter.add( spriteText2 );
+
+		}
 		var obstacle = this.collision(electron);
 		if (obstacle == null) { 	// no colision
 			this.moveElectron(electron);
@@ -419,20 +454,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	this.collideAmmeter = function ( electron, obstacle ) {
 		this.moveElectron(electron);
 		var n = obstacle.face.normal;      //the normal vector in local coordinates is either (0,1,0) or (0,-1,0)
-		var now = clock.getElapsedTime();
-		var delta = now - this.time;
 		this.ammeter.count += n.y; 
-		//this.ammeter.count += n.y/delta;
-		this.time = now; 
-		this.text2 = " rate = " + this.ammeter.count.toFixed() + " ";
-
-		this.ammeter.remove(this.ammeter.children[1]);
-		var spriteText2 = makeTextSprite( this.text2, 
-			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
-		spriteText2.position.set(-this.w, standardLength/5, 0);
-			
-		this.ammeter.add( spriteText2 );
-
 	}
 
 	this.collideConnectedJunction = function( electron, obstacle ) {
@@ -503,6 +525,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.findNextComponent = function( junction ) {
+		return junction.outComponents[0];
 		if (junction.probabilities.length == 0) {
 			//console.log("bug");
 			return null;
@@ -729,7 +752,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		 }
 	}
 
-	this.dblClicked = function () {
+	this.dblClicked = function() {
+		if ( this.ammeter.visible == false ) {
+			this.ammeter.visible = true;
+		}
+		else {
+			this.ammeter.visible = false;
+		}
+	}
+
+	this.dblClickedOld = function () {
 		if (this.measureOn == false) {
 			this.measureOn = true;
 			console.log("selected component is a: " + this.compType);
