@@ -488,6 +488,15 @@ Things that I am going to fix today:
 I paused working on the branching effect and instead adding some new features to the electron model interface:
 1. I am adding an ammeter
 
+*** notes on 6/18/2016
+1. I limited the rotation angles to 45 for both theta and phi (editorcontrols-spark.js)
+2. I increased the far property of camera from 1000 to 10,000 which helps with better rendering of the circuit
+	(the objects disapper when they are very very small and no disappearing when rotating!)
+3. I worked on the mechanism of electron moving, removed the limit on max velocity, and added energy loss after each collision
+
+*** notes on 6/18/2016
+1. changed the geometry of resistor to two merged cones!
+2. 
 
 ISSUES TO FIX LATER:
 

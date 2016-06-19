@@ -131,7 +131,7 @@ class Component implements Touchable {
     ctx.beginPath(); 
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, end.y);
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 10;
     ctx.stroke();
     
     num mx = (start.x + end.x) / 2;
@@ -337,7 +337,10 @@ class Component implements Touchable {
       removeConnectedComponents();
       Sounds.playSound("crunch");
       App.repaint();
-      theApp.circuit.sendDataToServer();
+      if (theApp.condition == 3 || theApp.condition == 4) {
+        theApp.circuit.sendDataToServer();
+      }
+      
       return;
     }
     
@@ -385,7 +388,9 @@ class Component implements Touchable {
       }
     }
     App.repaint();
-    theApp.circuit.sendDataToServer();
+    if (theApp.condition == 3 || theApp.condition == 4) {
+      theApp.circuit.sendDataToServer();
+    }    
   }
 
   void touchDrag(Contact event) {

@@ -37,12 +37,12 @@ class Battery extends Component  {
   }
     
     CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {
-      iw = img.width / 3;
-      ih = img.height / 3;
+      iw = img.width / 4;
+      ih = img.height / 4;
       ctx.drawImageScaled(img, -iw/2, -ih/2, iw, ih);
      if (!isBurnt) { 
      ctx.fillStyle = "rgb(120,180,35)";
-     ctx.fillRect(-5, -10, 40, 20);
+     ctx.fillRect(-5, -10, 30, 20);
      ctx.fillStyle = "rgb(0, 0, 0)";
      ctx.textAlign = 'left';
      ctx.textBaseline = 'top';

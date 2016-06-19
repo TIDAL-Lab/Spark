@@ -82,6 +82,13 @@ THREE.EditorControls = function ( object, domElement ) {
 
 	};
 
+	/* EB:
+	* radius : the distance from camera to scene (point of touch)
+	* theta : rotation from right to left, along y axis (starts from 0 to 180 if and then -180 to 0)
+	* phi: rotation from bottom to up, along x axis (starts from 90 goes either to 0 or 180)
+	*/
+
+
 	this.rotate = function ( delta ) {
 
 		vector.copy( object.position ).sub( center );
@@ -96,11 +103,23 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		phi = Math.max( EPS, Math.min( Math.PI - EPS, phi ) );
 
-		var radius = vector.length();
+		// EB modification
 
+		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta);
+		if (phi >= Math.PI/2) {
+			phi = Math.min( phi, Math.PI*3/4);
+		}
+		else {
+			phi = Math.max( phi, Math.PI/4);
+		}
+
+		// END EB modifications
+		var radius = vector.length();   // EB: distance from camera to scene
+		//console.log(theta*180/Math.PI);
 		vector.x = radius * Math.sin( phi ) * Math.sin( theta );
 		vector.y = radius * Math.cos( phi );
 		vector.z = radius * Math.sin( phi ) * Math.cos( theta );
+		//console.log(vector);
 
 		object.position.copy( center ).add( vector );
 
@@ -132,7 +151,7 @@ THREE.EditorControls = function ( object, domElement ) {
 			//thisObject.material.color.set( 0xFF9900 );
 			var thisComponent = components[index]; 
 
-			thisComponent.dblClicked();
+			thisComponent.clicked();
 		}
 
 		//}
@@ -164,7 +183,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		domElement.addEventListener( 'mousemove', onMouseMove, false );
 		domElement.addEventListener( 'mouseup', onMouseUp, false );
 		domElement.addEventListener( 'mouseout', onMouseUp, false );
-		domElement.addEventListener( 'dblclick', onMouseUp, false );
+		domElement.addEventListener( 'click', onMouseUp, false );
 
 	}
 
@@ -200,7 +219,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		domElement.removeEventListener( 'mousemove', onMouseMove, false );
 		domElement.removeEventListener( 'mouseup', onMouseUp, false );
 		domElement.removeEventListener( 'mouseout', onMouseUp, false );
-		domElement.removeEventListener( 'dblclick', onMouseUp, false );
+		domElement.removeEventListener( 'click', onMouseUp, false );
 
 		state = STATE.NONE;
 
@@ -228,7 +247,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 	}
 
-	function onMouseDoubleClick( event ) {
+	function onMouseClick( event ) {
 		console.log("double clicked");
 		pointer.set( event.clientX, event.clientY );
 		scope.show();
@@ -239,7 +258,7 @@ THREE.EditorControls = function ( object, domElement ) {
 	domElement.addEventListener( 'mousedown', onMouseDown, false );
 	domElement.addEventListener( 'mousewheel', onMouseWheel, false );
 	domElement.addEventListener( 'DOMMouseScroll', onMouseWheel, false ); // firefox
-	domElement.addEventListener( 'dblclick', onMouseDoubleClick, false );
+	domElement.addEventListener( 'click', onMouseClick, false );
 
 	// touch
 

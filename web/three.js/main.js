@@ -54,7 +54,8 @@ function init() {
 	//document.body.appendChild( container );
 
 	if (!ArFlag) {
-		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 1000 );
+		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
+		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
 		camera.position.z = 700;
 	}
 

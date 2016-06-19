@@ -77,8 +77,10 @@ class Circuit {
     }
     
     updateComponents();
-    theApp.model1.updateModel();     
-    sendDataToServer();
+    theApp.model1.updateModel();
+    if (theApp.condition == 3 || theApp.condition == 4) {
+      sendDataToServer();
+    }    
   }
 
 
@@ -152,6 +154,16 @@ class Circuit {
           
         });
       }
+      var offsetX = 0;
+      var offsetY = 0;
+      if (theApp.condition == 4 ) {
+        offsetX = theApp.marker.x ;
+        offsetY = theApp.marker.y;
+      }
+      else {
+        offsetX = theApp.workingBox.width/2;
+        offsetY = theApp.workingBox.height/2;
+      }
       
       var compObj = {'type': c.type,
                                           'voltageDrop': c.voltageDrop,
@@ -161,10 +173,10 @@ class Circuit {
                                           //'startY':(theApp.workingBox.height/2 - c.start.y),
                                           //'endX': (c.end.x - theApp.workingBox.width/2),
                                           //'endY': (theApp.workingBox.height/2 - c.end.y),
-                                          'startX': 1.0*(c.start.x -theApp.marker.x),
-                                          'startY':1.0*(theApp.marker.y - c.start.y),
-                                          'endX': 1.0*(c.end.x - theApp.marker.x),
-                                          'endY': 1.0*(theApp.marker.y - c.end.y),
+                                          'startX': 1.0*(c.start.x -offsetX),
+                                          'startY':1.0*(offsetY - c.start.y),
+                                          'endX': 1.0*(c.end.x - offsetX),
+                                          'endY': 1.0*(offsetY - c.end.y),
                                           'direction': c.direction,
                                           'innerWall':1,
                                           'tag': c.ARTag,
@@ -176,7 +188,7 @@ class Circuit {
 
 
     }
-    print(JSON.encode(myObj));
+    //print(JSON.encode(myObj));
     
 
     //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
@@ -268,7 +280,9 @@ class Circuit {
     n1.adjacents.add(n2);
     n2.adjacents.add(n1);
     findSpanningForest();
-    sendDataToServer();
+    if (theApp.condition == 3 || theApp.condition == 4) {
+      sendDataToServer();
+    }    
   }
   
   /*int returnDirection(double x0,double x1,double y0,double y1){

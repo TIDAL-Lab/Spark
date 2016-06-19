@@ -130,10 +130,12 @@ class App extends TouchManager {
    
    /* 
     * condition is the study condition
-    * 0 --> control condition: only circuit, no ABM model
-    * 1 --> ABM + circuit model, with the NetTango model embedded in the canvas
+    * 1 --> control condition: only circuit, no ABM model
+    * 2 --> ABM + circuit model, with the NetTango model embedded in the canvas
+    * 3 --> webgl non-AR
+    * 4 --> webgl AR
     */
-   num condition = 1;  
+   num condition = 3;  
 
       
    App() {
@@ -161,14 +163,14 @@ class App extends TouchManager {
      
      /* 
       * set the model based on the condition
-      * if condition = 0 --> model is the the only measures model as a frame
-      * if condition = 1 --> model is the NetTango model as a frame
+      * if condition = 1 --> model is the the only measures model as a frame (also for webgl conditions)
+      * if condition = 2 --> model is the NetTango model as a frame
       */
-     if (condition==0) {
-       model1 = new lumpModel(this, "div#model1");
+     if (condition== 2) {
+       model1 = new agentModel(this, "div#model1");
      }
      else {
-       model1 = new agentModel(this, "div#model1");
+       model1 = new lumpModel(this, "div#model1");
      }
      
      // instantiate lens and help objects
@@ -187,7 +189,7 @@ class App extends TouchManager {
      num centerY = workingBox.height / 2;
      
      // instantiate the JsAr tag
-     marker = new Marker(centerX, centerY);
+     if (condition == 4 ) { marker = new Marker(centerX, centerY); }
      
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
@@ -286,7 +288,7 @@ class App extends TouchManager {
      }
      lens.draw(ctx);
      help.draw(ctx);
-     marker.draw(ctx);
+     if (condition == 4) { marker.draw(ctx); }
      //ctx.restore();
      
    }

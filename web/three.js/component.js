@@ -20,6 +20,8 @@ var rectGeom, rectMesh;
 var ionGeometry = new THREE.SphereGeometry( 5, 16, 16 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
 var velocity = 2;
+var velocityMax = 10;
+var lossFactor = 0.9;
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 
 
@@ -83,13 +85,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
   	if (this.compType == "Wire") {
   		//this.electronCount = 1;
-  		this.electronCount = Math.round( 10 * this.l/standardLength); // this.l might not be an integer
+  		this.electronCount = Math.round( 15 * this.l/standardLength); // this.l might not be an integer
   	}
   	else if ( this.compType == "Battery" ){
   		this.electronCount = 0;
   	}
   	else { 		// Resistor or Bulb
-  		this.electronCount = 10;
+  		this.electronCount = 15;
   	}
  
 
@@ -101,10 +103,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// transform the force vector
 		var length = this.force.length();
 		this.force.transformDirection(this.container.matrixWorld); //normalized
-		this.force.multiplyScalar(length); 
-		//if (this.compType != 'Battery') {
-			this.createElectrons(electronGeometry);
-		//}
+		this.force.multiplyScalar(length);
+
+		this.createElectrons(electronGeometry);
 	}
 
 	this.createAmmeter = function() {
@@ -146,10 +147,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.computeForce = function() {
+		//this.volt = 0.001;
+		//this.direction = 1;
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
 	  	this.force.y = this.direction * this.volt; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
 	  	if (this.compType == "Wire") { this.force.y *= 100; }
+	  	//if (this.compType == "Resistor" || this.compType == "Bulb") { this.force.y /= 10; }
 	  	this.force.z = 0.0;
 	}
 
@@ -159,29 +163,60 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 										0.0 );
 
 		// var containerGeometry = new THREE.BoxGeometry( this.l, this.w, this.h);
+
 		/* CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
 		* radiusSegment = 24 (default value: 8)
 		* heightSegments = 1 (default value)
 		* openEnded = true (default is false)
+		*
+		* Cone geometry:
+		* ConeGeometry(radius, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
 		*/
-		var containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 24, 1, true); 
 
-/*		if (this.compType == "Resistor" || this.compType == "Bulb") {
-			var containerMaterial = new THREE.MeshBasicMaterial( { map: resistorImg, color: 0xCCCC00 } );
-		}
-		else */if (this.compType == "Battery") {
-			var containerMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
-		}
-		else {
-			var containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
-			containerMaterial.transparent = false;
-			containerMaterial.opacity = 0.7;
-			//containerMaterial.depthTest = false;
-			containerMaterial.depthWrite = false;
-		}
+		// TEST: cone container for resistor
+		var containerGeometry;
+		var containerMaterial;
+		if (this.compType == "Resistor" || this.compType == "Bulb") {
+			containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
 
+			var coneGeometry1 = new THREE.CylinderGeometry(this.w/2, this.w/10, this.l, 32, 1, true);
+			var coneGeometry2 = new THREE.CylinderGeometry(this.w/10, this.w/2, this.l, 32, 1, true);
+			//coneGeometry1.rotateY(10);
+			//coneGeometry2.translate(0,-this.l/2,0);
+			var coneBSP1 = new ThreeBSP(coneGeometry1);
+			var coneBSP2 = new ThreeBSP(coneGeometry2);
+			var union = coneBSP1.union(coneBSP2);
+			this.container = new THREE.Mesh( union.toGeometry(), containerMaterial);
+			this.container.geometry.computeFaceNormals();
+			//var bsp = new ThreeBSP( mesh1 ); 
+			//bsp = bsp.union( new ThreeBSP( mesh2 ) ); // unit it with the other cone
+			//this.container = bsp.toMesh(containerMaterial);
+			//this.container.position.y = this.l;
+		}
+		else if (this.compType == "Battery") { 
+			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 1, true);
+			containerMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
+			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
+			var plusText = makeTextSprite( "+", 
+				{ fontsize: 84, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
+			plusText.position.set(-this.w/2, -this.l/2, 0);
+			var minusText = makeTextSprite( "-", 
+				{ fontsize: 84, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
+			minusText.position.set(-this.w/2, this.l*0.8, 0);
+			this.container.add(plusText);
+			this.container.add(minusText);
+		} 
+		else {   // it's a wire
+			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 1, true);
+			containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
+		}
+		containerMaterial.transparent = true;
+		containerMaterial.opacity = 0.7;
+		containerMaterial.depthTest = true;  // this seems to help with showing the electrons always on top
+		containerMaterial.depthWrite = false;
 
-		this.container = new THREE.Mesh( containerGeometry, containerMaterial );
+		
 
 		// now add the junctions to the box	
 		var startJunction = this.createJunction(Math.PI/2, - this.l / 2);
@@ -241,8 +276,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		 */
 		var junction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 64, 64, 0, Math.PI*2, thetaStart, Math.PI/2), 
 										new THREE.MeshBasicMaterial( { color: red } ));
-		junction.material.transparent = true;
-		junction.material.opacity = 0.5;
+		junction.material.transparent = false;
+		junction.material.opacity = 0.7;
+		junction.material.depthTest = true;
 		junction.material.depthWrite = false;
 		junction.material.side = THREE.BackSide;
 
@@ -318,18 +354,19 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	this.createIons = function() {		
 		var count = 0;
-		var d = 40; // d is inverse of density of ions which is inversly proportional to resistance		
+		var d = 30; // d is inverse of density of ions which is inversly proportional to resistance		
 		if (this.compType == "Resistor" || this.compType == "Bulb") {
-			var d = 30 - 5 * this.R;
+			var d = 30 - 4 * this.R;
 		}
+		//var d = 30 - 5 * 1;
 		for ( i = 1; i < this.l/d; i ++ ) {
 			for (j = 1; j < this.w/d; j++) {
 				var pos;
 				if ((i+j) % 3 == 0) {
 					pos = new THREE.Vector3();
 					pos.y = -this.l/2 + i * d; // I switched the order of x & y (from BoxGeometry)
-					pos.x = -this.w/2 + j * d;
-					pos.z = 0.002;
+					pos.x = (-this.w/2 + j * d)*(1-0.12*(1+this.R));
+					pos.z = -0.002;
 
 					var ion = new THREE.Mesh( ionGeometry, ionMaterial );
 					ion.position.set(pos.x, pos.y, pos.z);
@@ -359,11 +396,11 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			electron.z = Math.random() * (this.h - 5) - (this.h - 5)/2; // component width*/
 
 			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
-			electron.x = Math.random() * (this.w - 5) - (this.w - 5)/2; //the x coordinate changes based on component length 
+			electron.x = Math.random() * (this.w - 5)*2/5 - (this.w - 5)/5; //the x coordinate changes based on component length 
 			electron.y = Math.random() * (this.l - 5) - (this.l - 5)/2; // component width 
 			
 			if (twoD) {
-				electron.z = 0.002;
+				electron.z = -0.002;
 			}	
 			else {
 				//electron.z = Math.random() * (this.w - 5) - (this.w - 5)/2;
@@ -643,12 +680,12 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// update velocity
 		electron.velocity.add( this.force );
 
-		var v = electron.velocity.length();
-			if (v > 4) {	// don't allow the speed to become more than 10, which is the distance for raycaster
+/*		var v = electron.velocity.length();
+			if (v > velocityMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
 				
 				electron.velocity.sub( this.force );
 			}
-
+*/
 		// move the electron
 		electron.add( electron.velocity );
 	}
@@ -672,7 +709,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		if (obstacle.object == this.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
 		if (obstacle.object == this.startJunction || obstacle.object == this.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
 
-
+		if ( this.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy	
 
 		// now calculate the reflection, non-AR condtion
 		if (!ArFlag) {
@@ -691,8 +728,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			m = m.getInverse(electrons.matrixWorld);
 			reflection.transformDirection(m);
 			electron.velocity = reflection.multiplyScalar(length);
-		}	
-
+		}
 
 	 }
 	 
@@ -740,7 +776,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		raycaster.set(origin, direction);
 		//var distance = 10;
 		raycaster.near = 0;
-		raycaster.far = 5;
+		raycaster.far = electron.velocity.length();
 		var collisions = raycaster.intersectObjects(this.obstacles, false);
 		// if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {
@@ -752,7 +788,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		 }
 	}
 
-	this.dblClicked = function() {
+	this.clicked = function() {
 		if ( this.ammeter.visible == false ) {
 			this.ammeter.visible = true;
 		}
