@@ -105,14 +105,14 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		// EB modification
 
-		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta);
+/*		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta);
 		if (phi >= Math.PI/2) {
 			phi = Math.min( phi, Math.PI*3/4);
 		}
 		else {
 			phi = Math.max( phi, Math.PI/4);
 		}
-
+*/
 		// END EB modifications
 		var radius = vector.length();   // EB: distance from camera to scene
 		//console.log(theta*180/Math.PI);
@@ -126,6 +126,10 @@ THREE.EditorControls = function ( object, domElement ) {
 		object.lookAt( center );
 
 		scope.dispatchEvent( changeEvent );
+
+		// TEST
+		//console.log(electrons.geometry.vertices[0].velocity);
+		//console.log(components[0].force);
 
 	};
 
@@ -248,7 +252,7 @@ THREE.EditorControls = function ( object, domElement ) {
 	}
 
 	function onMouseClick( event ) {
-		console.log("double clicked");
+		//console.log("double clicked");
 		pointer.set( event.clientX, event.clientY );
 		scope.show();
 	}

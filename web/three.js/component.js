@@ -9,19 +9,12 @@
  * Circuit-level and the level that shows interactions between electrons and ions as they move through circuit components.
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
-var red = 0xD11919;
-var darkRed = 0x990000;
-var green = 0x008F00;
-var darkGreen = 0x003300;
-var gray = 0x808080;
 
-var electronSize = 40;
+
+
 var rectGeom, rectMesh;
 var ionGeometry = new THREE.SphereGeometry( 5, 16, 16 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
-var velocity = 2;
-var velocityMax = 10;
-var lossFactor = 0.9;
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 
 
@@ -70,9 +63,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
    	this.time = clock.getElapsedTime();
    	//this.time2 = 0;
 
-   	console.log(this.compType + " :");
-   	console.log(this.direction);
-
   	// calculate the rotation angle of the component on the XY plane (-180 to 180 from +x axis)
 	var startToEnd = new THREE.Vector3( endX-startX, endY-startY, 0.0); // z is 0 (reading from Parse)
 	var xAxis = new THREE.Vector3(1, 0, 0);
@@ -87,7 +77,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		//this.electronCount = 1;
   		this.electronCount = Math.round( 15 * this.l/standardLength); // this.l might not be an integer
   	}
-  	else if ( this.compType == "Battery" ){
+  	else if ( this.compType == "Battery" ) {
   		this.electronCount = 0;
   	}
   	else { 		// Resistor or Bulb
@@ -100,12 +90,12 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		this.computeForce();		
 		this.createContainer();
 		this.createAmmeter();
-		// transform the force vector
+		// transform the force vector --> world space
 		var length = this.force.length();
 		this.force.transformDirection(this.container.matrixWorld); //normalized
 		this.force.multiplyScalar(length);
 
-		this.createElectrons(electronGeometry);
+		createElectrons(electronGeometry, this);
 	}
 
 	this.createAmmeter = function() {
@@ -127,23 +117,36 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
     	        //this.ammeter = object1;
         this.container.add(this.ammeter);
         this.obstacles.push(this.ammeter);
-
-        
-        
+       
         // Add text
         var randomColor = Math.floor( Math.random() * 255 );  // instead of r: 255
-		var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
-			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
-		spriteText1.position.set(-this.w, -standardLength/5, 0);
+		// var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
+		// 	{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
+		// spriteText1.position.set(-this.w, -standardLength/5, 0);
 
-		this.text2 = " rate = " + this.ammeter.count.toFixed() + " ";
+		this.text2 = " rate = " + this.ammeter.count.toFixed(2) + " ";
 		this.text2 = " rate = " + " ";
 		var spriteText2 = makeTextSprite( this.text2, 
 			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
 		spriteText2.position.set(-this.w, standardLength/5, 0);
 		
-	    this.ammeter.add( spriteText1 );
+	    //this.ammeter.add( spriteText1 );
 	    this.ammeter.add( spriteText2 );
+	}
+
+	this.updateAmmeter = function() {
+		var rate = this.ammeter.count/(ticks-10);
+		//var rate = this.ammeter.count;
+
+		this.text2 = " rate = " + Math.abs(rate.toFixed(2)) + " ";
+		this.ammeter.remove(this.ammeter.children[0]);  // used to be children[1] when I had text 1
+		var spriteText2 = makeTextSprite( this.text2, 
+			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
+		spriteText2.position.set(-this.w, standardLength/5, 0);
+		
+		this.ammeter.add( spriteText2 );
+		//this.ammeter.count = 0;
+
 	}
 
 	this.computeForce = function() {
@@ -215,8 +218,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		containerMaterial.opacity = 0.7;
 		containerMaterial.depthTest = true;  // this seems to help with showing the electrons always on top
 		containerMaterial.depthWrite = false;
-
-		
 
 		// now add the junctions to the box	
 		var startJunction = this.createJunction(Math.PI/2, - this.l / 2);
@@ -298,7 +299,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	this.updateJunctions = function() {
 		this.formJunctionCurrents( this.startJunction, "start" );
 		this.formJunctionCurrents( this.endJunction, "end" );
-	} 
+	}
+
 	this.formJunctionCurrents = function ( junction, string ) {  // REMOVE STRING: it's only for testing
 		for ( i = 0; i < junction.connectedComponents.length; i ++ ) {
 			var component = junction.connectedComponents[i];
@@ -313,14 +315,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			}
 		}
 
-/*		// TEST
-		if (this.ID == 0) { this.current = 1.5; junction.currents = [0.4, 0.1, 1];}
-		if (this.ID == 1) { this.current = 0.4; junction.currents = [-1.5, 0.1, 1];}
-		if (this.ID == 2) { this.current = 0.1; junction.currents = [-1.5, 0.4, 1];}
-		if (this.ID == 3) { this.current = 1; junction.currents = [-1.5, 0.4, 0.1];}
-
-		console.log("component " + this.ID + " " + string + ": " + junction.currents);*/
-
 		for (i=0; i < junction.connectedComponents.length; i++) {
 			if ( this.current != 0.0 && junction.currents[i] > 0.0 ) { // LATER: should it be this.current > 0.0 too? to avoid going back?
 				junction.outComponents.push(junction.connectedComponents[i]);
@@ -332,7 +326,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 				junction.probabilities.push(1); // there is the same probability for going to each branch
 			}
 		}
-		console.log("out " + this.ID + " " + string + ": " + junction.outCurrents);
+		//console.log("out " + this.ID + " " + string + ": " + junction.outCurrents);
 		if (this.current != 0.0) {
 			var norm = Math.min.apply( Math, junction.outCurrents );
 			junction.probabilities = junction.outCurrents.map(function(a) {
@@ -343,7 +337,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		for (i=1; i < junction.probabilities.length; i++) {  // start from the second element
 			junction.probabilities[i] += junction.probabilities[i-1];
 		}
-		console.log("prob " + this.ID + " " + string + ": " + junction.probabilities);
+		//console.log("prob " + this.ID + " " + string + ": " + junction.probabilities);
 
 		// var c = this.findNextComponent(junction);
 		// if (c != null) {console.log("next " + this.ID + " " + string + ": " + c.ID);}
@@ -385,182 +379,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		}	
 	}
 
-	this.createElectrons = function( electronGeometry ) {
-		for ( i = 0; i < this.electronCount; i ++ ) {
-
-			var electron = new THREE.Vector3();
-/*			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
-			electron.x = Math.random() * (this.l - 5) - (this.l - 5) /2; //the x coordinate changes based on component length 
-			electron.y = Math.random() * (this.w - 5) - (this.w - 5)/2; // component width 
-			//electron.z = 0.0;
-			electron.z = Math.random() * (this.h - 5) - (this.h - 5)/2; // component width*/
-
-			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
-			electron.x = Math.random() * (this.w - 5)*2/5 - (this.w - 5)/5; //the x coordinate changes based on component length 
-			electron.y = Math.random() * (this.l - 5) - (this.l - 5)/2; // component width 
-			
-			if (twoD) {
-				electron.z = -0.002;
-			}	
-			else {
-				//electron.z = Math.random() * (this.w - 5) - (this.w - 5)/2;
-				var zLimit = Math.sqrt((this.w - 5) * (this.w - 5) - (4*electron.x * electron.x));
-				electron.z = Math.random() * zLimit - zLimit/2; // calculations of random xz coordinate on a circle shape (cross section of a cylinder on xz plane)
-			}	
-
-			// now initiate electron velocity
-			if (twoD) {
-				// initiate a 2D velocity (no z direction)
-				var vX = Math.random() * velocity * 2 - velocity;
-			    var vY = Math.sqrt( velocity * velocity - vX*vX);   // this results in a constant velocity	
-				// I need to give a random sign to vY with 50-50 probability
-			    if ( Math.round(Math.random()) == 1 ) vY *= -1;
-			    vZ = 0.0;
-			}
-			else {
-				// initiate a 3D velocity
-				var vX = Math.random() * velocity * 2 - velocity;
-				var vYZ = Math.sqrt( velocity * velocity - vX * vX );
-				var vY = Math.random() * vYZ * 2 - vYZ;
-				var vZ = Math.sqrt( vYZ * vYZ - vY * vY); // this results in a constant velocity in 3D		    
-			    // I need to give a random sign to vY & vZ with 50-50 probability
-			    if ( Math.round(Math.random()) == 1 ) vY *= -1;
-			    if ( Math.round(Math.random()) == 1 ) vZ *= -1;
-			}
-
-			electron.velocity = new THREE.Vector3(
-		    	vX,		// x
-		    	vY,		//  
-		    	vZ);		// z
-
-			//translate the electron to be inside the component
-			//this.container.localToWorld(electron); // this changes the position of electron from local to world
-			electron.applyMatrix4( this.container.matrixWorld );
-			electron.componentID = this.ID;
-			electronGeometry.vertices.push( electron );
-		}	
-
-	}
-
-
-	this.updateElectron = function ( electron ) {
-		if ( ticks % 100 == 0) {
-			var rate = this.ammeter.count/(ticks-10);
-			this.text2 = " rate = " + Math.abs(rate.toFixed(2)) + " ";
-
-			this.ammeter.remove(this.ammeter.children[1]);
-			var spriteText2 = makeTextSprite( this.text2, 
-				{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
-			spriteText2.position.set(-this.w, standardLength/5, 0);
-			
-			this.ammeter.add( spriteText2 );
-
-		}
-		var obstacle = this.collision(electron);
-		if (obstacle == null) { 	// no colision
-			this.moveElectron(electron);
-		}
-		else {   // a collision is detected
-			
-			if ( obstacle.object == this.startJunction || 
-				 obstacle.object == this.endJunction ) {
-				if ( obstacle.object.connectedComponentIDs.length > 0 ) { // if it is connected to another component, change the electron's component ID
-															   // and wait for it to move next time
-				    this.collideConnectedJunction( electron, obstacle );
-				}
-				else {   // if the junction is not connected, bounce back the electron
-
-					this.bounceBack(electron, obstacle);
-				}
-			}
-			else if (obstacle.object == this.ammeter) {
-				this.collideAmmeter(electron, obstacle);
-			}
-/*			else if (this.ammeter != null && obstacle.object == this.ammeter.children[0]) { 
-				this.moveElectron(electron);     // do nothing for the sprite text label!
-				console.log("weird");
-			}*/
-			else {  // the obstacle is either component walls or ions, so bounce it back
-				this.bounceBack(electron, obstacle);
-			}
-			
-		}
-	}
-
-
-	this.collideAmmeter = function ( electron, obstacle ) {
-		this.moveElectron(electron);
-		var n = obstacle.face.normal;      //the normal vector in local coordinates is either (0,1,0) or (0,-1,0)
-		this.ammeter.count += n.y; 
-	}
-
-	this.collideConnectedJunction = function( electron, obstacle ) {
-		var thisJunction = obstacle.object;
-		//var connectedComponent = thisJunction.connectedComponents[0];
-		var nextComponent = this.findNextComponent( thisJunction );
-		if ( nextComponent == null ) {this.bounceBack(electron, obstacle);}	
-		else {
-
-			//first check if the connected component is a battery
-			// TEMP: for now, I assume that no more than one battery connected together
-			if (nextComponent.compType == "Battery") {
-				if ( nextComponent.startJunction.connectedComponentIDs[0] == this.ID ) {
-					// if the other end of battery is also connected to another component & it is a closed loop
-					// then transfer the electron to the other side
-					if (nextComponent.endJunction.connectedComponentIDs.length > 0
-						&& this.force.length() != 0.0) {
-						this.passFromBattery( electron, nextComponent.startJunction, nextComponent.endJunction, nextComponent);
-						//electron.componentID = thisJunction.connectedComponentID;
-						var afterComponent = components[electron.componentID];
-						var afterObstacle = afterComponent.collision(electron);
-						if (afterObstacle != null) {    // this is to avoid electrons stucking in overlap area
-							if ( afterObstacle.object == afterComponent.startJunction 
-								|| afterObstacle.object == afterComponent.endJunction ) {
-								this.bounceBack(electron, afterObstacle);
-							}
-						}
-	                }
-					else {  // if the battery is not connected from the other side (or is connected but I=0)
-							//	 bounce back the electron
-						this.bounceBack(electron, obstacle);
-					}
-				}
-				else {     //it is connected to battery's end junction
-					if (nextComponent.startJunction.connectedComponentIDs.length > 0
-						&& this.force.length() != 0.0 ) {
-						this.passFromBattery( electron, nextComponent.endJunction, nextComponent.startJunction, nextComponent);
-						//electron.componentID = thisJunction.connectedComponentID;
-						var afterComponent = components[electron.componentID];
-						var afterObstacle = afterComponent.collision(electron);
-						if (afterObstacle != null) {    // this is to avoid electrons stucking in overlap area
-							if ( afterObstacle.object == afterComponent.startJunction 
-								|| afterObstacle.object == afterComponent.endJunction ) {
-								this.bounceBack(electron, afterObstacle);
-							}
-						}
-					}
-					else { // if the battery is not connected from the other side, bounce back the electron
-						this.bounceBack(electron, obstacle);
-					}
-				}
-
-			}
-
-			else {   // if the connected component is not a battery
-				electron.componentID = thisJunction.connectedComponentIDs[0];
-				var nextObstacle = nextComponent.collision(electron);
-				if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
-					if ( nextObstacle.object == nextComponent.startJunction 
-						|| nextObstacle.object == nextComponent.endJunction ) {
-						this.bounceBack(electron, obstacle);
-					}
-				}	
-			}
-		}
-
-
-	}
-
 	this.findNextComponent = function( junction ) {
 		return junction.outComponents[0];
 		if (junction.probabilities.length == 0) {
@@ -586,29 +404,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	}
 
-	this.passFromBattery = function( thisElectron, firstJunction, secondJunction, battery ) {
-		var pushVector = new THREE.Vector3();
-		pushVector.subVectors(secondJunction.position, firstJunction.position);
-		var length = pushVector.length();  // TEST: 1.01
- 		pushVector.transformDirection(battery.container.matrixWorld); //normalized 
-		pushVector.multiplyScalar(length);
-
-		if (ArFlag) {  //AR condition
-			// first transform the electron position with the world matrix, move it to the next component
-			// then use inverse matrix to transform the position back to the electrons local position
-			thisElectron.applyMatrix4(electrons.matrixWorld);
-			thisElectron.add(pushVector);
-			var m = new THREE.Matrix4();
-			m = m.getInverse(electrons.matrixWorld);
-			thisElectron.applyMatrix4(m);
-		}
-		else {   // non-AR condition
-			thisElectron.add(pushVector);
-		}	
-
-		thisElectron.componentID = secondJunction.connectedComponentIDs[0];	
-	}
-
 	this.collideConnectedJunctionOld = function( electron, obstacle ) {
 		var thisJunction = obstacle.object;
 		var connectedComponent = components[thisJunction.connectedComponentID];
@@ -624,16 +419,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					this.passFromBattery( electron, connectedComponent.startJunction, connectedComponent.endJunction, connectedComponent);
 					//electron.componentID = thisJunction.connectedComponentID;
 					var nextComponent = components[electron.componentID];
-					var nextObstacle = nextComponent.collision(electron);
+					var nextObstacle = collision(electron, nextComponent.obstacles);
 					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
 						if ( nextObstacle.object == nextComponent.startJunction 
 							|| nextObstacle.object == nextComponent.endJunction ) {
-							this.bounceBack(electron, nextObstacle);
+							bounceBack(electron, nextObstacle, this);
 						}
 					}
                 }
 				else {  // if the battery is not connected from the other side, bounce back the electron
-					this.bounceBack(electron, obstacle);
+					bounceBack(electron, obstacle, this);
 				}
 			}
 			else {     //it is connected to battery's end junction
@@ -642,16 +437,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					this.passFromBattery( electron, connectedComponent.endJunction, connectedComponent.startJunction, connectedComponent);
 					//electron.componentID = thisJunction.connectedComponentID;
 					var nextComponent = components[electron.componentID];
-					var nextObstacle = nextComponent.collision(electron);
+					var nextObstacle = collision(electron, nextComponent.obstacles);
 					if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
 						if ( nextObstacle.object == nextComponent.startJunction 
 							|| nextObstacle.object == nextComponent.endJunction ) {
-							this.bounceBack(electron, nextObstacle);
+							bounceBack(electron, nextObstacle, this);
 						}
 					}
 				}
 				else { // if the battery is not connected from the other side, bounce back the electron
-					this.bounceBack(electron, obstacle);
+					bounceBack(electron, obstacle, this);
 				}
 			}
 
@@ -659,133 +454,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		else {   // if the connected component is not a battery
 			electron.componentID = thisJunction.connectedComponentID;
-			var nextObstacle = connectedComponent.collision(electron);
+			var nextObstacle = collision(electron, connectedComponent.obstacles);
 			if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
 				if ( nextObstacle.object == connectedComponent.startJunction 
 					|| nextObstacle.object == connectedComponent.endJunction ) {
-					this.bounceBack(electron, obstacle);
+					bounceBack(electron, obstacle, this);
 				}
 			}	
 		}
 
 
-	}
-
-	this.moveElectron = function (electron) {
-		// // transform the force vector
-		// var length = this.force.length();
-		// this.force.transformDirection(this.container.matrixWorld); //normalized
-		// this.force.multiplyScalar(length); 
-
-		// update velocity
-		electron.velocity.add( this.force );
-
-/*		var v = electron.velocity.length();
-			if (v > velocityMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
-				
-				electron.velocity.sub( this.force );
-			}
-*/
-		// move the electron
-		electron.add( electron.velocity );
-	}
-	
-	/* here instead of computing the ray vector in local space, I am computing the face normal
-	* in world coordinates and then I use the .reflect() method to calculate the reflection of 
-	* the ray. 
-	* reflection formula:  r=d−2(d⋅n)n (where d is the ray, and n is a normalized normal, and d.n is a dot product)
-	*/
-	
-	this.bounceBack = function( electron, obstacle ) {
-		// first, calculate the normal vector in world coordinate
-		var normalMatrix = new THREE.Matrix3().getNormalMatrix( this.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
-
-		var n = obstacle.face.normal;
-		// this part is for 2D movement of electrons (z=0)
-		if (twoD) {
-			n.z = 0.0; // project the normal vector on the xy plane (in local space of container)
-		}
-		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
-		if (obstacle.object == this.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
-		if (obstacle.object == this.startJunction || obstacle.object == this.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
-
-		if ( this.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy	
-
-		// now calculate the reflection, non-AR condtion
-		if (!ArFlag) {
-		var reflection = electron.velocity.clone().reflect(worldNormal);
-		electron.velocity = reflection;
-		}
-
-		// calculate the reflection for AR condition
-		if (ArFlag) {
-			var length = electron.velocity.length();
-			var direction = new THREE.Vector3();
-			direction.copy(electron.velocity);
-			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
-			var reflection = direction.reflect(worldNormal);
-			var m = new THREE.Matrix4();
-			m = m.getInverse(electrons.matrixWorld);
-			reflection.transformDirection(m);
-			electron.velocity = reflection.multiplyScalar(length);
-		}
-
-	 }
-	 
-	
-	// here instead of computing the face normal in world coordinate, I am computing the ray vector
-	// i.e., the electron velocity vector in box's local space.
-	// obstacle.face.normal --> returns the face normal in local space 
-	
-	this.bounceBackOld = function ( electron, obstacle ) {
-		var n = obstacle.face.normal; // it returns the face normal in box's local space
-		//console.log(n.x + ' ' + n.y + ' ' + n.z);
-		//n.z = 0; // we just want the image of the normal vector on the XY plane with Z = 0
-		var localVelocity = new THREE.Vector3(); 
-		localVelocity.copy(electron.velocity);
-		//localVelocity.applyMatrix4(electrons.matrixWorld); // apply JsAr transformations
-		var length = localVelocity.length();
-		localVelocity.transformDirection(this.container.matrix.transpose()); //later: check why I needed to add transpose
-		localVelocity.multiplyScalar(length);
-		//localVelocity.applyAxisAngle(new THREE.Vector3(0, 0, -1), this.rotationAngle); //worked before adding AR
-
-		var theta = localVelocity.angleTo(n);
-		var Beta = (2 * theta) - Math.PI ;
-		var rotationAxis = new THREE.Vector3(); // 
-		rotationAxis.crossVectors( localVelocity, n );
-		if (Beta == Math.PI/2) { 	// if velocity is tangential to the ion sphere
-			this.moveElectron(electron);
-		}
-		if (rotationAxis.length() == 0) {	// if Beta is 180 degrees the cross vector is zero, set rotation axis to z axis (sign does not matter anymore)
-			rotationAxis = (0,0,1);
-		}
-		else {
-			rotationAxis = rotationAxis.normalize(); 
-		}
-		//rotationAxis = rotationAxis.normalize();
-		electron.velocity.applyAxisAngle( rotationAxis, Beta );
-	}		
-
-	this.collision = function ( electron ) {
-		var direction = new THREE.Vector3();
-		direction.copy(electron.velocity);
-		direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
-		var origin = new THREE.Vector3();
-		origin.copy(electron);
-		origin.applyMatrix4(electrons.matrixWorld);
-		raycaster.set(origin, direction);
-		//var distance = 10;
-		raycaster.near = 0;
-		raycaster.far = electron.velocity.length();
-		var collisions = raycaster.intersectObjects(this.obstacles, false);
-		// if (collisions.length > 0 && collisions[0].distance <= distance) {
-		if ( collisions.length > 0 ) {
-			//console.log(collisions[0].faceIndex);	
-		 	return collisions[0];
-		 }
-		 else {
-		 	return null;
-		 }
 	}
 
 	this.clicked = function() {
@@ -795,51 +473,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		else {
 			this.ammeter.visible = false;
 		}
-	}
-
-	this.dblClickedOld = function () {
-		if (this.measureOn == false) {
-			this.measureOn = true;
-			console.log("selected component is a: " + this.compType);
-			console.log("V: " + this.volt + " I: " + this.current + " R: " + this.R);
-
-
-	        //this.ammeter = object1;
-	        this.container.add(this.ammeter);
-	        this.obstacles.push(this.ammeter);
-
-	        
-	        
-	        // Add text
-	        var randomColor = Math.floor( Math.random() * 255 );  // instead of r: 255
-			var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
-				{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
-			spriteText1.position.set(-this.w, -standardLength/5, 0);
-
-			this.text2 = " rate = " + this.ammeter.count.toFixed() + " ";
-			var spriteText2 = makeTextSprite( this.text2, 
-				{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
-			spriteText2.position.set(-this.w, standardLength/5, 0);
-			
-		    this.ammeter.add( spriteText1 );
-		    this.ammeter.add( spriteText2 );
-
-
-
-
-	        // spritey.updateMatrixWorld();
-	        //thisComponent.ammeter.startTime = clock.getElapsedTime();
-	        
-	    }
-	    else { // it is already measuring, so remove the ammeter
-	    	this.measureOn = false;
-	    	this.container.remove(this.ammeter);
-	    	this.ammeter.remove(this.ammeter.children[1]);
-	    	this.ammeter.remove(this.ammeter.children[0]);
-	    	this.obstacles.pop(this.ammeter);
-
-
-	    }
 	}
 
 }

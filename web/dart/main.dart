@@ -175,7 +175,7 @@ class App extends TouchManager {
      
      // instantiate lens and help objects
      lens = new Lens(width/2, canvasMargin * 3);
-     help = new Help(770, 470);
+     help = new Help(width*3/4, height/2);
     
      // initiate delete box 
      deleteBoxImg = new ImageElement();

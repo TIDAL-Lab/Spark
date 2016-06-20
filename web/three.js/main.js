@@ -39,6 +39,16 @@ var windowHalfY = window.innerHeight / 2;
 
 var mouseFlag = 0; // this flag is used to distinguish a mouse drag from a mouse click
 
+// COLORS:
+var red = 0xD11919;
+var darkRed = 0x990000;
+var green = 0x008F00;
+var darkGreen = 0x003300;
+var gray = 0x808080;
+var midnightBlue = 0x000099;
+var backgroundBlue = 0x337586;
+
+
 function doInit() {	
 	init();
 	if (ArFlag) JsArInit();
@@ -74,7 +84,7 @@ function init() {
 	initComponents();
 
 	renderer = new THREE.WebGLRenderer();
-	renderer.setClearColor ( 0x337586 ); 			//bluish background color
+	renderer.setClearColor ( backgroundBlue ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth , window.innerHeight );
 	//renderer.setSize( width * 2 , height * 2 );
@@ -109,7 +119,7 @@ function initComponents() {
 	}
 	
 	if (!ArFlag) electronSize = 10;
-	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: 0x000099 , transparent: true } );
+	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: backgroundBlue , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
 	markerRoot = new THREE.Mesh();
@@ -178,8 +188,9 @@ function updateElectrons() {
 
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
-		components[electron.componentID].updateElectron(electron); // the compoentID shows the 
-																	// index for the components array																	
+		updateElectron(electron, components[electron.componentID] ); // the compoentID shows the 
+																	// index for the components array
+		//components[electron.componentID].updateElectron(electron); 																	
 	}
 	electrons.geometry.verticesNeedUpdate = true;
 }
@@ -193,10 +204,10 @@ function createConnectedMeshes() {
 	if ( components.length != 0 ) {
 		connectedMeshes[labelCounter] = new Array(); 
 	} 
-	console.log('graph labels: ');	
+	//console.log('graph labels: ');	
 	for (k=0; k < components.length; k++) {
 		var gl = components[k].graphLabel;
-		console.log(gl);
+		//console.log(gl);
 		if ( gl != labelCounter ) { // start the next list of connected components
 			labelCounter++;
 			connectedMeshes[labelCounter] = new Array();
@@ -205,8 +216,8 @@ function createConnectedMeshes() {
 		connectedMeshes[labelCounter].push( clonedComponent );
 	}
 	
-	console.log('number of connected graphs: ' + connectedMeshes.length);
-	console.log(connectedMeshes);
+	//console.log('number of connected graphs: ' + connectedMeshes.length);
+	//console.log(connectedMeshes);
 	
 	// Now, create a CSG union mesh
 	var compositeMeshes = new Array(connectedMeshes.length); // create an array of composite meshes, one for each connected graph

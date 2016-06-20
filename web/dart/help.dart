@@ -68,9 +68,9 @@ class Help implements Touchable {
   }
   
   void initiate () {
-    //visible = true;
-    //img.src = "images/helps/bg.png";
-    //App.repaint();
+//    visible = true;
+//    img.src = "images/helps/help1.png";
+//    App.repaint();
   }
   
   void show () {
@@ -83,11 +83,11 @@ class Help implements Touchable {
   }
   
   void next() {
-    if (theApp.condition==0) {
-      max = 3;
+    if (theApp.condition==2) {
+      max = 4;
     }
     else {
-      max = 4;
+      max = 3;
     }
     if (number != max) {
       number++;
@@ -158,7 +158,7 @@ class Help implements Touchable {
   }
   
   void touchDrag(Contact event) {
-    /*
+ 
     num deltaX = event.touchX - dragX;
     num deltaY = event.touchY - dragY;
 
@@ -169,7 +169,7 @@ class Help implements Touchable {
     //this.move(deltaX, deltaY);
     /* redraw everything */
     App.repaint(); 
-    */
+
   }
    
   void touchSlide(Contact event) {}
