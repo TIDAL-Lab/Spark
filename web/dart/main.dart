@@ -135,7 +135,7 @@ class App extends TouchManager {
     * 3 --> webgl non-AR
     * 4 --> webgl AR
     */
-   num condition = 3;  
+   num condition = 2;  
 
       
    App() {

@@ -190,7 +190,6 @@ function updateElectrons() {
 	ticks++;
 	var eVertices = electrons.geometry.vertices;
 
-
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
 		updateElectron(electron, components[electron.componentID] ); // the compoentID shows the 
@@ -213,6 +212,8 @@ function updateElectrons() {
 		);
 		var line = new THREE.Line( trackGeometry, trackMaterial );
 		lines.add( line );
+		// halo.position = electron;
+		// halo.needsUpdate = true;
 	}
 }
 
@@ -387,15 +388,22 @@ function keepMoving() {
 
 var watch = false;
 
-
+var halo;
 function watchElectron() {
 	if (!watch) {
 		// add an object to hold the tracking lines
 		lines = new THREE.Object3D();
+		// halo = new THREE.Mesh( new THREE.SphereGeometry(electronSize/2, 16, 16), 
+		// 								new THREE.MeshBasicMaterial( { color: orange } ));
+		// halo.material.transparent = true;
+		// halo.material.opacity = 0.5;
+		// halo.position = electrons.geometry.vertices[0];
+		// scene.add(halo);
 		scene.add(lines);
 	}
 	else {
 		scene.remove(lines);
+		scene.remove(halo);
 	}
 	watch = !watch;
 	

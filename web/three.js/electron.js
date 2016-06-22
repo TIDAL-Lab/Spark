@@ -15,6 +15,7 @@ var velocity = 2;
 var velocityMax = 15;
 var lossFactor = 0.9;
 
+
 function createElectrons( electronGeometry, component ) {
 	for ( i = 0; i < component.electronCount; i ++ ) {
 
@@ -31,10 +32,9 @@ function createElectrons( electronGeometry, component ) {
 		electron.y = Math.random() * (component.l - 5) - (component.l - 5)/2; // component width 
 		
 		if (twoD) {
-			electron.z = -0.002;
+			electron.z = offsetZ;
 		}	
-		else {
-			//electron.z = Math.random() * (component.w - 5) - (component.w - 5)/2;
+		else { // 3D movement of electrons
 			var zLimit = Math.sqrt((component.w - 5) * (component.w - 5) - (4*electron.x * electron.x));
 			electron.z = Math.random() * zLimit - zLimit/2; // calculations of random xz coordinate on a circle shape (cross section of a cylinder on xz plane)
 		}	
@@ -63,17 +63,18 @@ function createElectrons( electronGeometry, component ) {
 	    	vX,		// x
 	    	vY,		//  
 	    	vZ);		// z
-
-		// transform the velocity vector --> world space
-		var length = electron.velocity.length();
-		electron.velocity.transformDirection(component.container.matrixWorld); //normalized
-		electron.velocity.multiplyScalar(length);
+		
+		// transform the velocity vector --> world space  ----> NO! this is unnecessary!!
+		// var length = electron.velocity.length();
+		// electron.velocity.transformDirection(component.container.matrixWorld); //normalized
+		// electron.velocity.multiplyScalar(length);
 		
 		//translate the electron to be inside the component
 		//component.container.localToWorld(electron); // component.changes the position of electron from local to world
 		electron.applyMatrix4( component.container.matrixWorld );
 		electron.componentID = component.ID;
 		electronGeometry.vertices.push( electron );
+
 	}	
 
 }
@@ -85,6 +86,25 @@ function updateElectron(electron, component) {
 	electron.velocity.add(component.force);
 	var obstacle = collision(electron, component.obstacles);
 	if (obstacle == null) { 	// no colision
+/*		// make sure it is not out of container
+		var nextPosition = new THREE.Vector3().copy(electron); // next position
+		nextPosition.add(electron.velocity);
+		var nextVector = new THREE.Vector3().copy(electron.velocity);
+		//nextVector.multiplyScalar(-1);
+		component.container.material.side = THREE.FrontSide; 
+		component.startJunction.material.side = THREE.FrontSide;
+		component.endJunction.material.side = THREE.FrontSide;
+		var nextObstacle = collision(electron, component.obstacles);
+		if (nextObstacle == null) {
+			moveElectron(electron, component.force);
+			component.container.material.side = THREE.BackSide; 
+			component.startJunction.material.side = THREE.BackSide;
+			component.endJunction.material.side = THREE.BackSide;
+		}
+		else {
+			console.log("STOP");
+		}*/
+
 		moveElectron(electron, component.force);
 	}
 	else {   // a collision is detected
@@ -123,37 +143,54 @@ function moveElectron(electron, force) {
 
 	// update velocity
 	//electron.velocity.add( force );
-
+		var m = new THREE.Matrix4();
+		m = m.getInverse(components[0].container.matrixWorld);
+		var test = new THREE.Vector3().copy(electron)
+		test.applyMatrix4(m);
+		//console.log(test.x);
 		var v = electron.velocity.length();
-		if (v > velocityMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
-			
-			electron.velocity.sub( force );
+		if (electron.velocity.length() > velocityMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
+			electron.velocity.setLength(velocityMax-0.01);
+			//electron.velocity.sub( force );
 		}
+		if (electron.velocity.length() > velocityMax) console.log("error: velocity exceeds the max velocity");
 
 	// move the electron
-	//electron.add( electron.velocity );
+	electron.add( electron.velocity );
 
 
-	var direction = new THREE.Vector3();
-	direction.copy(electron.velocity);  // in local space / force is already added
-	//direction.transformDirection(electrons.matrixWorld); //transform direction to world space also normalizes the vector
+	// var direction = new THREE.Vector3();
+	// direction.copy(electron.velocity);  // in local space / force is already added
+	// direction.transformDirection(electrons.matrixWorld); //transform direction to world space also normalizes the vector
 	// var origin = new THREE.Vector3();
 	// origin.copy(electron);
 	// origin.applyMatrix4(electrons.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
-	electron.add(direction);
-}
+	// electron.add(direction);
 
+}
+var arrowHelper = new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,0), 10, darkGreen );
 function collision( electron, obstacles ) {
-	var direction = new THREE.Vector3();
+	// CHECK for AR, I think I should uncomment this for AR
+/*	var direction = new THREE.Vector3();
 	direction.copy(electron.velocity);  // in local space / force is already added
 	direction.transformDirection(electrons.matrixWorld); //transform direction to world space also normalizes the vector
 	var origin = new THREE.Vector3();
 	origin.copy(electron);
 	origin.applyMatrix4(electrons.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
-	raycaster.set(origin, direction);
+*/
+	scene.remove(arrowHelper);
+	var dir = new THREE.Vector3().copy(electron.velocity).normalize();
+	var length = electron.velocity.length();
+	var origin = new THREE.Vector3().copy(electron); 
+	arrowHelper = new THREE.ArrowHelper( dir, origin, length+electronSize/2, darkGreen );
+	scene.add(arrowHelper);
+
+	raycaster.set(origin, dir);
+
+	//raycaster.set( electron, electron.velocity);
 	//var distance = 10;
 	raycaster.near = 0;
-	raycaster.far = electron.velocity.length() + 1;
+	raycaster.far = electron.velocity.length() + electronSize/2;
 	var collisions = raycaster.intersectObjects(obstacles, false);
 	// if (collisions.length > 0 && collisions[0].distance <= distance) {
 	if ( collisions.length > 0 ) {
@@ -177,20 +214,20 @@ function bounceBack( electron, obstacle, component ) {
 	var normalMatrix = new THREE.Matrix3().getNormalMatrix( component.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
 
 	var n = obstacle.face.normal;
+
 	// this part is for 2D movement of electrons (z=0)
+	if (n.z>0.5) console.log("normal vector in z direction");
 	if (twoD) {
 		n.z = 0.0; // project the normal vector on the xy plane (in local space of container)
 	}
 	var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
-	if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
-	if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
-
-	if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy	
+	//if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
+	//if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
 
 	// now calculate the reflection, non-AR condtion
 	if (!ArFlag) {
-	var reflection = electron.velocity.clone().reflect(worldNormal);
-	electron.velocity = reflection;
+		var reflection = electron.velocity.clone().reflect(worldNormal);
+		electron.velocity = reflection;
 	}
 
 	// calculate the reflection for AR condition
@@ -205,6 +242,8 @@ function bounceBack( electron, obstacle, component ) {
 		reflection.transformDirection(m);
 		electron.velocity = reflection.multiplyScalar(length);
 	}
+
+	if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
 
  }
  

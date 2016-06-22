@@ -13,6 +13,7 @@
 var ionGeometry = new THREE.SphereGeometry( 5, 16, 16 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
+var offsetZ = 0.00;
 
 function Component(type, current, res, volt, startX, startY, endX, endY, direction, connections, graphLabel) {
  	this.compType = type; // "wire", "resistor", "bulb", "battery"
@@ -61,60 +62,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		createElectrons(electronGeometry, this);
 	}
 
-	this.createAmmeter = function() {
-		var cylinderGeometry = new THREE.CylinderGeometry( this.w * 0.52, this.w * 0.52, standardLength/10, 24, 1, false);
-	    var boxGeometry = new THREE.BoxGeometry(standardLength/5, standardLength/5, standardLength/5);
-        var ammeterMaterial = new THREE.MeshBasicMaterial( { color: orange } );  // or darkGreen
-
-        this.ammeter = new THREE.Mesh( cylinderGeometry, ammeterMaterial );
-        //var object2 = new THREE.Mesh( boxGeometry, ammeterMaterial );
-        //object2.position.set(-this.w*0.52 - standardLength/10, 0, 0);
-        //object1.add(object2);
-        this.ammeter.count = 0;
-
-        ammeterMaterial.transparent = true;
-	    ammeterMaterial.opacity = 0.6;
-
-	    this.ammeter.visible = false;
-
-    	        //this.ammeter = object1;
-        this.container.add(this.ammeter);
-        this.obstacles.push(this.ammeter);
-       
-        // Add text
-        var randomColor = Math.floor( Math.random() * 255 );  // instead of r: 255
-		// var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
-		// 	{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
-		// spriteText1.position.set(-this.w, -standardLength/5, 0);
-
-		this.text2 = " rate = " + this.ammeter.count.toFixed(2) + " ";
-		this.text2 = " rate = " + " ";
-		var spriteText2 = makeTextSprite( this.text2, 
-			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
-		spriteText2.position.set(-this.w, standardLength/5, 0);
-		
-	    //this.ammeter.add( spriteText1 );
-	    this.ammeter.add( spriteText2 );
-	}
-
-	this.updateAmmeter = function() {
-		var rate = this.ammeter.count/(ticks-10);
-		//var rate = this.ammeter.count;
-
-		this.text2 = " rate = " + Math.abs(rate.toFixed(2)) + " ";
-		this.ammeter.remove(this.ammeter.children[0]);  // used to be children[1] when I had text 1
-		var spriteText2 = makeTextSprite( this.text2, 
-			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
-		spriteText2.position.set(-this.w, standardLength/5, 0);
-		
-		this.ammeter.add( spriteText2 );
-		//this.ammeter.count = 0;
-
-	}
-
 	this.computeForce = function() {
-		this.volt = 0.1;
-		this.direction = 1;
+		//this.volt = 0.001;
+		//this.direction = 1;
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
 	  	this.force.y = this.direction * this.volt; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
@@ -126,6 +76,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var length = this.force.length();
 		this.force.transformDirection(this.container.matrixWorld); //normalized
 		this.force.multiplyScalar(length);
+		//console.log(this.force);
 	}
 
 	this.createContainer = function() {
@@ -137,9 +88,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		* radiusSegment = 24 (default value: 8)
 		* heightSegments = 1 (default value)
 		* openEnded = true (default is false)
-		*
-		* Cone geometry:
-		* ConeGeometry(radius, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
 		*/
 
 		// TEST: cone container for resistor
@@ -148,8 +96,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		if (this.compType == "Resistor" || this.compType == "Bulb") {
 			containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
 
-			var coneGeometry1 = new THREE.CylinderGeometry(this.w/2, this.w/10, this.l, 32, 1, true);
-			var coneGeometry2 = new THREE.CylinderGeometry(this.w/10, this.w/2, this.l, 32, 1, true);
+			var coneGeometry1 = new THREE.CylinderGeometry(this.w/2, this.w/10, this.l, 64, 64, true);
+			var coneGeometry2 = new THREE.CylinderGeometry(this.w/10, this.w/2, this.l, 64, 64, true);
 			//coneGeometry1.rotateY(10);
 			//coneGeometry2.translate(0,-this.l/2,0);
 			var coneBSP1 = new ThreeBSP(coneGeometry1);
@@ -176,9 +124,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			this.container.add(minusText);
 		} 
 		else {   // it's a wire
-			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 1, true);
+			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
 			containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
+
+			// var secondLayer =  new THREE.Mesh( containerGeometry, containerMaterial );
+			// this.container.add(secondLayer);
+			// this.obstacles.push(secondLayer);
 		}
 		containerMaterial.transparent = true;
 		containerMaterial.opacity = 0.7;
@@ -211,7 +163,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					endJunction.connectedComponentIDs.push(i);
 					endJunction.connectedComponents.push(components[i]);
 				}
-
 			}
 		}
 	    // add the junctions to the box
@@ -219,11 +170,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.container.add(this.startJunction);
 		this.endJunction = endJunction;
 		this.container.add(this.endJunction);
-		// console.log("component " + this.ID + ": ")
-		// console.log(this.startJunction.connectedComponentIDs);
 
 		// create ions and add them to the box
 		if (this.compType != "Battery") { this.createIons(); }
+		
 		this.container.material.side = THREE.BackSide;  // for collision detection code
   		this.obstacles.push(this.container); // for collision detection code
   		this.obstacles.push(this.startJunction);
@@ -242,7 +192,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var sign = Math.sign(vector.z);		
 		var rotationAngle = angle*sign;
 		this.container.rotation.z = rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
-		this.container.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix for electrons
+		//this.container.rotation.x = Math.PI/6;
+		// I need to manually update the matrix for electrons
+		this.container.updateMatrixWorld(); // because it is not in the render() loop yet 
 
 		//var edges = new THREE.FaceNormalsHelper( this.container, 4, darkGreen, 2 );
 		//var wireframe = new THREE.WireframeHelper( this.container, 0x00ff00 );
@@ -255,7 +207,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		 here I changed the thetaLength from Math.PI (default) to Math.PI/2
 		 --> the end junction is capped correctly, but I need to rotate the start junction along the y axis
 		 */
-		var junction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 64, 64, 0, Math.PI*2, thetaStart, Math.PI/2), 
+		var junction = new THREE.Mesh( new THREE.SphereGeometry(this.w/2, 32, 32, 0, Math.PI*2, thetaStart, Math.PI/2), 
 										new THREE.MeshBasicMaterial( { color: red } ));
 		junction.material.transparent = false;
 		junction.material.opacity = 0.7;
@@ -340,7 +292,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					pos = new THREE.Vector3();
 					pos.y = -this.l/2 + i * d; // I switched the order of x & y (from BoxGeometry)
 					pos.x = (-this.w/2 + j * d)*(1-0.12*(1+this.R));
-					pos.z = -0.002;
+					pos.z = offsetZ;
 
 					var ion = new THREE.Mesh( ionGeometry, ionMaterial );
 					ion.position.set(pos.x, pos.y, pos.z);
@@ -443,6 +395,57 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			}	
 		}
 
+
+	}
+
+	this.createAmmeter = function() {
+		var cylinderGeometry = new THREE.CylinderGeometry( this.w * 0.52, this.w * 0.52, standardLength/10, 24, 1, false);
+	    var boxGeometry = new THREE.BoxGeometry(standardLength/5, standardLength/5, standardLength/5);
+        var ammeterMaterial = new THREE.MeshBasicMaterial( { color: orange } );  // or darkGreen
+
+        this.ammeter = new THREE.Mesh( cylinderGeometry, ammeterMaterial );
+        //var object2 = new THREE.Mesh( boxGeometry, ammeterMaterial );
+        //object2.position.set(-this.w*0.52 - standardLength/10, 0, 0);
+        //object1.add(object2);
+        this.ammeter.count = 0;
+
+        ammeterMaterial.transparent = true;
+	    ammeterMaterial.opacity = 0.6;
+
+	    this.ammeter.visible = false;
+
+    	        //this.ammeter = object1;
+        this.container.add(this.ammeter);
+        this.obstacles.push(this.ammeter);
+       
+        // Add text
+        var randomColor = Math.floor( Math.random() * 255 );  // instead of r: 255
+		// var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
+		// 	{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
+		// spriteText1.position.set(-this.w, -standardLength/5, 0);
+
+		this.text2 = " rate = " + this.ammeter.count.toFixed(2) + " ";
+		this.text2 = " rate = " + " ";
+		var spriteText2 = makeTextSprite( this.text2, 
+			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
+		spriteText2.position.set(-this.w, standardLength/5, 0);
+		
+	    //this.ammeter.add( spriteText1 );
+	    this.ammeter.add( spriteText2 );
+	}
+
+	this.updateAmmeter = function() {
+		var rate = this.ammeter.count/(ticks-10);
+		//var rate = this.ammeter.count;
+
+		this.text2 = " rate = " + Math.abs(rate.toFixed(2)) + " ";
+		this.ammeter.remove(this.ammeter.children[0]);  // used to be children[1] when I had text 1
+		var spriteText2 = makeTextSprite( this.text2, 
+			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
+		spriteText2.position.set(-this.w, standardLength/5, 0);
+		
+		this.ammeter.add( spriteText2 );
+		//this.ammeter.count = 0;
 
 	}
 
