@@ -28,6 +28,9 @@ var compositeMesh;
 
 var clock = new THREE.Clock();
 var ticks = 0;
+var lines; // an object that holds the tracking lines as its children
+
+
 
 
 var updateFlag = false;
@@ -47,6 +50,7 @@ var darkGreen = 0x003300;
 var gray = 0x808080;
 var midnightBlue = 0x000099;
 var backgroundBlue = 0x337586;
+var orange = 0xFF9900;
 
 
 function doInit() {	
@@ -156,7 +160,7 @@ function animate() {
 }
 
 function render() {
-	if (!updateFlag) {
+	if (!updateFlag && !stop) {
         updateElectrons();
     }
  	renderer.autoClear = false;
@@ -186,6 +190,7 @@ function updateElectrons() {
 	ticks++;
 	var eVertices = electrons.geometry.vertices;
 
+
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
 		updateElectron(electron, components[electron.componentID] ); // the compoentID shows the 
@@ -193,6 +198,22 @@ function updateElectrons() {
 		//components[electron.componentID].updateElectron(electron); 																	
 	}
 	electrons.geometry.verticesNeedUpdate = true;
+	if (watch) {
+		//var randomIndex = Math.floor(Math.random() * eVertices.length);
+		var electron = eVertices[0];
+		// var dir = electron.velocity.normalize();
+		// var length = electron.velocity.length();
+		// var arrowHelper = new THREE.ArrowHelper( dir, electron, length, darkGreen );
+		// scene.add(arrowHelper);
+		var trackMaterial = new THREE.LineBasicMaterial({ color: orange });
+		var trackGeometry = new THREE.Geometry();
+		trackGeometry.vertices.push(
+			electron,
+			new THREE.Vector3().addVectors(electron, electron.velocity)
+		);
+		var line = new THREE.Line( trackGeometry, trackMaterial );
+		lines.add( line );
+	}
 }
 
 /* create a list of connected meshes, 
@@ -348,3 +369,34 @@ function roundRect(ctx, x, y, w, h, r)
 	ctx.stroke();   
 }
 
+var gridHelper = new THREE.GridHelper( window.innerWidth, 10, 0x0000ff, 0x808080 );
+gridHelper.position.y = 0.0;
+gridHelper.rotateX(Math.PI/2);
+var toggle = true;
+
+function displayGrid() {
+	if (toggle) {scene.add(gridHelper);}
+	else {scene.remove(gridHelper);}
+	toggle = !toggle;
+}
+
+var stop = true;
+function keepMoving() {
+	stop = !stop;   // the stop flag is used in the rendering function as a condition for running updateElectrons()
+}
+
+var watch = false;
+
+
+function watchElectron() {
+	if (!watch) {
+		// add an object to hold the tracking lines
+		lines = new THREE.Object3D();
+		scene.add(lines);
+	}
+	else {
+		scene.remove(lines);
+	}
+	watch = !watch;
+	
+}

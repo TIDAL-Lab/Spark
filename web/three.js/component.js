@@ -10,45 +10,24 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-
-
-var rectGeom, rectMesh;
 var ionGeometry = new THREE.SphereGeometry( 5, 16, 16 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 
-
- /*
- * component inputs:
- * type: "Wire", "Resistor", "Bulb", or "Battery"
- * current: electric current measure
- * res: electric resistance measure
- * volt: voltage measure
- * startX: X coordinate of start point
- * startY: Y coordinate of start point
- * endX: X coordinate of end point
- * endY: Y coordinate of end point
- * direction: 1 if from start to end, -1 if from end to start, 0 if no current
- * connections: XXX
- * graphlabel: XXX
-	
- */
-
 function Component(type, current, res, volt, startX, startY, endX, endY, direction, connections, graphLabel) {
  	this.compType = type; // "wire", "resistor", "bulb", "battery"
-  	this.current = current;
-  	this.R = res;
-  	this.volt = volt;
-  	this.startPoint = new THREE.Vector3( startX, startY, 0.0 );
+  	this.current = current;  // electric current measure
+  	this.R = res;   // resistance measure
+  	this.volt = volt; // voltage measure
+  	this.startPoint = new THREE.Vector3( startX, startY, 0.0 );  // startX: X coordinate of start point
   	this.endPoint = new THREE.Vector3( endX, endY, 0.0 ); 
-  	this.direction = direction; // 0 if v=0; 1 if from Start to End; -1 if from End to Start
+  	this.direction = direction; // 0 if no current; 1 if from Start to End; -1 if from End to Start
   	this.graphLabel = graphLabel;
   	this.ID;
   	this.electronCount; // Change it later
   	this.ionCount; //Change it later
   	this.l = Math.sqrt((endX-startX)*(endX-startX)+(endY-startY)*(endY-startY));
   	this.w = 110;
-  	this.h = 30; // height of box (i.e., depth of it in z direction)
   	this.ions = [];
   	this.obstacles = [];
   	this.container;
@@ -63,16 +42,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
    	this.time = clock.getElapsedTime();
    	//this.time2 = 0;
 
-  	// calculate the rotation angle of the component on the XY plane (-180 to 180 from +x axis)
-	var startToEnd = new THREE.Vector3( endX-startX, endY-startY, 0.0); // z is 0 (reading from Parse)
-	var xAxis = new THREE.Vector3(1, 0, 0);
-	var angle = startToEnd.angleTo(xAxis);
-	var vector = new THREE.Vector3();
-	vector.crossVectors(xAxis, startToEnd);
-	var sign = Math.sign(vector.z);		
-	var rotationAngle = angle*sign;
-	this.rotationAngle = rotationAngle;
-
   	if (this.compType == "Wire") {
   		//this.electronCount = 1;
   		this.electronCount = Math.round( 15 * this.l/standardLength); // this.l might not be an integer
@@ -83,25 +52,19 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	else { 		// Resistor or Bulb
   		this.electronCount = 15;
   	}
- 
 
   	this.init = function( electronGeometry, ID ) {
-  		this.ID = ID;
-  		this.computeForce();		
+  		this.ID = ID;		
 		this.createContainer();
 		this.createAmmeter();
-		// transform the force vector --> world space
-		var length = this.force.length();
-		this.force.transformDirection(this.container.matrixWorld); //normalized
-		this.force.multiplyScalar(length);
-
+		this.computeForce();
 		createElectrons(electronGeometry, this);
 	}
 
 	this.createAmmeter = function() {
 		var cylinderGeometry = new THREE.CylinderGeometry( this.w * 0.52, this.w * 0.52, standardLength/10, 24, 1, false);
 	    var boxGeometry = new THREE.BoxGeometry(standardLength/5, standardLength/5, standardLength/5);
-        var ammeterMaterial = new THREE.MeshBasicMaterial( { color: 0xFF9900 } );  // or darkGreen
+        var ammeterMaterial = new THREE.MeshBasicMaterial( { color: orange } );  // or darkGreen
 
         this.ammeter = new THREE.Mesh( cylinderGeometry, ammeterMaterial );
         //var object2 = new THREE.Mesh( boxGeometry, ammeterMaterial );
@@ -150,22 +113,25 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.computeForce = function() {
-		//this.volt = 0.001;
-		//this.direction = 1;
+		this.volt = 0.1;
+		this.direction = 1;
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
 	  	this.force.y = this.direction * this.volt; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
 	  	if (this.compType == "Wire") { this.force.y *= 100; }
 	  	//if (this.compType == "Resistor" || this.compType == "Bulb") { this.force.y /= 10; }
 	  	this.force.z = 0.0;
+
+	  	// transform the force vector --> world space
+		var length = this.force.length();
+		this.force.transformDirection(this.container.matrixWorld); //normalized
+		this.force.multiplyScalar(length);
 	}
 
 	this.createContainer = function() {
 		var center = new THREE.Vector3( (this.startPoint.x + this.endPoint.x) / 2, 
 										(this.startPoint.y + this.endPoint.y) / 2, 
 										0.0 );
-
-		// var containerGeometry = new THREE.BoxGeometry( this.l, this.w, this.h);
 
 		/* CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
 		* radiusSegment = 24 (default value: 8)
@@ -263,10 +229,24 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		this.obstacles.push(this.startJunction);
   		this.obstacles.push(this.endJunction);
 
-		//transform the box
+		//transform the container
+		// first set its position
 		this.container.position.set(center.x, center.y, center.z);
-		this.container.rotation.z = this.rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
+		// then rotates it
+		// calculate the rotation angle of the component on the XY plane (-180 to 180 from +x axis)
+		var startToEnd = new THREE.Vector3().subVectors( this.endPoint, this.startPoint );
+		var xAxis = new THREE.Vector3(1, 0, 0);
+		var angle = startToEnd.angleTo(xAxis);
+		var vector = new THREE.Vector3();
+		vector.crossVectors(xAxis, startToEnd);
+		var sign = Math.sign(vector.z);		
+		var rotationAngle = angle*sign;
+		this.container.rotation.z = rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
 		this.container.updateMatrixWorld(); // because it is not in the render() loop yet, I need to manually update the matrix for electrons
+
+		//var edges = new THREE.FaceNormalsHelper( this.container, 4, darkGreen, 2 );
+		//var wireframe = new THREE.WireframeHelper( this.container, 0x00ff00 );
+		//scene.add(wireframe);
 	}
 
 	this.createJunction = function(thetaStart, yPos) {

@@ -105,14 +105,14 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		// EB modification
 
-/*		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta);
+		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta);
 		if (phi >= Math.PI/2) {
 			phi = Math.min( phi, Math.PI*3/4);
 		}
 		else {
 			phi = Math.max( phi, Math.PI/4);
 		}
-*/
+
 		// END EB modifications
 		var radius = vector.length();   // EB: distance from camera to scene
 		//console.log(theta*180/Math.PI);

@@ -494,9 +494,16 @@ I paused working on the branching effect and instead adding some new features to
 	(the objects disapper when they are very very small and no disappearing when rotating!)
 3. I worked on the mechanism of electron moving, removed the limit on max velocity, and added energy loss after each collision
 
-*** notes on 6/18/2016
+*** notes on 6/19/2016
 1. changed the geometry of resistor to two merged cones!
-2. 
+2. working on the electrons motion!
+
+*** notes on 6/21/2016
+1. Added a bunch of buttons to control/test the electrons motion
+2. added a "watch an electron" button; first I tried an arrowHelper but for some reason it slows down the rendering
+	so instead, I used the line geometry
+3. 
+
 
 ISSUES TO FIX LATER:
 

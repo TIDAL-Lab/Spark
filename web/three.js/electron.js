@@ -11,7 +11,7 @@
  */
 
 var electronSize = 40;
-var velocity = 5;
+var velocity = 2;
 var velocityMax = 15;
 var lossFactor = 0.9;
 
@@ -136,7 +136,7 @@ function moveElectron(electron, force) {
 
 	var direction = new THREE.Vector3();
 	direction.copy(electron.velocity);  // in local space / force is already added
-	direction.transformDirection(electrons.matrixWorld); //transform direction to world space also normalizes the vector
+	//direction.transformDirection(electrons.matrixWorld); //transform direction to world space also normalizes the vector
 	// var origin = new THREE.Vector3();
 	// origin.copy(electron);
 	// origin.applyMatrix4(electrons.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
@@ -153,7 +153,7 @@ function collision( electron, obstacles ) {
 	raycaster.set(origin, direction);
 	//var distance = 10;
 	raycaster.near = 0;
-	raycaster.far = electron.velocity.length();
+	raycaster.far = electron.velocity.length() + 1;
 	var collisions = raycaster.intersectObjects(obstacles, false);
 	// if (collisions.length > 0 && collisions[0].distance <= distance) {
 	if ( collisions.length > 0 ) {
