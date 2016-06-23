@@ -34,7 +34,7 @@ class Help implements Touchable {
     this.y = y;
 
     img = new ImageElement();
-    if (theApp.condition == 0) {
+    if (theApp.condition == 1) {
       helpSrc = "images/helps-control/";
     }
     else {
@@ -42,6 +42,12 @@ class Help implements Touchable {
     }
     String temp = helpSrc +"bg.png";
     setImage(temp);
+    if (theApp.condition==2 || theApp.condition == 5) {
+      max = 4;
+    }
+    else {
+      max = 3;
+    }
     
     theApp.addTouchable(this);
     
@@ -54,8 +60,8 @@ class Help implements Touchable {
       ctx.beginPath(); 
       ctx.save();
       ctx.translate(this.x, this.y);
-      iw = img.width / 2.5;
-      ih = img.height / 2.5;
+      iw = img.width / 2;
+      ih = img.height / 2;
       ctx.drawImageScaled(theApp.help.img, 5, 0, iw, ih);
       ctx.restore();
     }
@@ -83,24 +89,22 @@ class Help implements Touchable {
   }
   
   void next() {
-    if (theApp.condition==2) {
-      max = 4;
-    }
-    else {
-      max = 3;
-    }
-    if (number != max) {
+    if (number < max) {
       number++;
       img.src = helpSrc + "help${number.toString()}.png";
     }
+    print("next: ");
+    print(number);
     App.repaint();    
   }
   
   void back() {
-    if (number != 1){
+    if (number > 1){
       number--;
       img.src = helpSrc + "help${number.toString()}.png";
     }
+    print("back: ");
+    print(number);
     App.repaint();    
   }
   
@@ -120,7 +124,9 @@ class Help implements Touchable {
       num ty = event.touchY;
       if (tx >= x && (tx <= x + iw) && ty >= y && (ty <= y + ih)) {
         //print("lens contains touch");
+        
       }
+      
       return (tx >= x && tx <= x + iw && ty >= y && ty <= y + ih);
     }
     return false;
@@ -139,17 +145,20 @@ class Help implements Touchable {
    
   void touchUp(Contact event){
     /* if it is clicked, take an action if the click is on a button */
-    if (clickX == event.touchX && clickY == event.touchY) {
+    
+    if ((clickX - event.touchX).abs()<10 && (clickY - event.touchY).abs()<10) {
+//      print(clickX);
+//      print(event.touchX);
       /* is it on next? */
-      if (clickX > (x + 0.8 * iw) && clickX <= (x + iw) && clickY > (y + 0.8 * ih) && clickY <= (y + ih)) {
+      if (clickX > (x + 0.8 * iw) && clickX <= (x + iw) && clickY > (y + 0.5 * ih) && clickY <= (y + ih)) {
         this.next();
       }
       /* is it on back? */
-      if (clickX > (x + 0.6 * iw) && clickX <= (x + 0.8 * iw) && clickY > (y + 0.8 * ih) && clickY <= (y + ih)) {
+      if (clickX > (x + 0.6 * iw) && clickX <= (x + 0.8 * iw) && clickY > (y + 0.5 * ih) && clickY <= (y + ih)) {
         this.back();
       }
       /* is it on close? */
-      if (clickX > (x + 0.45 * iw) && clickX <= (x + 0.6 * iw) && clickY > (y + 0.8 * ih) && clickY <= (y + ih)) {
+      if (clickX > (x + 0.45 * iw) && clickX <= (x + 0.6 * iw) && clickY > (y + 0.5 * ih) && clickY <= (y + ih)) {
         this.close();
         initiate();
         visible = false;

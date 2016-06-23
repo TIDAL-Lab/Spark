@@ -58,8 +58,8 @@ body {
   height: 85px;
   border: none;
   position: fixed;
-  bottom: 30px;
-  right: 280px;
+  bottom: 150px;
+  right: 300px;
   outline: none;
   -webkit-animation: glowing 1500ms infinite;
   animation: glowing 1500ms infinite;
