@@ -159,16 +159,16 @@ class Help implements Touchable {
   
   void touchDrag(Contact event) {
  
-    num deltaX = event.touchX - dragX;
-    num deltaY = event.touchY - dragY;
-
-    dragX += deltaX;
-    dragY += deltaY;
-    this.x += deltaX;
-    this.y += deltaY;
-    //this.move(deltaX, deltaY);
-    /* redraw everything */
-    App.repaint(); 
+//    num deltaX = event.touchX - dragX;
+//    num deltaY = event.touchY - dragY;
+//
+//    dragX += deltaX;
+//    dragY += deltaY;
+//    this.x += deltaX;
+//    this.y += deltaY;
+//    //this.move(deltaX, deltaY);
+//    /* redraw everything */
+//    App.repaint(); 
 
   }
    

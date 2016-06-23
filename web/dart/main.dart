@@ -180,7 +180,7 @@ class App extends TouchManager {
      
      // instantiate lens and help objects
      if (theApp.condition != 5) lens = new Lens(width/2, canvasMargin * 3);
-     help = new Help(width*3/4, height/2);
+     help = new Help(width*3.3/5, height*2/3);
     
      // initiate delete box 
      deleteBoxImg = new ImageElement();
