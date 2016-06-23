@@ -70,6 +70,9 @@ class Toolbar {
       
     button = document.querySelector("$id #reset-button");
     if (button != null) button.onClick.listen((evt) => this.app.reset());
+    
+    button = document.querySelector("$id #lens-button");
+    if (button != null) button.onClick.listen((evt) => this.app.model1.launchModel());
       
     /* update the values of sliders, whenever it is changed */
     InputElement slider1 = document.querySelector("#battery-slider");

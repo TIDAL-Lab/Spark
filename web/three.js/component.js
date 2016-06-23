@@ -93,7 +93,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// TEST: cone container for resistor
 		var containerGeometry;
 		var containerMaterial;
-		if (this.compType == "Resistor" || this.compType == "Bulb") {
+/*		if (this.compType == "Resistor" || this.compType == "Bulb") {
 			containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
 
 			var coneGeometry1 = new THREE.CylinderGeometry(this.w/2, this.w/10, this.l, 64, 64, true);
@@ -109,8 +109,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			//bsp = bsp.union( new ThreeBSP( mesh2 ) ); // unit it with the other cone
 			//this.container = bsp.toMesh(containerMaterial);
 			//this.container.position.y = this.l;
-		}
-		else if (this.compType == "Battery") { 
+		}*/
+		if (this.compType == "Battery") { 
 			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 1, true);
 			containerMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );

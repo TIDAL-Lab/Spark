@@ -180,7 +180,7 @@ class ControlPoint implements Touchable {
   }
 
   void touchUp(Contact event) {
-    theApp.lens.findComponent();
+    if (theApp.condition != 5) theApp.lens.findComponent();
     dragging = false;
     makeConnection();
     updateCircuit();    

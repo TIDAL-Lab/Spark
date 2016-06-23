@@ -31,7 +31,33 @@
    margin-bottom: 5px;
    display: inline-block;
  }
+#edition-toolbar {
+   background-color: rgba(22, 49, 79, 0);
+   border-radius: 15px;
+   /* border: 2px solid white; */
+   position: absolute;
+   bottom: 50px;
+   right: 650px;
+   text-align: center;
+   padding: 2px;
+   width: 300px;
+   z-index: 2;
+}
 
+#edition-toolbar button {
+   background-color: none;
+   padding: none;
+   outline: 0px;
+   border: none;
+   width: 88px;
+   height: 88px;
+   margin-left: 10px;
+   margin-right: 10px;
+   margin-top: 5px;
+   margin-bottom: 5px;
+   display: inline-block;
+ }
+ 
 #slider-toolbar {
    position: absolute;
    bottom: 25px;
@@ -94,32 +120,7 @@ input::-webkit-slider-thumb {
    display: inline-block; 
    } 
 
-#edition-toolbar {
-   background-color: rgba(22, 49, 79, 0);
-   /* border-radius: 15px;
-    border: 2px solid white; */
-   position: absolute;
-   bottom: 20px;
-   right: 480px;
-   text-align: center;
-   padding: 1px;
-   width: 100px;
-   z-index: 2;
-}
 
-#edition-toolbar button {
-   background-color: none;
-   padding: none;
-   outline: 0px;
-   border: none;
-   width: 55px;
-   height: 55px;
-   margin-left: 5px;
-   margin-right: 5px;
-   margin-top: 5px;
-   margin-bottom: 5px;
-   display: inline-block;
- }
 #reset-button {
   background: url("../images/buttons/restart.png") 0 0 no-repeat;
 }
@@ -129,6 +130,17 @@ input::-webkit-slider-thumb {
    border: #005368;
    padding: none;
  }
+ 
+ #lens-button {
+  background: url("../images/buttons/next.png") 0 0 no-repeat;
+}
+#lens-button:active
+ { 
+   background-position: 2px 2px; 
+   border: #005368;
+   padding: none;
+ }
+ 
 #help-button {
   background: url("../images/buttons/help.png") 0 0 no-repeat;
 }

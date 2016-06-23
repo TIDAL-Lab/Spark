@@ -381,7 +381,7 @@ function displayGrid() {
 	toggle = !toggle;
 }
 
-var stop = true;
+var stop = false;
 function keepMoving() {
 	stop = !stop;   // the stop flag is used in the rendering function as a condition for running updateElectrons()
 }

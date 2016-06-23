@@ -34,6 +34,7 @@ part 'Touch.dart';
 part 'toolbar.dart';
 part 'agentModel.dart';
 part 'lumpModel.dart';
+part 'webglModel.dart';
 part 'sounds.dart';
 part 'slider.dart';
 part 'help.dart';
@@ -126,7 +127,7 @@ class App extends TouchManager {
    int canvasMargin = 5;
    Rectangle workingBox; // the box for building circuits
    Rectangle containerBox;
-   Marker marker; 
+   Marker marker;
    
    /* 
     * condition is the study condition
@@ -134,8 +135,9 @@ class App extends TouchManager {
     * 2 --> ABM + circuit model, with the NetTango model embedded in the canvas
     * 3 --> webgl non-AR
     * 4 --> webgl AR
+    * 5 --> webgl + circuit model on the same screen
     */
-   num condition = 2;  
+   num condition = 5;  
 
       
    App() {
@@ -169,12 +171,15 @@ class App extends TouchManager {
      if (condition== 2) {
        model1 = new agentModel(this, "div#model1");
      }
+     else if (condition == 5) {
+       model1 = new webglModel(this, "div#model1");
+     }
      else {
        model1 = new lumpModel(this, "div#model1");
      }
      
      // instantiate lens and help objects
-     lens = new Lens(width/2, canvasMargin * 3);
+     if (theApp.condition != 5) lens = new Lens(width/2, canvasMargin * 3);
      help = new Help(width*3/4, height/2);
     
      // initiate delete box 
@@ -184,7 +189,13 @@ class App extends TouchManager {
      
      //set the working box
      CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
-     workingBox = new Rectangle(canvasMargin, canvasMargin,width * (2/3), toolbarRect.top -(3*canvasMargin));
+     if (condition == 5) {
+       workingBox = new Rectangle(canvasMargin, canvasMargin,width /2, toolbarRect.top -(3*canvasMargin));
+     }
+     
+     else {
+       workingBox = new Rectangle(canvasMargin, canvasMargin,width * (2/3), toolbarRect.top -(3*canvasMargin));
+     }
      num centerX = workingBox.width / 2;
      num centerY = workingBox.height / 2;
      
@@ -226,8 +237,10 @@ class App extends TouchManager {
      document.querySelector("#generic-slider").style.display = "none";
      model1.component = null;
      help.visible = false;
-     lens.x = width/2; // fix later
-     lens.y = canvasMargin * 3; // fix later
+     if (theApp.condition != 5) {
+       lens.x = width/2; // fix later
+       lens.y = canvasMargin * 3; // fix later
+     }
 
      num centerX = workingBox.width/2;
      num centerY = workingBox.height/2;
@@ -253,8 +266,12 @@ class App extends TouchManager {
    void draw() {
      CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge; 
      containerBox = new Rectangle(canvasMargin, canvasMargin,width - (4*canvasMargin), toolbarRect.top -(3*canvasMargin));
-     workingBox = new Rectangle(canvasMargin, canvasMargin,width - 530, toolbarRect.top -(3*canvasMargin));
-     
+     if (condition == 5) {
+       workingBox = new Rectangle(canvasMargin, canvasMargin,width - 730, toolbarRect.top -(3*canvasMargin));
+     }
+     else {
+       workingBox = new Rectangle(canvasMargin, canvasMargin,width - 530, toolbarRect.top -(3*canvasMargin));
+     }     
      ctx.clearRect(0, 0, canvas.width, canvas.height);
      /*
      ctx.save();
@@ -286,7 +303,7 @@ class App extends TouchManager {
      for (Component c in components) {
        if (c.visible) c.draw(ctx);
      }
-     lens.draw(ctx);
+     if (theApp.condition != 5) lens.draw(ctx);
      help.draw(ctx);
      if (condition == 4) { marker.draw(ctx); }
      //ctx.restore();
@@ -297,8 +314,10 @@ class App extends TouchManager {
 
    static void repaint() {
      /* make the lens on top of all the touchables */
-     theApp.removeTouchable(theApp.lens);
-     theApp.addTouchable(theApp.lens);
+     if (theApp.condition != 5) {
+       theApp.removeTouchable(theApp.lens);
+       theApp.addTouchable(theApp.lens);
+     }
      
      /* redraw the components of app*/
      theApp.draw();

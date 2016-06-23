@@ -78,7 +78,7 @@ class Circuit {
     
     updateComponents();
     theApp.model1.updateModel();
-    if (theApp.condition == 3 || theApp.condition == 4) {
+    if (theApp.condition == 3 || theApp.condition == 4 || theApp.condition == 4) {
       sendDataToServer();
     }    
   }
@@ -156,11 +156,11 @@ class Circuit {
       }
       var offsetX = 0;
       var offsetY = 0;
-      if (theApp.condition == 4 ) {
+      if (theApp.condition == 4 ) {  // AR condition
         offsetX = theApp.marker.x ;
         offsetY = theApp.marker.y;
       }
-      else {
+      else {   // non-AR condition either condition 3 or 5
         offsetX = theApp.workingBox.width/2;
         offsetY = theApp.workingBox.height/2;
       }
@@ -280,7 +280,7 @@ class Circuit {
     n1.adjacents.add(n2);
     n2.adjacents.add(n1);
     findSpanningForest();
-    if (theApp.condition == 3 || theApp.condition == 4) {
+    if (theApp.condition == 3 || theApp.condition == 4 || theApp.condition == 5) {
       sendDataToServer();
     }    
   }
