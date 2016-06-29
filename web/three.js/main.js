@@ -28,7 +28,7 @@ var compositeMesh;
 
 var clock = new THREE.Clock();
 var ticks = 0;
-var lines; // an object that holds the tracking lines as its children
+
 
 
 
@@ -51,6 +51,7 @@ var gray = 0x808080;
 var midnightBlue = 0x000099;
 var backgroundBlue = 0x337586;
 var orange = 0xFF9900;
+var darkOrange = 0xFF6600;
 
 
 function doInit() {	
@@ -204,7 +205,7 @@ function updateElectrons() {
 		// var length = electron.velocity.length();
 		// var arrowHelper = new THREE.ArrowHelper( dir, electron, length, darkGreen );
 		// scene.add(arrowHelper);
-		var trackMaterial = new THREE.LineBasicMaterial({ color: orange });
+		var trackMaterial = new THREE.LineBasicMaterial({ color: darkOrange });
 		var trackGeometry = new THREE.Geometry();
 		trackGeometry.vertices.push(
 			electron,
@@ -212,6 +213,11 @@ function updateElectrons() {
 		);
 		var line = new THREE.Line( trackGeometry, trackMaterial );
 		lines.add( line );
+		// var geometry = new THREE.CircleGeometry( 5, 32 );
+		// var material = new THREE.MeshBasicMaterial( { color: orange } );
+		// var circle = new THREE.Mesh( geometry, material );
+		halo.position.set(electron.x, electron.y, electron.z);
+		// scene.add(circle);
 		// halo.position = electron;
 		// halo.needsUpdate = true;
 	}
@@ -387,18 +393,20 @@ function keepMoving() {
 }
 
 var watch = false;
-
 var halo;
+var lines; // an object that holds the tracking lines as its children
 function watchElectron() {
 	if (!watch) {
 		// add an object to hold the tracking lines
 		lines = new THREE.Object3D();
-		// halo = new THREE.Mesh( new THREE.SphereGeometry(electronSize/2, 16, 16), 
-		// 								new THREE.MeshBasicMaterial( { color: orange } ));
+		var geometry = new THREE.CircleGeometry( 5, 16 );
+		var material = new THREE.MeshBasicMaterial( { color: darkOrange } );
+		halo = new THREE.Mesh( geometry, material );
+		halo.material.visible = false;
 		// halo.material.transparent = true;
 		// halo.material.opacity = 0.5;
-		// halo.position = electrons.geometry.vertices[0];
-		// scene.add(halo);
+		halo.material.visible = true;
+		scene.add(halo);
 		scene.add(lines);
 	}
 	else {

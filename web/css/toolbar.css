@@ -7,14 +7,15 @@
  /*calling the toolbars by their ids instead of using .toolbar for class toolbar, as now we have two toolbars */ 
 #selection-toolbar {
    background-color: rgba(22, 49, 79, 0);
-   border-radius: 15px;
+   border-radius: none;
    /* border: 2px solid white; */
    position: absolute;
-   bottom: 50px;
-   left: 40px;
+   bottom: 0px;
+   left: 0px;
    text-align: center;
-   padding: 2px;
+   padding: none;
    width: 480px;
+   height: 105px;
    z-index: 2;
 }
 
@@ -22,9 +23,10 @@
    background-color: rgb(0, 0, 0);
    outline: none;
    border: 2px solid white;
+   top: 0px;
    width: 83px;
    height: 53px;
-   border-radius: 2px;
+   border-radius: none;
    margin-left: 5px;
    margin-right: 25px;
    margin-top: 5px;
@@ -33,14 +35,14 @@
  }
 #edition-toolbar {
    background-color: rgba(22, 49, 79, 0);
-   border-radius: 15px;
-   /* border: 2px solid white; */
+   border-radius: none  ;
+   /* border: 2px solid white; */ 
    position: absolute;
-   bottom: 50px;
-   right: 650px;
+   bottom: 40px;
+   right: 0px;
    text-align: center;
-   padding: 2px;
-   width: 300px;
+   padding: none;
+   width: 150px;
    z-index: 2;
 }
 
@@ -49,10 +51,10 @@
    padding: none;
    outline: 0px;
    border: none;
-   width: 88px;
-   height: 88px;
+   width: 55px;
+   height: 55px;
    margin-left: 10px;
-   margin-right: 10px;
+   margin-right: 0px;
    margin-top: 5px;
    margin-bottom: 5px;
    display: inline-block;
@@ -60,8 +62,8 @@
  
 #slider-toolbar {
    position: absolute;
-   bottom: 25px;
-   left: 50px;
+   bottom: 15px;
+   left: 0px;
    text-align: center;
    padding: 2px;
    width: 230px;
@@ -100,8 +102,8 @@ input::-webkit-slider-thumb {
 #values {
    position: absolute;
    background-color: transparent;
-   bottom: 5px;
-   left: 50px;
+   bottom: 0px;
+   left: 0px;
    text-align: center;
    padding: 2px;
    width: 460px;
@@ -142,7 +144,7 @@ input::-webkit-slider-thumb {
  }
  
 #help-button {
-  background: url("../images/buttons/help.png") 0 0 no-repeat;
+  background: url("../images/buttons/help-big.png") 0 0 no-repeat;
 }
 #help-button:active
  { 

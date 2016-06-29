@@ -30,8 +30,9 @@ class Lens implements Touchable {
   Lens(num x, num y) {
     this.x = x;
     this.y = y;
-   
     img = new ImageElement();
+//    img.style.position = "absolute";
+    //img = document.getElementById("lens-image");
     setImage("images/magnifier.png");
     
     theApp.addTouchable(this);
@@ -46,8 +47,8 @@ class Lens implements Touchable {
     ctx.beginPath(); 
     ctx.save();
     ctx.translate(this.x, this.y);
-    iw = img.width / 2;
-    ih = img.height / 2;
+    iw = img.width/1.5;
+    ih = img.height/1.5;
     ctx.drawImageScaled(img, 0, 0, iw, ih);
     ctx.restore();
     }
@@ -55,20 +56,20 @@ class Lens implements Touchable {
   void findComponent() {
     num mx = x + iw/2;
     num my = y + ih/2;
-    if (onComponent(theApp.model1.component, mx, my)) return; /* if it is not on top of the model component */
+    if (onComponent(theApp.model.component, mx, my)) return; /* if it is not on top of the model component */
     else {
       for (Component c in theApp.components) {
         if (onComponent(c, mx, my)) {
           if (c is Wire || c is Resistor || c is Bulb || c is Battery) {
-            theApp.model1.launchModel(c);
+            theApp.model.launchModel(c);
             return;
           }
         }
       }
   
-//      document.query("#model1").style.display = "none";
-//      theApp.model1.component = null;
-      theApp.model1.closeModel();
+//      document.query("#model").style.display = "none";
+//      theApp.model.component = null;
+      theApp.model.closeModel();
     }
   }
   

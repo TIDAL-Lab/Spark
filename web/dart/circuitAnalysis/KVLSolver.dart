@@ -64,11 +64,11 @@ class KirchhoffSolver {
      * SOLUTION is a Px1 matrix of loop currents (P = M - (N - 1), # of independent loops)
      * from here, I need to calculate component (branch) currents
      **/
-    print('Matrix A: ${ms.a.getArray()}');
-    print('Matrix B: ${ms.b.getArray()}');
+//    print('Matrix A: ${ms.a.getArray()}');
+//    print('Matrix B: ${ms.b.getArray()}');
     
     Matrix solution = ms.solve();
-    print('Solution: ${solution.getArray()}');
+    //print('Solution: ${solution.getArray()}');
     //print('Loops: ${circuit.loops.first}');
     //circuit.printGraph();
     return solution;
@@ -77,8 +77,10 @@ class KirchhoffSolver {
   
   void convertLoopsToEquations(EquationSet es) {
     for (int i=0; i<circuit.loops.length; i++) {
+      bool burntFlag = false;
       for (Edge e in circuit.loops[i].path) {
         if (e.component is Battery) {
+          if ((e.component as Battery).isBurnt) {burntFlag = true;}
           es.equations[i].rhs += e.component.voltageDrop * e.direction * -1;
         }
         else {
@@ -87,6 +89,7 @@ class KirchhoffSolver {
           }
         }
       }
+      if (burntFlag) {es.equations[i].rhs = 0.0;}
     }
   }
   

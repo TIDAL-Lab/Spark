@@ -72,7 +72,7 @@ class Toolbar {
     if (button != null) button.onClick.listen((evt) => this.app.reset());
     
     button = document.querySelector("$id #lens-button");
-    if (button != null) button.onClick.listen((evt) => this.app.model1.launchModel());
+    if (button != null) button.onClick.listen((evt) => this.app.model.launchModel());
       
     /* update the values of sliders, whenever it is changed */
     InputElement slider1 = document.querySelector("#battery-slider");
@@ -84,12 +84,6 @@ class Toolbar {
       slider1.onTouchEnd.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
       //slider1.onMouseUp.listen((e) => changeValue("battery-value", double.parse(slider1.value)));
     }
-
-    
-    InputElement slider2 = document.querySelector("#wire-slider");
-    //changeValue("wire-value", double.parse(slider.value));
-    //slider.onChange.listen((evt) => changeValue("wire-value", double.parse(slider.value)));
-
     
     InputElement slider3 = document.querySelector("#resistor-slider");
     if (slider3 != null) {
@@ -99,13 +93,6 @@ class Toolbar {
     slider3.onTouchEnd.listen((e) => changeValue("resistor-value", double.parse(slider3.value)));
     }
     
-    InputElement slider4 = document.querySelector("#bulb-slider");
-    if (slider4 != null) {
-    changeValue("bulb-value", double.parse(slider4.value));
-    //slider4.onChange.listen((evt) => changeValue("bulb-value", double.parse(slider4.value)));
-    slider4.onTouchMove.listen((e) => sliderMove(e, "#bulb-slider"));
-    slider4.onTouchEnd.listen((e) => changeValue("bulb-value", double.parse(slider4.value)));
-    }
   }
   
   void createComponent(CssRect rect, String type) {
@@ -154,7 +141,7 @@ void sliderMove(UIEvent evt, String who) {
   } else if (tx < width * 2 / 5) {
     slider.value = "1.5";
   } else if (tx < width * 3 / 5) {
-    slider.value = "2";
+    slider.value = "2.0";
   } else if (tx < width * 4 / 5) {
     slider.value = "2.5";
   } else {

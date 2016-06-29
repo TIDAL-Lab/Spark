@@ -523,3 +523,12 @@ TODO006 (6/5/2016): the electrons pass from battery either from + to - or - to +
 					and i might need to consider the direction of current flow to let the electrons go from one side to the other
 					
 TODO007 (6/14/2016): 
+
+* make the watch electron button look nicer
+
+* make the watch electron not pick a random electron
+
+* make the watch electron ray look nicer
+
+* make a halo for the electron that is moving
+

@@ -28,53 +28,55 @@ class agentModel {
   Random rand = new Random();
   Component component;
    
-  agentModel(this.app, String id) {
+  agentModel(String id) {
     
     ButtonElement button;
-    button = document.querySelector("$id .close-button");
+    button = document.querySelector("$id #close-button");
     if (button != null) button.onClick.listen((e) => closeModel());
     
-    button = document.querySelector("$id .help-button");
+    button = document.querySelector("#help-button");
     if (button != null) button.onClick.listen((e) => theApp.help.show());
     
   }
   
   void closeModel() {
-    IFrameElement frame = querySelector("div#model1 #model-frame");
+    IFrameElement frame = querySelector("div#model #model-frame");
     frame.src = "";
-    document.querySelector("#model1").style.display = "none";
-    theApp.model1.component = null;
+    document.querySelector("#model").style.display = "none";
+    //document.querySelector("#help").style.display = "none";
+    theApp.model.component = null;
     theApp.help.close();
   }
   
   void launchModel(Component c) {
     
-    theApp.model1.component = c;
+    theApp.model.component = c;
     String i = c.current.toString();
     String r = c.resistance.toString();
     String v = c.voltageDrop.toString();
     
-    IFrameElement frame = document.querySelector("div#model1 #model-frame");
+    IFrameElement frame = document.querySelector("div#model #model-frame");
     if (c is Wire) frame.src = "models/wire.html?i=${i}&r=${r}&v=${v}";
     if (c is Resistor || c is Bulb) frame.src = "models/resistor.html?i=${i}&r=${r}&v=${v}";
     if (c is Battery) frame.src = "probe.html?i=${i}&r=${r}&v=${v}&type=${c.type}";
 //    if (c is Wire) frame.src = "http://spark-project.appspot.com/Wire?i=${i}&r=${r}&v=${v}";
 //    else frame.src = "http://spark-project.appspot.com/Resistor?i=${i}&r=${r}&v=${v}";    
-    document.querySelector("#model1").style.display = "block";
+    document.querySelector("#model").style.display = "block";
+    //document.querySelector("#help").style.display = "block";
     theApp.help.initiate();
   }
   
   /** update the model if it is open 
    */ 
   updateModel() {
-    Component c = theApp.model1.component;
-    if (document.querySelector("#model1").style.display == "block" && !(c is Battery)) {
+    Component c = theApp.model.component;
+    if (document.querySelector("#model").style.display == "block" && !(c is Battery)) {
       
       String i = c.current.toString();
       String r = c.resistance.toString();
       String v = c.voltageDrop.toString();
       //frame.src = "http://spark-project.appspot.com/Resistor?i=${i}&r=${r}&v=${v}";
-      IFrameElement frame = document.querySelector("div#model1 #model-frame");
+      IFrameElement frame = document.querySelector("div#model #model-frame");
       String frameSource;
       if (c is Wire) {
         //frameSource = "http://spark-project.appspot.com/Wire?i=${i}&r=${r}&v=${v}";

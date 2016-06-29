@@ -29,8 +29,8 @@ import 'dart:core';
 import 'dart:web_audio';
 import 'dart:js';
 //import "package:json_object/json_object.dart";
-
-part 'Touch.dart';
+part 'app.dart';
+part 'touch.dart';
 part 'toolbar.dart';
 part 'agentModel.dart';
 part 'lumpModel.dart';
@@ -38,7 +38,7 @@ part 'webglModel.dart';
 part 'sounds.dart';
 part 'slider.dart';
 part 'help.dart';
-part 'Lens.dart';
+part 'lens.dart';
 part 'marker.dart';
 //part 'connectServer.dart';
 part 'circuitAnalysis/Circuit.dart';
@@ -58,9 +58,9 @@ App theApp;
 
 
 void main() {
-  
-  new App();
   initiate();
+  new App();
+  
 
 }
 
@@ -77,16 +77,14 @@ void initiate() {
     slider.onTouchEnd.listen((e) => genericChangeValue(double.parse(slider.value)));
   }
   
-  // set up a flag to switch between touch and mouse events
-  // this is a code Mike sent me, I need to integrate it into my code later
+  // set up a flag to switch between touch and mouse events (Mike's code, needs to be integrated into my code) 
+/*
   /**
    * Is the given flag set to true in the URL query string?
    */
   bool isFlagSet(String name) {
     return window.location.search.indexOf("${name}=true") > 0;
   }
-
-
 
   /**
    * Binds a click event to a button
@@ -101,261 +99,5 @@ void initiate() {
       }
     }
   }
+   */
 }
-
-
-class App extends TouchManager {
-
-   CanvasRenderingContext2D ctx;
-   CanvasElement canvas;
-
-   int width;
-   int height;
-  
-   String id = "circuit";
-   List<Component> components;
-   List<ControlPoint> controlPoints;
-   Circuit circuit;
-   Toolbar selectionBar; 
-   Toolbar editionBar;
-   var model1;
-   Component genericSliderComponent; //the component that is tapped on to change its value
-   Help help; // the help text
-   Lens lens; // the magnifying glass object
-   int ARTagCounter;
-   ImageElement deleteBoxImg;   
-   int canvasMargin = 5;
-   Rectangle workingBox; // the box for building circuits
-   Rectangle containerBox;
-   Marker marker;
-   
-   /* 
-    * condition is the study condition
-    * 1 --> control condition: only circuit, no ABM model
-    * 2 --> ABM + circuit model, with the NetTango model embedded in the canvas
-    * 3 --> webgl non-AR
-    * 4 --> webgl AR
-    * 5 --> webgl + circuit model on the same screen
-    */
-   num condition = 5;  
-
-      
-   App() {
-     
-     theApp = this;
-     // size of the monitor 
-     width = window.innerWidth;
-     height = window.innerHeight;
-     canvas = document.querySelector("#foreground");
-     canvas.width = width;
-     canvas.height = height;
-     ctx = canvas.getContext("2d");
-     
-     registerEvents(canvas);     
-     window.onResize.listen((evt) => resizeScreen());
-     // Add the app itself as a touchable object 
-     new Screen();
-     circuit = new Circuit();
-     components = new List<Component>();
-     controlPoints = new List<ControlPoint>();
-     selectionBar = new Toolbar(this, "div#selection-toolbar");
-     editionBar = new Toolbar(this, "div#edition-toolbar");
-     
-     ARTagCounter = 0;
-     
-     /* 
-      * set the model based on the condition
-      * if condition = 1 --> model is the the only measures model as a frame (also for webgl conditions)
-      * if condition = 2 --> model is the NetTango model as a frame
-      */
-     if (condition== 2) {
-       model1 = new agentModel(this, "div#model1");
-     }
-     else if (condition == 5) {
-       model1 = new webglModel(this, "div#model1");
-     }
-     else {
-       model1 = new lumpModel(this, "div#model1");
-     }
-     
-     // instantiate lens and help objects
-     if (theApp.condition != 5) lens = new Lens(width/2, canvasMargin * 3);
-     help = new Help(width*3.3/5, height*2/3);
-    
-     // initiate delete box 
-     deleteBoxImg = new ImageElement();
-     deleteBoxImg.src = "images/trash-bin.png";
-     deleteBoxImg.onLoad.listen((event) { draw(); });
-     
-     //set the working box
-     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
-     if (condition == 5) {
-       workingBox = new Rectangle(canvasMargin, canvasMargin,width /2, toolbarRect.top -(3*canvasMargin));
-     }
-     
-     else {
-       workingBox = new Rectangle(canvasMargin, canvasMargin,width * (2/3), toolbarRect.top -(3*canvasMargin));
-     }
-     num centerX = workingBox.width / 2;
-     num centerY = workingBox.height / 2;
-     
-     // instantiate the JsAr tag
-     if (condition == 4 ) { marker = new Marker(centerX, centerY); }
-     
-     InputElement slider = querySelector("#battery-slider");
-     var voltage = double.parse(slider.value);
-     
-     // create the first battery
-     new Battery(centerX - 50, centerY - 50, centerX + 50, centerY - 50, voltage);
-     
-     //var t = 65;
-   }
-   
-   
-   /* Resize the window
-    */
-   void resizeScreen() { // fix later
-     width = window.innerWidth;
-     height = window.innerHeight;
-
-     canvas.width = width;
-     canvas.height = height;
-     
-    repaint();
-   }
-
-   
-   /* Reset the application */
-   void reset() {
-     ARTagCounter = 0;
-     components.clear();
-     controlPoints.clear();
-     circuit.edges.clear();
-     circuit.nodes.clear();
-     circuit.updateComponents();
-     document.querySelector("#model1").style.display = "none";
-     document.querySelector("#generic-slider").style.display = "none";
-     model1.component = null;
-     help.visible = false;
-     if (theApp.condition != 5) {
-       lens.x = width/2; // fix later
-       lens.y = canvasMargin * 3; // fix later
-     }
-
-     num centerX = workingBox.width/2;
-     num centerY = workingBox.height/2;
-     
-     // reset the sliders
-     //InputElement batterySlider = querySelector("#battery-slider");
-     //InputElement resistorSlider = querySelector("#resistor-slider");
-     //querySelector("#battery-slider").value =2.0;
-     InputElement slider1 = document.querySelector("#battery-slider");
-     slider1.value = "2.0";
-     querySelector("#battery-value").text = "Voltage = 2.0";
-     InputElement slider2 = document.querySelector("#resistor-slider");
-     slider2.value = "1.0";
-     querySelector("#resistor-value").text = "Resistance = 1.0";
-     
-     /* create the first battery */
-     InputElement slider = querySelector("#battery-slider");
-     var voltage = double.parse(slider.value);
-     new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
-   }
-
-   /* Draw */
-   void draw() {
-     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge; 
-     containerBox = new Rectangle(canvasMargin, canvasMargin,width - (4*canvasMargin), toolbarRect.top -(3*canvasMargin));
-     if (condition == 5) {
-       workingBox = new Rectangle(canvasMargin, canvasMargin,width - 730, toolbarRect.top -(3*canvasMargin));
-     }
-     else {
-       workingBox = new Rectangle(canvasMargin, canvasMargin,width - 530, toolbarRect.top -(3*canvasMargin));
-     }     
-     ctx.clearRect(0, 0, canvas.width, canvas.height);
-     /*
-     ctx.save();
-     ctx.fillStyle = "rgba(250,250,250,0.8)";
-     ctx.textAlign = 'left';
-     ctx.textBaseline = 'top';
-     ctx.font = '34px sans-serif'; /* other fonts: verdana */
-     ctx.fillText("SPARK", 20, 20);
-      */
-     
-     ctx.strokeStyle = 'white';
-     ctx.lineWidth = 2;
-     ctx.fillStyle = "rgba(255,255,255,0.2)";
-     ctx.strokeRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
-     ctx.fillRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
-
-     /*
-     if (this.gridsOn == true) {
-       drawGrids (margin, margin, width - (3*margin), rect.top.toInt() - (2*margin));
-     }
-     */     
-     num boxW = deleteBoxImg.width / 7;
-     num boxH = deleteBoxImg.height / 7;
-     ctx.drawImageScaled(deleteBoxImg, 2 * canvasMargin, 2*canvasMargin, boxW, boxH);
-     
-
-     
-     /* redraw the components */
-     for (Component c in components) {
-       if (c.visible) c.draw(ctx);
-     }
-     if (theApp.condition != 5) lens.draw(ctx);
-     help.draw(ctx);
-     if (condition == 4) { marker.draw(ctx); }
-     //ctx.restore();
-     
-   }
-   
-
-
-   static void repaint() {
-     /* make the lens on top of all the touchables */
-     if (theApp.condition != 5) {
-       theApp.removeTouchable(theApp.lens);
-       theApp.addTouchable(theApp.lens);
-     }
-     
-     /* redraw the components of app*/
-     theApp.draw();
-     
-   }
- 
-
-}
-
-
-class Screen implements Touchable {
-
-   Screen() {
-      theApp.addTouchable(this);
-   }
-
-   bool containsTouch(Contact event) {
-     return true;
-   }
-
-   bool touchDown(Contact event) { 
-//     document.querySelector("#generic-slider").style.display = "none";
-//     App.repaint();
-     return true;
-   }
-
-   void touchUp(Contact event) {
-     //App.repaint();
-   }
-
-   void touchDrag(Contact event) {
-   }
-
-   void touchSlide(Contact event) {
-
-   }
-}
-
-
-
-

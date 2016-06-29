@@ -26,29 +26,16 @@ class Help implements Touchable {
   num clickX, clickY;
   num iw, ih;
   ImageElement img;
-  int number, max;
+  int page, max_pages;
   bool visible = false;
-  String helpSrc;
+  String helpSrc;  // is set in setConditions in App class
+  
   Help (num x, num y) {
     this.x = x;
     this.y = y;
 
     img = new ImageElement();
-    if (theApp.condition == 1) {
-      helpSrc = "images/helps-control/";
-    }
-    else {
-      helpSrc ="images/helps/";
-    }
-    String temp = helpSrc +"bg.png";
-    setImage(temp);
-    if (theApp.condition==2 || theApp.condition == 5) {
-      max = 4;
-    }
-    else {
-      max = 3;
-    }
-    
+    setImage("images/helps/bg.png");    
     theApp.addTouchable(this);
     
   }
@@ -80,39 +67,35 @@ class Help implements Touchable {
   }
   
   void show () {
-    ButtonElement button = document.getElementsByClassName("help-button").first;
+    ButtonElement button = document.querySelector("#help-button");
     button.style.display = "none";
     visible = true;
     img.src = helpSrc + "help1.png";
-    number = 1;
+    page = 1;
     App.repaint();
   }
   
   void next() {
-    if (number < max) {
-      number++;
-      img.src = helpSrc + "help${number.toString()}.png";
+    if (page < max_pages) {
+      page++;
+      img.src = helpSrc + "help${page.toString()}.png";
     }
-    print("next: ");
-    print(number);
     App.repaint();    
   }
   
   void back() {
-    if (number > 1){
-      number--;
-      img.src = helpSrc + "help${number.toString()}.png";
+    if (page > 1){
+      page--;
+      img.src = helpSrc + "help${page.toString()}.png";
     }
-    print("back: ");
-    print(number);
     App.repaint();    
   }
   
   void close() {
     visible = false;
     App.repaint();  
-    //ButtonElement button = document.query("model1 .help-button");
-    ButtonElement button = document.getElementsByClassName("help-button").first;
+    ButtonElement button = document.querySelector("#help-button");
+    //ButtonElement button = document.getElementsByClassName("help-button").first;
     button.style.display = "block";
   }
   /* ------------------------
@@ -122,11 +105,11 @@ class Help implements Touchable {
     if (visible) {
       num tx = event.touchX;
       num ty = event.touchY;
-      if (tx >= x && (tx <= x + iw) && ty >= y && (ty <= y + ih)) {
-        //print("lens contains touch");
-        
-      }
-      
+//      if (tx >= x && (tx <= x + iw) && ty >= y && (ty <= y + ih)) {
+//        print("help contains touch");
+//        
+//      }
+//      
       return (tx >= x && tx <= x + iw && ty >= y && ty <= y + ih);
     }
     return false;
@@ -167,7 +150,7 @@ class Help implements Touchable {
   }
   
   void touchDrag(Contact event) {
- 
+//    print("touch drag");
 //    num deltaX = event.touchX - dragX;
 //    num deltaY = event.touchY - dragY;
 //

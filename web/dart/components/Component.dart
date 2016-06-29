@@ -24,8 +24,6 @@ part of SparkProject;
 class Component implements Touchable {  
   String type;
   static int TAG;
-  int ARTag;
-  String ARImgSrc;
   ImageElement img;
   ImageElement ARImg;
   
@@ -106,18 +104,6 @@ class Component implements Touchable {
     //slider.className = "component-slider";
     //document.querySelector("div#sliders").children.add(slider);
   }
- 
-  void setARImgSrc() {
-    ARTag = theApp.ARTagCounter;
-    theApp.ARTagCounter++;
-    //var ARTagf = new NumberFormat("000").format(ARTag);
-    var ARTagf; // FIX THIS LATER!!!
-    ARImgSrc = "images/frame-markers-transparent/frameMarker_" + ARTagf.toString() + ".png";
-    ARImg.src = ARImgSrc;
-    ARImg.onLoad.listen((event) { App.repaint(); });
-    
-  }
-
 
   void setImage(String src) {
     img.src = src;
@@ -144,7 +130,7 @@ class Component implements Touchable {
     
     drawComponent(ctx);
     /* draw a box containing the component, if its model is launched */
-    if (theApp.model1.component == this) {
+    if (theApp.model.component == this) {
       ctx.fillStyle = "rgba(255,255,0,0.2)";
       if (this is Wire) {
         //var w = min(iw, 80);
@@ -218,8 +204,8 @@ class Component implements Touchable {
   }
   
   bool inBox(num deltaX, num deltaY) {
-    if (start.x + deltaX < theApp.workingBox.width && start.y + deltaY < theApp.workingBox.height 
-        && end.x + deltaX < theApp.workingBox.width  && end.y + deltaY < theApp.workingBox.height) {
+    if (start.x + deltaX+10 < theApp.workingBox.width && start.y + deltaY < theApp.workingBox.height 
+        && end.x + deltaX+10 < theApp.workingBox.width  && end.y + deltaY < theApp.workingBox.height) {
       return true;
     }
     return false;
@@ -254,10 +240,10 @@ class Component implements Touchable {
     theApp.circuit.removeBranch(this); // removing the branch from the circuit should be 
                                       // the last thing to do, as it calls the sendDataToServer function
     
-    if (this == theApp.model1.component) { // if the model is being shown for this component
-//      document.querySelector("#model1").style.display = "none";
-//      theApp.model1.component = null;
-      theApp.model1.closeModel();
+    if (this == theApp.model.component) { // if the model is being shown for this component
+//      document.querySelector("#model").style.display = "none";
+//      theApp.model.component = null;
+      theApp.model.closeModel();
     }
     
 
@@ -326,7 +312,7 @@ class Component implements Touchable {
   }
 
   void touchUp(Contact event) {
-    if (theApp.condition != 5) theApp.lens.findComponent();
+    if (SHOW_LENS) theApp.lens.findComponent();
     /* if the component is over the delete box area, remove it */
     num mx = min(start.x, end.x);
     num my = min(start.y, end.y);
@@ -337,7 +323,7 @@ class Component implements Touchable {
       removeConnectedComponents();
       Sounds.playSound("crunch");
       App.repaint();
-      if (theApp.condition == 3 || theApp.condition == 4) {
+      if (USE_SERVER) {
         theApp.circuit.sendDataToServer();
       }
       
@@ -346,7 +332,8 @@ class Component implements Touchable {
     
     
     /* if the component is clicked, show the generic slider */
-    if (clickX == event.touchX && clickY == event.touchY) {
+    //if (clickX == event.touchX && clickY == event.touchY) {
+    if ((clickX - event.touchX).abs()<10 && (clickY - event.touchY).abs()<10) {
       this.slider = document.querySelector("#generic-slider");
       if (this is Battery || this is Resistor) {
         this.slider.style.display = "block";
@@ -388,7 +375,9 @@ class Component implements Touchable {
       }
     }
     App.repaint();
-    if (theApp.condition == 3 || theApp.condition == 4) {
+    //print(USE_SERVER);
+    if (USE_SERVER) {
+      //print("use server");
       theApp.circuit.sendDataToServer();
     }    
   }

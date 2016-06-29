@@ -34,4 +34,17 @@ THINGS TO FIX LATER:
 3. DART OLD ISSUE: slider change not updating the value
 	UPDATE: it workes with touch events, but I should later test it with the mouse events
 
+*** notes on 6/25/2016
+1. cleaned up the code, created an app.dart file and moved the App class from main.dart
+2. organized the settings for conditions
+3. working on the css styles
+
+*** notes on 6/27/2016
+1. setting the screen with CANVAS_RATIO and HELP_RATIO
+2. I don't remember what those were for: probe.html, probe.dart, and probeToolbar.css
+	investigation: they are for condition 1 and battery for condition 2 which show the V, I, R values
+3. I first set the canvas to be the same size as the workspace, but then realized that I can draw the help text
+	so I changed the canvas size to be the whole screen.
+	Now I have issues with drawing control points outside of the workingbox
+
 	

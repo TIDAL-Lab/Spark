@@ -41,7 +41,7 @@ class Circuit {
   num time;
   Matrix solution;
   List<Battery> burntBatteries;
-  num maxCurrent = 10;
+  num maxCurrent = 20;
 
   List<List<Component>> connectedComponents = new List<List<Component>>(); // this list is for sending the connection information to the webgl code
 
@@ -77,8 +77,8 @@ class Circuit {
     }
     
     updateComponents();
-    theApp.model1.updateModel();
-    if (theApp.condition == 3 || theApp.condition == 4 || theApp.condition == 4) {
+    theApp.model.updateModel();
+    if (USE_SERVER) {
       sendDataToServer();
     }    
   }
@@ -156,11 +156,11 @@ class Circuit {
       }
       var offsetX = 0;
       var offsetY = 0;
-      if (theApp.condition == 4 ) {  // AR condition
+      if ( SHOW_MARKER ) {  // AR condition
         offsetX = theApp.marker.x ;
         offsetY = theApp.marker.y;
       }
-      else {   // non-AR condition either condition 3 or 5
+      else {   // non-AR condition
         offsetX = theApp.workingBox.width/2;
         offsetY = theApp.workingBox.height/2;
       }
@@ -179,7 +179,6 @@ class Circuit {
                                           'endY': 1.0*(offsetY - c.end.y),
                                           'direction': c.direction,
                                           'innerWall':1,
-                                          'tag': c.ARTag,
                                           'connection': rowArray,
                                           'graphLabel': e.nodes[0].graphLabel
                                           };
@@ -280,7 +279,7 @@ class Circuit {
     n1.adjacents.add(n2);
     n2.adjacents.add(n1);
     findSpanningForest();
-    if (theApp.condition == 3 || theApp.condition == 4 || theApp.condition == 5) {
+    if (USE_SERVER) {
       sendDataToServer();
     }    
   }
@@ -551,7 +550,7 @@ class Circuit {
       obj.add(s);
     }
   //}
-    print(JSON.encode(obj));
+    //print(JSON.encode(obj));
   }
 }
 /** ------------------------

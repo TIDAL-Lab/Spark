@@ -34,6 +34,9 @@ class ControlPoint implements Touchable {
   num clickX;
   num clickY;
   
+  num dragX = 0;
+  num dragY = 0;
+  
   ControlPoint(this.x, this.y) {
     theApp.addTouchable(this);
     connections = new List<ControlPoint>();
@@ -171,6 +174,9 @@ class ControlPoint implements Touchable {
     clickX = event.touchX;
     clickY = event.touchY;
     
+    dragX = event.touchX;
+    dragY = event.touchY;
+    
     beforeDragConnections.clear();
     beforeDragConnections.addAll(connections); /* a copy of connections before the drag */
     clearConnections();
@@ -180,7 +186,7 @@ class ControlPoint implements Touchable {
   }
 
   void touchUp(Contact event) {
-    if (theApp.condition != 5) theApp.lens.findComponent();
+    if (SHOW_LENS) theApp.lens.findComponent();
     dragging = false;
     makeConnection();
     updateCircuit();    
@@ -189,7 +195,9 @@ class ControlPoint implements Touchable {
   }
 
   void touchDrag(Contact event) {
-    
+    num deltaX = event.touchX - dragX;
+    num deltaY = event.touchY - dragY;
+    //if (myComponent.inBox(deltaX, deltaY)) {
     if (myComponent is Wire) {
       var dist = (event.touchX - myConjoint.x)*(event.touchX - myConjoint.x) + (event.touchY - myConjoint.y)*(event.touchY - myConjoint.y);
       if (dist > 40 * 40) { /* don't let the wire length to become less than 40 */
@@ -225,6 +233,7 @@ class ControlPoint implements Touchable {
         y -= fy;
       }
     }
+    //}
     App.repaint();
 
   }
