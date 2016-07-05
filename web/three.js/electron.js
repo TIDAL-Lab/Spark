@@ -164,6 +164,7 @@ function moveElectron(electron, component) {
 	if (Math.abs(electronLocal.y) <= component.l/2) {
 		if (Math.abs(electronLocal.x) > component.w/2) {
 			electron.velocity.multiplyScalar(-1);
+			//console.log("it is getting out");
 			//electron.sub(electron.velocity);
 		}
 	}

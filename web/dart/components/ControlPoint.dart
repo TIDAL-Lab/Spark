@@ -55,10 +55,10 @@ class ControlPoint implements Touchable {
     } else if (dragging) {
       ctx.fillStyle = "orange";
     }
-    ctx.arc(x, y, 6, 0, PI * 2, true);
+    ctx.arc(x, y, 8, 0, PI * 2, true);
     ctx.fill();
     //ctx.save();
-    ctx.arc(x, y, 10, 0, PI * 2, true);
+    ctx.arc(x, y, 12, 0, PI * 2, true);
     ctx.fillStyle = "rgba(255,255,255,0.5)";
     if (isConnected) ctx.fillStyle = "rgba(0,255,0,0.5)";
     ctx.fill();

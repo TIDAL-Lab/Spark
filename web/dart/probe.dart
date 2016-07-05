@@ -36,31 +36,31 @@ void main() {
 //  var vFormated = new NumberFormat("#0.000").format(v);
 //  var rFormated = new NumberFormat("#0.0").format(r);
   
-  var iFormated = i.toStringAsFixed(3);
-  var vFormated = v.toStringAsFixed(3);
-  var rFormated = r.toStringAsFixed(1);
+  var iFormated = i.toStringAsPrecision(3);
+  var vFormated = v.toStringAsPrecision(3);
+  var rFormated = r.toStringAsPrecision(1);
   
   ImageElement img = new ImageElement();
   
-  img = document.querySelector("#component-image");
-  switch (type) {
-    case 'Resistor':
-      img.src = "images/probe/resistor.png";
-      break;
-    case 'Bulb':
-      img.src = "images/probe/bulb.png";
-      break;
-    case 'Wire':
-      img.src = "images/probe/wire.png";
-      break;
-    case 'Battery':
-      img.src = "images/probe/battery.png";
-      break;
-  }
-  img.style.width = "150px";
-  img.style.position = "absolute";
-  img.style.top = "20px";
-  img.style.left = "160px";
+//  img = document.querySelector("#component-image");
+//  switch (type) {
+//    case 'Resistor':
+//      img.src = "images/probe/resistor.png";
+//      break;
+//    case 'Bulb':
+//      img.src = "images/probe/bulb.png";
+//      break;
+//    case 'Wire':
+//      img.src = "images/probe/wire.png";
+//      break;
+//    case 'Battery':
+//      img.src = "images/probe/battery.png";
+//      break;
+//  }
+//  img.style.width = "150px";
+//  img.style.position = "absolute";
+//  img.style.top = "10px";
+//  img.style.left = "160px";
   
   ParagraphElement p = new ParagraphElement();
   
@@ -69,6 +69,13 @@ void main() {
   
   p = document.querySelector("#type");
   p.text = "This is a " + type;
+  
+  img = document.querySelector("#voltmeter-image");
+  img.src = "images/buttons/voltmeter3.png";
+  img.style.width = "220px";
+  img.style.position = "absolute";
+  img.style.top = "90px";
+  img.style.left = "150px";
   
   p = document.querySelector("#voltage-value");
   if (type == 'Battery') p.text = "Voltage = ${vFormated}";
@@ -79,14 +86,5 @@ void main() {
   
   p = document.querySelector("#resistance-value");
   p.text = "Resistance = ${rFormated}";
-  
-
-//  
-//  ImageElement img;
-//  img = new ImageElement();
-//  //setImage("images/resistor2t.png");
-//  img.src = "images/resistor2t.png";
-//  //img.onLoad.listen((event) { draw(); }); 
-//  //draw();
   
 }

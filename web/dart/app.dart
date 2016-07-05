@@ -29,12 +29,12 @@ part of SparkProject;
  * 4 --> webgl AR
  * 5 --> webgl + circuit model on the same screen
  */
-int CONDITION = 5;
+int CONDITION = 1;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
-num CANVAS_RATIO = 0.55;
-num HELP_RATIO = 0.4;
+num CANVAS_RATIO = 0.65;
+num HELP_RATIO = 0.55;
 
 class App extends TouchManager {
 
@@ -146,14 +146,14 @@ class App extends TouchManager {
 //     canvas2.height = h3;
 //     
      var helpButton = document.querySelector("#help-button");
-     helpButton.style.left = "${w2/2-10}px";
-     helpButton.style.top = "${h2+10}px";
+     helpButton.style.left = "${w2/2-120}px";
+     helpButton.style.top = "${h2+50}px";
      
      var toolbar = document.querySelector("#edition-toolbar");
      toolbar.style.right = "${w2}px";
      
-     help.x = w1;
-     help.y = h2+20;
+     help.x = w1+50;
+     help.y = h2+10;
      
    }
    
@@ -161,11 +161,12 @@ class App extends TouchManager {
      switch ( condition ) {
        case 1:     // no electron model
          help.max_pages = 3;
-         help.helpSrc = "images/helps-control/";
+         help.helpSrc = "images/helps-control2/";
          model = new lumpModel("div#model");
          SHOW_LENS = true;
          SHOW_MARKER = false;
          USE_SERVER = false;
+         document.querySelector("#lens-button").style.background = "transparent";
          break;
        case 2:
          help.max_pages = 4;
@@ -200,6 +201,9 @@ class App extends TouchManager {
          SHOW_LENS = false;
          SHOW_MARKER = false;
          USE_SERVER = true;
+         CANVAS_RATIO = 0.55;
+         HELP_RATIO = 0.4;
+         theApp.setScreen();
          break;
      }
    }
@@ -226,8 +230,8 @@ class App extends TouchManager {
      help.visible = false;
      setScreen();
      if (SHOW_LENS) {
-       lens.x = CANVAS_RATIO*canvas.width/2; // fix later
-       lens.y = canvasMargin * 3; // fix later
+       lens.x = CANVAS_RATIO*canvas.width*3/4; // fix later
+       lens.y = canvas.height/2; // fix later
      }
 
 //     centerX = workingBox.width/2;

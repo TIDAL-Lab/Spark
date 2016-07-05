@@ -100,7 +100,7 @@ class Component implements Touchable {
       slider.step = "1";
       slider.value = "${this.resistance}";
     }
-    
+    App.repaint();  // reset the slider thumb
     //slider.className = "component-slider";
     //document.querySelector("div#sliders").children.add(slider);
   }
@@ -113,11 +113,19 @@ class Component implements Touchable {
 
 
   void draw(CanvasRenderingContext2D ctx) { 
-    ctx.strokeStyle = "rgba(212, 212, 212, 0.7)"; /* wire shade */
+    if (this.type == "Wire") {
+      ctx.strokeStyle = "rgba(222, 222, 222, 0.9)"; /* wire shade */
+      ctx.lineWidth = 10;      
+    }
+    else {
+      ctx.strokeStyle = "rgba(155,155,155,1)"; /* wire shade */
+      ctx.lineWidth = 10;
+    }
+    
     ctx.beginPath(); 
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, end.y);
-    ctx.lineWidth = 10;
+    
     ctx.stroke();
     
     num mx = (start.x + end.x) / 2;
@@ -129,6 +137,14 @@ class Component implements Touchable {
     ctx.rotate(-angle + PI / 2);
     
     drawComponent(ctx);
+    
+    if (this.type == "Bulb") {
+      // draw a juction box for the bulb
+      num d2 = (end.x - start.x)*(end.x - start.x)+(end.y - start.y)*(end.y - start.y);
+      num d = sqrt(d2);      
+      ctx.fillStyle = "rgba(155,155,155,1)";
+      ctx.fillRect(-d/2, -5, d, 10);
+    }
     /* draw a box containing the component, if its model is launched */
     if (theApp.model.component == this) {
       ctx.fillStyle = "rgba(255,255,0,0.2)";
@@ -333,7 +349,7 @@ class Component implements Touchable {
     
     /* if the component is clicked, show the generic slider */
     //if (clickX == event.touchX && clickY == event.touchY) {
-    if ((clickX - event.touchX).abs()<10 && (clickY - event.touchY).abs()<10) {
+    if ((clickX - event.touchX).abs()<5 && (clickY - event.touchY).abs()<5) {
       this.slider = document.querySelector("#generic-slider");
       if (this is Battery || this is Resistor) {
         this.slider.style.display = "block";

@@ -29,7 +29,7 @@ class lumpModel {
   }
   
   void launchModel(Component c) {
-    
+    if (theApp.help.visible) {theApp.help.close();}
     theApp.model.component = c;
     String i = c.current.toString();
     String r = c.resistance.toString();
@@ -39,7 +39,8 @@ class lumpModel {
     frame.src = "probe.html?i=${i}&r=${r}&v=${v}&type=${c.type}";
     
     document.querySelector("#model").style.display = "block";
-    document.querySelector("#help-button").style.display = "block";
+    //document.querySelector("#help-button").style.display = "block";
+    theApp.help.show();
     //document.querySelector("div#help .help-button").style.display = "block";
     
     theApp.help.initiate();

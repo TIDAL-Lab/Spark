@@ -47,8 +47,8 @@ class Lens implements Touchable {
     ctx.beginPath(); 
     ctx.save();
     ctx.translate(this.x, this.y);
-    iw = img.width/1.5;
-    ih = img.height/1.5;
+    iw = img.width/2;
+    ih = img.height/2;
     ctx.drawImageScaled(img, 0, 0, iw, ih);
     ctx.restore();
     }
@@ -105,7 +105,8 @@ class Lens implements Touchable {
    
   void touchUp(Contact event){
     /* if the lens is over component launch its model */
-    findComponent(); 
+    findComponent();
+    //document.querySelector("#big-button").style.display = "none";
     App.repaint();
   }
    

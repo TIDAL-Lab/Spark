@@ -31,6 +31,7 @@ class Bulb extends Component  {
 
   Bulb(num x0, num y0, num x1, num y1, num r) : super("Bulb",x0, y0, x1, y1) {
     setImage("images/bulb-off.png");
+    onbulb.src = "images/bulb-on-yellow3.png";
     onbulb.src = "images/bulb-on.png";
     current = 0.0;
     resistance = 3.0;
@@ -56,32 +57,33 @@ class Bulb extends Component  {
     iw = img.width / 2.2;
     ih = img.height / 2.2;
     ctx.drawImageScaled(img, -iw/2, -ih, iw, ih);
- 
-    //ctx.globalAlpha = 0.8;
-    if (this.current < theApp.circuit.maxCurrent) {
-      var base = theApp.circuit.maxCurrent/2;
-      var power = (this.current.abs() + 1) * (this.current.abs() + 1); // max I = 10 => power is between 1 and 100
-      //var powerScaled = log(power)/log(base); // calculate log base 100 of power 
-      var powerScaled = log(power)/log(base); // calculate log base 100 of power
-      ctx.globalAlpha = powerScaled;
-      //ctx.globalAlpha = 1.0;
-      //print(ctx.globalAlpha);
-    }
+    
     ctx.save();
-    {
-      //ctx.rect(188, 40, 200, 100);
-      ctx.beginPath();
-      ctx.arc(0, -ih/1.5, iw/2.1, 0, 6.2832, true);
-      ctx.fillStyle = 'white';
-      ctx.shadowColor = 'rgba(255,255,255,1.0)';
-      ctx.shadowBlur = ctx.globalAlpha * 100;
-      //ctx.shadowOffsetX = 0;
-      //ctx.shadowOffsetY = 0;
-      ctx.fill();
+    var base = theApp.circuit.maxCurrent/2;;
+    var power = 1;
+    var powerScaled = 0;
+    if (this.current < theApp.circuit.maxCurrent) {
+      power = (this.current.abs() + 1) * (this.current.abs() + 1); // max I = 10 => power is between 1 and 100
+      powerScaled = log(power)/log(base); // calculate log base 100 of power
     }
-    ctx.restore();
+    //print(ctx.globalAlpha);
+    ctx.beginPath();
+    ctx.globalAlpha = log(power)/log(base);
+    ctx.shadowColor = 'rgba(255,255,255,1.0)';
+    ctx.shadowBlur = powerScaled*powerScaled*powerScaled*powerScaled*100;
+    //print(ctx.shadowBlur);
+    ctx.arc(0, -ih/1.5, iw/2.1, 0, 6.2832, true);
+    ctx.fillStyle = 'white';
+    //ctx.shadowOffsetX = 0;
+    //ctx.shadowOffsetY = 0;
+    ctx.fill();
+    ctx.shadowBlur = 0.0;
     ctx.drawImageScaled(onbulb, -iw/2, -ih, iw, ih);
+    ctx.restore();
+    
     ctx.globalAlpha = 1.0;
+    ctx.shadowBlur = 0.0;
+    
     return ctx;
     }
     

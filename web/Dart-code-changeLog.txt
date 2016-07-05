@@ -47,4 +47,5 @@ THINGS TO FIX LATER:
 	so I changed the canvas size to be the whole screen.
 	Now I have issues with drawing control points outside of the workingbox
 
-	
+*** notes on 7/1/2016
+1. remove sliders in the toolbar (just leaving the generic slider)	

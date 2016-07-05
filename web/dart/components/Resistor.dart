@@ -30,14 +30,16 @@ class Resistor extends Component {
     current = 0.0;
     resistance = r;
     voltageDrop = 0.0;
-    
+    this.slider = document.querySelector("#generic-slider");
+    this.slider.style.display = "block";
+    setSlider();
     //addSlider(x0, y0);
     //theApp.circuit.addNewBranch(this); 
   }
   
   CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {
-    iw = img.width / 4;
-    ih = img.height / 4;
+    iw = img.width / 3.5;
+    ih = img.height / 3.5;
     ctx.drawImageScaled(img, -iw/2, -ih/2, iw, ih);
     //ctx.fillStyle = "rgba(120,180,35,250)";
     //ctx.fillRect(-5, -10, 40, 20);

@@ -31,14 +31,17 @@ class Battery extends Component  {
     warning.src = "images/burnt-sign.png";
     current = 0.0;
     resistance = 0.0;
-    voltageDrop = v;    
+    voltageDrop = v; 
     
+    this.slider = document.querySelector("#generic-slider");
+    this.slider.style.display = "block";
+    setSlider();
     //addSlider(x0, y0);       
   }
     
     CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {
-      iw = img.width / 4;
-      ih = img.height / 4;
+      iw = img.width / 3.5;
+      ih = img.height / 3.5;
       ctx.drawImageScaled(img, -iw/2, -ih/2, iw, ih);
      if (!isBurnt) { 
      ctx.fillStyle = "rgb(120,180,35)";

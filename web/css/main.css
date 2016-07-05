@@ -46,8 +46,8 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
-  border: 1px solid white;
-  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  background-color: rgba(255, 255, 255, 0.0);
   padding: 3px;
   font-family: Arial, Helvetica, sans-serif;
   z-index: 0;
@@ -81,21 +81,21 @@ body {
 }
 #help-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  background: url("../images/buttons/hint.png") 0 0 no-repeat;
-  width: 85px;
+  background: url("../images/buttons/learn2.png") 0 0 no-repeat;
+  width: 200px;
   height: 85px;
   border: none;
   position: absolute;
   top: 20px;
   left: 100px;
   outline: none;
-  -webkit-animation: glowing 1500ms infinite;
-  animation: glowing 1500ms infinite;
+  /* -webkit-animation: glowing 1500ms infinite;
+  animation: glowing 1500ms infinite; */
 }
 #help-image {
   border: none;
   position: absolute;
-  top: 20px;
+  top: 50px;
   left: 20px;
   outline: none;
 }
@@ -112,3 +112,22 @@ body {
   100% { background-color: #005368; -webkit-box-shadow: 0 0 3px #005368; }
 }
 
+#big-button {
+  -webkit-transform: rotate(360deg); /* Chrome & Safari */
+  background: url("../images/buttons/help3.png") 0 0 no-repeat;
+  width: 320px;
+  height: 320px;
+  border: none;
+  position: absolute;
+  top: 50px;
+  right: 100px;
+  outline: none;
+  z-index = -1;
+}
+
+#big-button:active
+ { 
+   background: url("../images/buttons/hint-empty.png") 0 0 no-repeat; 
+   border: none;
+   padding: none;
+ }

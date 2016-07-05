@@ -86,14 +86,14 @@
     <canvas id="foreground" style="position: absolute;" ></canvas>
   </div>  
   <div id="selection-toolbar" class="toolbar">
-    <button id="battery-button"></button>
+    <button id="battery-button" hidden="true"></button>
     <button id="resistor-button"/></button>
     <button id="wire-button" /></button>
     <button id="bulb-button" /></button>
   </div>     
   <div id="slider-toolbar" class="toolbar">
-    <input id="battery-slider" type="range" min="2" max="4.0" step="1" value="2.0">
-    <input id="resistor-slider" type="range" min="1" max="3" step="1" value="1">
+    <input id="battery-slider" type="range" min="2" max="4.0" step="1" value="2.0" hidden="true">
+    <input id="resistor-slider" type="range" min="1" max="3" step="1" value="1" hidden="true">
     <input id="wire-slider" type="range" min="1" max="5" step="0.5" value="1" hidden="true">
     <input id="bulb-slider" type="range" min="1" max="3" step="0.5" value="1" hidden="true">
   </div>
@@ -107,6 +107,7 @@
     <button id="lens-button"></button>  
     <button id="reset-button"></button>
   </div>
+  <!-- <button id="big-button"></button> -->
   <input id="generic-slider" type="range" style="position: absolute; display: none;"> 
       
   <div id="model" style="display: none;">

@@ -33,17 +33,24 @@ void genericSliderTouch(TouchEvent tframe) {
   num ty = tframe.changedTouches[0].client.y - top;
   var min = double.parse(slider.min);
   var step = double.parse(slider.step);
-  if (tx < width / 5.0) {
+  if (tx < width / 3.0) {
     slider.value = min.toString();
-  } else if (tx < width * 2 / 5) {
+  } else if (tx < width * 2 / 3) {
     slider.value = ( min + step ).toString();
-  } else if (tx < width * 3 / 5) {
-    slider.value = (min + 2 * step).toString();
-  } else if (tx < width * 4 / 5) {
-    slider.value = (min + 3 * step).toString();
   } else {
-    slider.value = (min + 4 * step).toString();
+    slider.value = (min + 2 * step).toString();
   }
+//  if (tx < width / 5.0) {
+//    slider.value = min.toString();
+//  } else if (tx < width * 2 / 5) {
+//    slider.value = ( min + step ).toString();
+//  } else if (tx < width * 3 / 5) {
+//    slider.value = (min + 2 * step).toString();
+//  } else if (tx < width * 4 / 5) {
+//    slider.value = (min + 3 * step).toString();
+//  } else {
+//    slider.value = (min + 4 * step).toString();
+//  }
   //genericChangeValue(int.parse(slider.value));
 
 }
