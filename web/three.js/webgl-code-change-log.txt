@@ -504,6 +504,9 @@ I paused working on the branching effect and instead adding some new features to
 	so instead, I used the line geometry
 3. 
 
+*** notes on 7/16/2016
+1. working on styling the watch-button
+ 
 
 ISSUES TO FIX LATER:
 

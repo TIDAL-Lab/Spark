@@ -20,38 +20,45 @@
 */
 part of SparkProject;
 
-class Help implements Touchable {
-  num x,y;
-  num dragX, dragY;
-  num clickX, clickY;
-  num iw, ih;
+class Help {
   ImageElement img;
-  int page, max_pages;
-  bool visible = false;
+  ParagraphElement p;
+  ParagraphElement p2;
+  int page;
   String helpSrc;  // is set in setConditions in App class
   
-  Help (num x, num y) {
-    this.x = x;
-    this.y = y;
-
-    img = new ImageElement();
-    setImage("images/helps/bg.png");    
-    theApp.addTouchable(this);
+  Help () {
+    img = document.querySelector("#help-image");
+    setImage("images/helps/bg.png");   
     
+    p = new ParagraphElement();
+    p = document.querySelector("#type");
+    
+    p2 = new ParagraphElement();
+    p2 = document.querySelector("#description");
+    
+    var button = document.querySelector("#page0-button");
+    if (button != null) button.onClick.listen((e) => showPage(0));
+    
+    button = document.querySelector("#page1-button");
+    if (button != null) button.onClick.listen((e) => showPage(1));
+    
+    button = document.querySelector("#page2-button");
+    if (button != null) button.onClick.listen((e) => showPage(2));
+    
+    button = document.querySelector("#page3-button");
+    if (button != null) button.onClick.listen((e) => showPage(3));
+    
+    button = document.querySelector("#back-button");
+    if (button != null) button.onClick.listen((e) => back());
+    
+    button = document.querySelector("#close-help-button");
+    if (button != null) button.onClick.listen((e) => close());
   }
   
   //int get index => helpSources.indexOf(img.src);
   
   void draw(CanvasRenderingContext2D ctx) { 
-    if (this.visible) {
-      ctx.beginPath(); 
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      iw = img.width / 2;
-      ih = img.height / 2;
-      ctx.drawImageScaled(theApp.help.img, 5, 0, iw, ih);
-      ctx.restore();
-    }
   }
   
   void setImage(String src) {
@@ -60,111 +67,72 @@ class Help implements Touchable {
     img.onLoad.listen((event) { App.repaint(); }); 
   }
   
-  void initiate () {
-//    visible = true;
-//    img.src = "images/helps/help1.png";
-//    App.repaint();
-  }
-  
   void show () {
+    this.back();
+    var div = document.querySelector("#help");
+    div.style.display = "block";
     ButtonElement button = document.querySelector("#help-button");
     button.style.display = "none";
-    visible = true;
-    img.src = helpSrc + "help1.png";
-    page = 1;
-    App.repaint();
+    String type = theApp.model.component.type;
+    p.text = "This is a " + type;
+    switch (type) {
+      case "Battery":
+        p2.text = "Battery produces energy (voltage) for a circuit";
+        break;
+      case "Wire":
+        p2.text = "Wire is a conductive material that electrons can move through easily";
+        break;
+      case "Bulb":
+        p2.text = "Light bulb is a type of a resistor that can emit light";
+        break;
+      case "Resistor":
+        p2.text = "A resistor is a conductive material that can slow down the movement of electrons in a circuit";
+        break;
+    }
   }
   
-  void next() {
-    if (page < max_pages) {
-      page++;
-      img.src = helpSrc + "help${page.toString()}.png";
-    }
-    App.repaint();    
+  void showPage(num page) {
+    img.src = helpSrc + "help${page.toString()}.png";
+    var div = document.querySelector("#main-page");
+    div.style.display = "none";
+    
+    var button = document.querySelector("#back-button");
+    button.style.display = "inline";
   }
   
   void back() {
-    if (page > 1){
-      page--;
-      img.src = helpSrc + "help${page.toString()}.png";
-    }
-    App.repaint();    
-  }
-  
-  void close() {
-    visible = false;
-    App.repaint();  
-    ButtonElement button = document.querySelector("#help-button");
-    //ButtonElement button = document.getElementsByClassName("help-button").first;
-    button.style.display = "block";
-  }
-  /* ------------------------
-  Touch Events
-* ------------------------ */  
-  bool containsTouch(Contact event) {
-    if (visible) {
-      num tx = event.touchX;
-      num ty = event.touchY;
-//      if (tx >= x && (tx <= x + iw) && ty >= y && (ty <= y + ih)) {
-//        print("help contains touch");
-//        
-//      }
-//      
-      return (tx >= x && tx <= x + iw && ty >= y && ty <= y + ih);
-    }
-    return false;
-  }
- 
-  bool touchDown(Contact event){
-    dragX = event.touchX;
-    dragY = event.touchY; 
+    img.src = "images/helps/bg.png";
+    var button = document.querySelector("#back-button");
+    button.style.display = "none";
     
-    clickX = event.touchX;
-    clickY = event.touchY;
+    var div = document.querySelector("#main-page");
+    div.style.display = "block";
     
-    //App.repaint();
-    return true;
-  }
-   
-  void touchUp(Contact event){
-    /* if it is clicked, take an action if the click is on a button */
-    
-    if ((clickX - event.touchX).abs()<10 && (clickY - event.touchY).abs()<10) {
-//      print(clickX);
-//      print(event.touchX);
-      /* is it on next? */
-      if (clickX > (x + 0.8 * iw) && clickX <= (x + iw) && clickY > (y + 0.5 * ih) && clickY <= (y + ih)) {
-        this.next();
-      }
-      /* is it on back? */
-      if (clickX > (x + 0.6 * iw) && clickX <= (x + 0.8 * iw) && clickY > (y + 0.5 * ih) && clickY <= (y + ih)) {
-        this.back();
-      }
-      /* is it on close? */
-      if (clickX > (x + 0.45 * iw) && clickX <= (x + 0.6 * iw) && clickY > (y + 0.5 * ih) && clickY <= (y + ih)) {
-        this.close();
-        initiate();
-        visible = false;
-      }
-    }
-  }
-  
-  void touchDrag(Contact event) {
-//    print("touch drag");
-//    num deltaX = event.touchX - dragX;
-//    num deltaY = event.touchY - dragY;
-//
-//    dragX += deltaX;
-//    dragY += deltaY;
-//    this.x += deltaX;
-//    this.y += deltaY;
-//    //this.move(deltaX, deltaY);
-//    /* redraw everything */
-//    App.repaint(); 
 
   }
-   
-  void touchSlide(Contact event) {}
   
-  
+//  void next() {
+//    if (page < max_pages) {
+//      page++;
+//      img.src = helpSrc + "help${page.toString()}.png";
+//    }
+//    App.repaint();    
+//  }
+//  
+//  void back() {
+//    if (page > 1){
+//      page--;
+//      img.src = helpSrc + "help${page.toString()}.png";
+//    }
+//    App.repaint();    
+//  }
+//  
+  void close() {
+    var button = document.querySelector("#help-button");
+    button.style.display = "block";
+    
+    var div = document.querySelector("#help");
+    div.style.display = "none";
+  }
+
 }

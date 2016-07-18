@@ -11,6 +11,7 @@ void main() {
   num v;
   num r;
   num i;
+  num brightness;
   String type;
   CanvasRenderingContext2D ctx;
   CanvasElement canvas;
@@ -25,6 +26,7 @@ void main() {
     }
     else if (param.startsWith("i=")) {
       i = double.parse(param.substring(2));
+      brightness = i/0.3;
     }
     else if (param.startsWith("type=")) {
       type = param.substring(5);
@@ -39,6 +41,7 @@ void main() {
   var iFormated = i.toStringAsPrecision(3);
   var vFormated = v.toStringAsPrecision(3);
   var rFormated = r.toStringAsPrecision(1);
+  var bFormated = brightness.toStringAsPrecision(2);
   
   ImageElement img = new ImageElement();
   
@@ -67,24 +70,36 @@ void main() {
   //p = document.querySelector("#component-type");
   //p.text = "${type}";
   
-  p = document.querySelector("#type");
-  p.text = "This is a " + type;
+//  p = document.querySelector("#type");
+//  p.text = "This is a " + type;
   
-  img = document.querySelector("#voltmeter-image");
-  img.src = "images/buttons/voltmeter3.png";
-  img.style.width = "220px";
-  img.style.position = "absolute";
-  img.style.top = "90px";
-  img.style.left = "150px";
+//  img = document.querySelector("#voltmeter-image");
+//  img.src = "images/buttons/voltmeter3.png";
+//  //img.onLoad.listen((event) { App.repaint(); });
+//  img.style.width = "250px";
+//  img.style.position = "absolute";
+//  img.style.top = "50px";
+//  img.style.left = "50px";
+
+
+  
+  p = document.querySelector("#current-value");
+  p.text = "Current = ${iFormated}";
+  p.style.top = "200px";
+  
+  p = document.querySelector("#resistance-value");
+  p.text = "Resistance = ${rFormated}";
+  p.style.top = "240px";
   
   p = document.querySelector("#voltage-value");
   if (type == 'Battery') p.text = "Voltage = ${vFormated}";
   else p.text = "Voltage Drop = ${vFormated}";
+  p.style.top = "280px";
   
-  p = document.querySelector("#current-value");
-  p.text = "Current = ${iFormated}";
-  
-  p = document.querySelector("#resistance-value");
-  p.text = "Resistance = ${rFormated}";
+  if (type == "Bulb") {
+    p = document.querySelector("#brightness-factor");
+    p.text = "Brightness Factor = ${bFormated}";
+    p.style.top = "320px";
+  }
   
 }

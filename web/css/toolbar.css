@@ -133,7 +133,7 @@ input::-webkit-slider-thumb {
    padding: none;
  }
  
- #lens-button {
+#lens-button {
   background: url("../images/buttons/next.png") 0 0 no-repeat;
 }
 #lens-button:active

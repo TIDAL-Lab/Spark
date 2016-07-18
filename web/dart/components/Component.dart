@@ -94,7 +94,7 @@ class Component implements Touchable {
       slider.step = "1";
       slider.value = "${this.voltageDrop}";
     }
-    else {
+    else if (this is Resistor){
       slider.min = "1";
       slider.max = "3.0";
       slider.step = "1";
@@ -118,7 +118,7 @@ class Component implements Touchable {
       ctx.lineWidth = 10;      
     }
     else {
-      ctx.strokeStyle = "rgba(155,155,155,1)"; /* wire shade */
+      ctx.strokeStyle = "rgba(155,155,155,0.9)"; 
       ctx.lineWidth = 10;
     }
     
@@ -142,8 +142,10 @@ class Component implements Touchable {
       // draw a juction box for the bulb
       num d2 = (end.x - start.x)*(end.x - start.x)+(end.y - start.y)*(end.y - start.y);
       num d = sqrt(d2);      
-      ctx.fillStyle = "rgba(155,155,155,1)";
-      ctx.fillRect(-d/2, -5, d, 10);
+      //ctx.fillStyle = "rgba(35,35,35,0.5)";
+      ctx.fillStyle = "rgba(43,76,85,1.0)";
+      //ctx.fillStyle = "rgba(205,165,110,1)";
+      ctx.fillRect(-d/2, -10, d, 20);
     }
     /* draw a box containing the component, if its model is launched */
     if (theApp.model.component == this) {
@@ -312,7 +314,7 @@ class Component implements Touchable {
     num cy = screenToComponentY(tx, ty);
     num cw = sqrt((start.x - end.x)*(start.x - end.x) + (start.y - end.y)*(start.y - end.y)) - 20;
     num ch = ih;
-    return (cx.abs() <= cw/2 && cy.abs() <= ch/2);
+    return (cx.abs() <= cw/2 && cy.abs() <= ch*2);
   }
 
   bool touchDown(Contact event) {

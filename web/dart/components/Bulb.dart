@@ -54,9 +54,9 @@ class Bulb extends Component  {
   }
   
   CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {
-    iw = img.width / 2.2;
-    ih = img.height / 2.2;
-    ctx.drawImageScaled(img, -iw/2, -ih, iw, ih);
+    iw = img.width / 2;
+    ih = img.height / 2;
+    ctx.drawImageScaled(img, -iw/2, -ih*0.9, iw, ih);
     
     ctx.save();
     var base = theApp.circuit.maxCurrent/2;;
@@ -72,13 +72,13 @@ class Bulb extends Component  {
     ctx.shadowColor = 'rgba(255,255,255,1.0)';
     ctx.shadowBlur = powerScaled*powerScaled*powerScaled*powerScaled*100;
     //print(ctx.shadowBlur);
-    ctx.arc(0, -ih/1.5, iw/2.1, 0, 6.2832, true);
+    ctx.arc(0, -ih/1.8, iw/2, 0, 6.2832, true);
     ctx.fillStyle = 'white';
     //ctx.shadowOffsetX = 0;
     //ctx.shadowOffsetY = 0;
     ctx.fill();
     ctx.shadowBlur = 0.0;
-    ctx.drawImageScaled(onbulb, -iw/2, -ih, iw, ih);
+    ctx.drawImageScaled(onbulb, -iw/2, -ih*0.9, iw, ih);
     ctx.restore();
     
     ctx.globalAlpha = 1.0;

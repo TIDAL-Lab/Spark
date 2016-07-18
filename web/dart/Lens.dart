@@ -60,10 +60,10 @@ class Lens implements Touchable {
     else {
       for (Component c in theApp.components) {
         if (onComponent(c, mx, my)) {
-          if (c is Wire || c is Resistor || c is Bulb || c is Battery) {
+          //if (c is Wire || c is Resistor || c is Bulb || c is Battery) {
             theApp.model.launchModel(c);
             return;
-          }
+          //}
         }
       }
   

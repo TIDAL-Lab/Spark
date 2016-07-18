@@ -25,13 +25,6 @@ body {
    z-index: 0; 
 }
 
-#workspace {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  z-index = 10;
-}
-
 #foreground {
   position: absolute;
   top: 0px;
@@ -57,6 +50,9 @@ body {
   position: absolute;
   top: 0px;
   left: 0px;
+  width: 100%;
+  height: 100%;
+  border: none;
   display: block;
 }
 
@@ -74,36 +70,115 @@ body {
 
 #help {
   position: absolute;
+  top: 200px;
+  left: 0px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.0);
   padding: 3px;
   font-family: Arial, Helvetica, sans-serif;
-  z-index: 0;  
+  z-index: 0;
   display: block;
 }
+
 #help-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  background: url("../images/buttons/learn2.png") 0 0 no-repeat;
-  width: 200px;
+  background: url("../images/buttons/learn-50.png") 0 0 no-repeat;
+  top: 20px;
+  left: 100px;
+  width: 240px;
   height: 85px;
   border: none;
   position: absolute;
-  top: 20px;
-  left: 100px;
   outline: none;
   /* -webkit-animation: glowing 1500ms infinite;
   animation: glowing 1500ms infinite; */
 }
+
 #help-image {
   border: none;
   position: absolute;
-  top: 50px;
-  left: 20px;
+  top: 0px;
+  left: 0px;
   outline: none;
 }
-
-#model-frame {
-  width: 100%;
-  height: 100%;
+.page-button {
+  -webkit-transform: rotate(360deg); /* Chrome & Safari */
+  left: 180px;
+  width: 400px;
+  height: 60px;
   border: none;
+  position: absolute;
+  outline: none;
+  display: inline;
+}
+
+#page0-button {
+  background: url("../images/buttons/page0-50.png") 0 0 no-repeat;
+  bottom: 260px;
+}
+#page0-button:active
+ { 
+   background-position: 2px 2px; 
+   border: none;
+   padding: none;
+ }
+
+#page1-button {
+  background: url("../images/buttons/page1-50.png") 0 0 no-repeat;
+  bottom: 200px;
+}
+#page1-button:active
+ { 
+   background-position: 2px 2px; 
+   border: none;
+   padding: none;
+ }
+ 
+#page2-button {
+  background: url("../images/buttons/page2-50.png") 0 0 no-repeat;
+  bottom: 140px;
+}
+
+#page2-button:active
+ { 
+   background-position: 2px 2px; 
+   border: none;
+   padding: none;
+ }
+ 
+#page3-button {
+  background: url("../images/buttons/page3-50.png") 0 0 no-repeat;
+  bottom: 80px;
+}
+#page3-button:active
+ { 
+   background-position: 2px 2px; 
+   border: none;
+   padding: none;
+ }
+#close-help-button {
+  -webkit-transform: rotate(360deg); /* Chrome & Safari */
+  background: url("../images/buttons/close.png") 0 0 no-repeat;
+  right: 15px;
+  top: 10px;
+  width: 52px;
+  height: 52px;
+  border: none;
+  position: absolute;
+  outline: none;
+  display: inline;
+}
+#back-button {
+  -webkit-transform: rotate(360deg); /* Chrome & Safari */
+  background: url("../images/buttons/back-resize2.png") 0 0 no-repeat;
+  right: 15px;
+  bottom: 15px;
+  width: 100px;
+  height: 52px;
+  border: none;
+  position: absolute;
+  outline: none;
+  display: inline;
 }
 
 @-webkit-keyframes glowing {
@@ -112,22 +187,39 @@ body {
   100% { background-color: #005368; -webkit-box-shadow: 0 0 3px #005368; }
 }
 
-#big-button {
-  -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  background: url("../images/buttons/help3.png") 0 0 no-repeat;
-  width: 320px;
-  height: 320px;
-  border: none;
-  position: absolute;
-  top: 50px;
-  right: 100px;
-  outline: none;
-  z-index = -1;
-}
-
-#big-button:active
- { 
-   background: url("../images/buttons/hint-empty.png") 0 0 no-repeat; 
+.secondText {
+   outline: none;
+   color: rgb(5, 5, 5);
+   position: absolute;
+   text-align: center;
+   top: 100px;
+   left: 50px;
    border: none;
-   padding: none;
- }
+   width: 600px;
+   height: 10px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: Comic Sans MS;
+   font-size:18px;
+   display: inline;
+   z-index: 10;
+}
+.bigText {
+   outline: none;
+   color: rgb(5, 5, 5);
+   position: absolute;
+   text-align: center;
+   top: 50px;
+   left: 50px;
+   border: none;
+   width: 600px;
+   height: 10px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: Comic Sans MS;
+   font-size:30px;
+   display: inline;
+   z-index: 10;
+}

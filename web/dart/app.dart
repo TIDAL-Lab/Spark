@@ -25,16 +25,15 @@ part of SparkProject;
  * condition is the study condition
  * 1 --> control condition: only circuit, no ABM model
  * 2 --> ABM + circuit model, with the NetTango model embedded in the canvas
- * 3 --> webgl non-AR
+ * 3 --> webgl nonAR: circuit model on the same screen
  * 4 --> webgl AR
- * 5 --> webgl + circuit model on the same screen
  */
 int CONDITION = 1;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
-num CANVAS_RATIO = 0.65;
-num HELP_RATIO = 0.55;
+num CANVAS_RATIO = 0.55;
+num HELP_RATIO = 0.40;
 
 class App extends TouchManager {
 
@@ -54,7 +53,7 @@ class App extends TouchManager {
    Circuit circuit;
    Toolbar selectionBar; 
    Toolbar editionBar;
-   var model;
+   Model model;
    
    Component genericSliderComponent; //the component that is tapped on to change its value
    Help help; // the help text
@@ -77,7 +76,7 @@ class App extends TouchManager {
      
      //canvas2 = document.querySelector("#help-canvas");
      //ctx2 = canvas2.getContext("2d");
-     help = new Help(100, 100);
+     help = new Help();
      setScreen();
      
      registerEvents(canvas);     
@@ -145,31 +144,40 @@ class App extends TouchManager {
 //     canvas2.width = w2;
 //     canvas2.height = h3;
 //     
-     var helpButton = document.querySelector("#help-button");
-     helpButton.style.left = "${w2/2-120}px";
-     helpButton.style.top = "${h2+50}px";
      
      var toolbar = document.querySelector("#edition-toolbar");
      toolbar.style.right = "${w2}px";
      
-     help.x = w1+50;
-     help.y = h2+10;
+     var div = document.querySelector("#help");
+     div.style.top = "${h2}px";
+     div.style.width = "${w2}px";
+     div.style.height = "${h3}px";
+     
+     var button = document.querySelector("#help-button");
+     button.style.left = "${w2*1.5/5}px";
+     button.style.top = "${h2+50}px";
+     
+     var img = document.querySelector("#help-image");
+     img.style.width = div.style.width;
+     img.style.height = div.style.height;
+     
+//     help.x = w1+50;
+//     help.y = h2+10;
      
    }
    
    void setConditions() {
      switch ( condition ) {
        case 1:     // no electron model
-         help.max_pages = 3;
-         help.helpSrc = "images/helps-control2/";
+         help.helpSrc = "images/helps-control/";
          model = new lumpModel("div#model");
          SHOW_LENS = true;
          SHOW_MARKER = false;
          USE_SERVER = false;
          document.querySelector("#lens-button").style.background = "transparent";
+         document.querySelector("#page0-button").style.display = "none";
          break;
        case 2:
-         help.max_pages = 4;
          help.helpSrc ="images/helps/";
          model = new agentModel("div#model");
          SHOW_LENS = true;
@@ -177,25 +185,6 @@ class App extends TouchManager {
          USE_SERVER = false;
          break;
        case 3:
-         help.max_pages = 4;
-         help.helpSrc ="images/helps/";
-         model = new lumpModel("div#model");
-         SHOW_LENS = true;
-         SHOW_MARKER = false;
-         USE_SERVER = true;
-         break;
-       case 4:
-         help.max_pages = 4;
-         help.helpSrc ="images/helps/";
-         model = new lumpModel("div#model");
-         // instantiate the JsAr tag
-         marker = new Marker(centerX, centerY);
-         SHOW_LENS = true;
-         SHOW_MARKER = true;
-         USE_SERVER = true;
-         break;
-       case 5:
-         help.max_pages = 4;
          help.helpSrc ="images/helps/";
          model = new webglModel("div#model");
          SHOW_LENS = false;
@@ -204,6 +193,15 @@ class App extends TouchManager {
          CANVAS_RATIO = 0.55;
          HELP_RATIO = 0.4;
          theApp.setScreen();
+         break;
+       case 4:
+         help.helpSrc ="images/helps/";
+         model = new lumpModel("div#model");
+         // instantiate the JsAr tag
+         marker = new Marker(centerX, centerY);
+         SHOW_LENS = true;
+         SHOW_MARKER = true;
+         USE_SERVER = true;
          break;
      }
    }
@@ -226,8 +224,7 @@ class App extends TouchManager {
      circuit.updateComponents();
      document.querySelector("#model").style.display = "none";
      document.querySelector("#generic-slider").style.display = "none";
-     model.component = null;
-     help.visible = false;
+     model.reset();
      setScreen();
      if (SHOW_LENS) {
        lens.x = CANVAS_RATIO*canvas.width*3/4; // fix later
@@ -282,11 +279,9 @@ class App extends TouchManager {
      for (Component c in components) {
        if (c.visible) c.draw(ctx);
      }
-     if (SHOW_LENS) lens.draw(ctx);
-     help.draw(ctx); 
+     if (SHOW_LENS) lens.draw(ctx); 
      if (SHOW_MARKER) { marker.draw(ctx); }
      //ctx.restore();
-     //help.draw(ctx2);
    }
    
 

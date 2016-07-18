@@ -49,3 +49,7 @@ THINGS TO FIX LATER:
 
 *** notes on 7/1/2016
 1. remove sliders in the toolbar (just leaving the generic slider)	
+
+*** notes on 7/18/2016
+1. modifying the way that the circuit is connected to different models for different conditions	
+	it is currently a big mess

@@ -3,58 +3,54 @@
 * { -webkit-user-select: none; }
 
 body {
-   margin: 0;
-   padding: 0;
-   color: #ccc;
-	 font: 10px "Helvetica Neue", Helvetica, Arial, sans-serif;
-	 font-weight: 300;
-	 line-height: 1.625;
-   overflow: hidden;
-    background-color: #005368;
-   /* background-color: #ffff00; */
-   
-   overflow: hidden;
+  background-color: #005368;
+  margin: 0px;
+  overflow: hidden;
+  font-family:Monospace;
+  font-size:13px;
+  text-align:center;
+  font-weight: bold;
+  text-align:center;
 }
 
-#content {
-   background: -moz-linear-gradient(top, #068, #005368);
-   background: -webkit-linear-gradient(top, #068, #005368);
-   position: absolute;
-   top: 10px;
-   left: 10px;
+a {
+  color:#0078ff;
 }
 
-#button {
-  -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  background: url("../../images/buttons/minus.png") 0 0 no-repeat;
-  width: 152px;
-  height: 152px;
-  border: none;
+#info {
+  color: #fff;
   position: absolute;
-  top: 5px;
-  right: 5px;
-  outline: none;
+  top: 0px; width: 100%;
+  padding: 5px;
+  z-index: 100;
 }
 
-.help-button {
+#watch-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  background: url("../images/buttons/hint.png") 0 0 no-repeat;
-  width: 85px;
-  height: 85px;
+  background: url("../../images/buttons/watch2.png") 0 0 no-repeat;
+  background-size: 100%; 
+  height: 40px;
+  position: absolute;
+  margin: -40px -100px;
+  width: 200px;
+  top: 20%;
+  left: 50%;
   border: none;
-  position: fixed;
-  bottom: 100px;
-  right: 220px;
-  outline: none;
-  -webkit-animation: glowing 1500ms infinite;
-  animation: glowing 1500ms infinite;
+  padding: none;
+  display: block;
 }
 
 
+#watch-button:active
+ { 
+   background: url("../../images/buttons/watch2-active.png") 0 0 no-repeat;
+   background-size: 100%;
+   background-position: 2px 2px; 
+   border: none;
+   padding: none;
+ }
 
-@-webkit-keyframes glowing {
-  0% { background-color: #005368; -webkit-box-shadow: 0 0 3px #005368; }
-  50% { background-color: #007388; -webkit-box-shadow: 0 0 9px #007388; }
-  100% { background-color: #005368; -webkit-box-shadow: 0 0 3px #005368; }
+#watch-button:hover {
+  border: none;
+  padding: none;
 }
-
