@@ -10,7 +10,7 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var ionGeometry = new THREE.SphereGeometry( 5, 16, 16 );
+var ionGeometry = new THREE.SphereGeometry( 5, 8, 8 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 var offsetZ = 0.00;
@@ -28,7 +28,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.electronCount; // Change it later
   	this.ionCount; //Change it later
   	this.l = Math.sqrt((endX-startX)*(endX-startX)+(endY-startY)*(endY-startY));
-  	this.w = 110;
+  	this.w = 70;
   	this.ions = [];
   	this.obstacles = [];
   	this.container;

@@ -20,8 +20,8 @@
 		<script src="lib/three.js/build/three.min.js"></script>
 		<script src="lib/three.js/examples/js/Detector.js"></script>
 		<script src="lib/three.js/examples/js/libs/stats.min.js"></script>
-		<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>
-		<script src="lib/three.js/examples/js/controls/DeviceOrientationControls.js"></script>
+<!--		<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>
+		<script src="lib/three.js/examples/js/controls/DeviceOrientationControls.js"></script>  -->
 		<script src="lib/EditorControls-spark.js"></script>
 
 		<!-- the following scripts are the JsArToolkit scripts -->
@@ -36,25 +36,15 @@
 		<script src="lib/winjs/js/base.js"></script>
 		<script src="lib/winjs/js/ui.js"></script>
 
-		<style>
-		</style>
 	</head>
 	<body>
-
-<!-- 	    <div id="loading">Loading...</div>
-	      
-	    <div id="nowebgl">
-	      <p>I'm sorry, but there seems to be a problem with WebGL which this demo relies on.<br />
-	      Please check <a href="http://get.webgl.org/troubleshooting/">here for some troubleshooting information</a>.</p>
-	    </div> -->
 
 	    <video id="inputStream" width="320" height="240" autoplay="autoplay" style="display: none"></video>
 	    <img id="inputImage" width="320" height="240" src="tests/static.png" style="display: none"/>
 	    <canvas id="inputCapture" width="320" height="240" style="display: none"></canvas>
 	    <canvas id="debugCanvas" width="320" height="240" style="display: none"></canvas>
 
-	    <div id="result"></div>
-	    <!--
+    <!--
 	    <button onclick="keepMoving()"> move electrons</button>
 	    <button onclick="updateElectrons()"> next move</button>
 	    <button onclick="displayGrid()"> grid on</button>
@@ -62,18 +52,13 @@
 	    <button id="watch-button" onclick="watchElectron()"></button>
 
 	    <script src="AR_mediastream-spark.js"></script>
-
 	    <script src="launch.js"></script>
 	 	<script src="main.js"></script>
 		<!-- the following scripts are various classes in the code -->
 		<script src="component.js"></script>
-		<!-- the following scripts are the functional scripts for Spark -->
-		
+		<!-- the following scripts are the functional scripts for Spark -->	
 		<script src="electron.js"></script>
-		<script src="MotionDetection.js"></script>
-
 		<script type="text/javascript">
-
 		// moved to launch.js
 		</script>
 	</body>

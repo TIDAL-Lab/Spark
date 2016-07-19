@@ -2,14 +2,13 @@ part of SparkProject;
 
 class Model {
   App app;
-  String id; // html id for toolbar div tag
   Random rand = new Random();
   Component component = null;
   
-  Model(String id) {
-    this.id = id;
+  Model() {
+   
     ButtonElement button;
-    button = document.querySelector("$id #close-button");
+    button = document.querySelector("#close-button");
     if (button != null) button.onClick.listen((e) => closeModel());
     
     button = document.querySelector("#help-button");
@@ -17,7 +16,7 @@ class Model {
     
   }
   
-  void closeModel() {}
+  void closeModel() { }
   void reset() {
     
   }

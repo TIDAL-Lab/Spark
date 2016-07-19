@@ -1,6 +1,4 @@
 import 'dart:html';
-//import 'dart:math';
-//import 'package:intl/intl.dart'; //this is for number format for AR tags
 
 void main() {
 
@@ -19,7 +17,6 @@ void main() {
   for (String param in list) {
     if (param.startsWith("v=")) {
       v = double.parse(param.substring(2));
-      //window.alert("Set voltage to v");
     }
     else if (param.startsWith("r=")) {
       r = double.parse(param.substring(2));
@@ -42,8 +39,28 @@ void main() {
   var vFormated = v.toStringAsPrecision(3);
   var rFormated = r.toStringAsPrecision(1);
   var bFormated = brightness.toStringAsPrecision(2);
+ 
+  ParagraphElement p = new ParagraphElement();
   
-  ImageElement img = new ImageElement();
+  p = document.querySelector("#current-value");
+  p.text = "Current = ${iFormated}";
+  p.style.top = "200px";
+  
+  p = document.querySelector("#resistance-value");
+  p.text = "Resistance = ${rFormated}";
+  p.style.top = "240px";
+  
+  p = document.querySelector("#voltage-value");
+  if (type == 'Battery') p.text = "Voltage = ${vFormated}";
+  else p.text = "Voltage Drop = ${vFormated}";
+  p.style.top = "280px";
+  
+  if (type == "Bulb") {
+    p = document.querySelector("#brightness-factor");
+    p.text = "Brightness Factor = ${bFormated}";
+    p.style.top = "320px";
+  }
+ 
   
 //  img = document.querySelector("#component-image");
 //  switch (type) {
@@ -64,9 +81,7 @@ void main() {
 //  img.style.position = "absolute";
 //  img.style.top = "10px";
 //  img.style.left = "160px";
-  
-  ParagraphElement p = new ParagraphElement();
-  
+    
   //p = document.querySelector("#component-type");
   //p.text = "${type}";
   
@@ -80,26 +95,5 @@ void main() {
 //  img.style.position = "absolute";
 //  img.style.top = "50px";
 //  img.style.left = "50px";
-
-
-  
-  p = document.querySelector("#current-value");
-  p.text = "Current = ${iFormated}";
-  p.style.top = "200px";
-  
-  p = document.querySelector("#resistance-value");
-  p.text = "Resistance = ${rFormated}";
-  p.style.top = "240px";
-  
-  p = document.querySelector("#voltage-value");
-  if (type == 'Battery') p.text = "Voltage = ${vFormated}";
-  else p.text = "Voltage Drop = ${vFormated}";
-  p.style.top = "280px";
-  
-  if (type == "Bulb") {
-    p = document.querySelector("#brightness-factor");
-    p.text = "Brightness Factor = ${bFormated}";
-    p.style.top = "320px";
-  }
-  
+ 
 }

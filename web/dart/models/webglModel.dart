@@ -3,7 +3,7 @@ part of SparkProject;
 
 class webglModel extends Model {
    
-  webglModel(String id) : super(id) {    
+  webglModel() : super() {    
     
   }
   
@@ -13,10 +13,16 @@ class webglModel extends Model {
   }
   
   void launchModel() {
-    IFrameElement frame = document.querySelector("div#model #model-frame");
+    IFrameElement frame = document.querySelector("#model-frame");
     frame.src = "../three.js/Spark-webgl.html";
+    
+    // getting the window of the iframe
+    var receiver = frame.contentWindow;
+    receiver.postMessage("hello Elli Golli, I love you!!", 'http://localhost:8080');
+    
     document.querySelector("#model").style.display = "block";
-    //document.querySelector("#help").style.display = "block";
     theApp.help.show();
   }
+  
+  void updateModel() {}
 }

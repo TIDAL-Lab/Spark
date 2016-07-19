@@ -32,13 +32,14 @@ import 'dart:js';
 part 'app.dart';
 part 'touch.dart';
 part 'toolbar.dart';
+
 part 'models/model.dart';
 part 'models/agentModel.dart';
 part 'models/lumpModel.dart';
 part 'models/webglModel.dart';
 part 'sounds.dart';
 part 'slider.dart';
-part 'help.dart';
+part 'models/help.dart';
 part 'lens.dart';
 part 'marker.dart';
 //part 'connectServer.dart';

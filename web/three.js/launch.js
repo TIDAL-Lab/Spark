@@ -10,6 +10,12 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
+window.addEventListener('message', function(event) {
+	if (event.origin !== 'http://localhost:8080') return;
+	console.log(event.data);
+	event.source.postMessage('hello back Elli Goli', event.origin);
+}, false);
+
 Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
 doParse('init');
 //listen for streamed messages

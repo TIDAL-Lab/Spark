@@ -507,6 +507,11 @@ I paused working on the branching effect and instead adding some new features to
 *** notes on 7/16/2016
 1. working on styling the watch-button
  
+*** notes on 7/18/2016
+1. changed the touch events (and also mouse events): 
+	one-fingered touch: pan 
+	two-fingered touch: zoom
+2. 
 
 ISSUES TO FIX LATER:
 

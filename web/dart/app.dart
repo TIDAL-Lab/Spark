@@ -28,7 +28,7 @@ part of SparkProject;
  * 3 --> webgl nonAR: circuit model on the same screen
  * 4 --> webgl AR
  */
-int CONDITION = 1;
+int CONDITION = 3;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
@@ -66,6 +66,7 @@ class App extends TouchManager {
    num centerX, centerY;
    
    int condition = CONDITION;
+   
       
    App() {
      theApp = this;
@@ -80,9 +81,11 @@ class App extends TouchManager {
      setScreen();
      
      registerEvents(canvas);     
-     window.onResize.listen((evt) => resizeScreen());
-     // Add the app itself as a touchable object 
-
+     window.onResize.listen((evt) => resizeScreen()); 
+     
+     // receiving message from the iframe
+     window.onMessage.listen((evt) => receiveMessage(evt));
+  
      circuit = new Circuit();
      components = new List<Component>();
      controlPoints = new List<ControlPoint>();
@@ -90,7 +93,8 @@ class App extends TouchManager {
      editionBar = new Toolbar(this, "div#edition-toolbar");
      
      
-     setConditions();
+     setConditions();     
+     
      // initiate delete box 
      deleteBoxImg = new ImageElement();
      deleteBoxImg.src = "images/trash-bin.png";
@@ -109,6 +113,10 @@ class App extends TouchManager {
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);    
      new Battery(centerX - 50, centerY - 50, centerX + 50, centerY - 50, voltage);     
+   }
+   
+   void receiveMessage(evt) {
+     window.console.log(evt.data);
    }
    
    void setScreen() {
@@ -170,7 +178,7 @@ class App extends TouchManager {
      switch ( condition ) {
        case 1:     // no electron model
          help.helpSrc = "images/helps-control/";
-         model = new lumpModel("div#model");
+         model = new lumpModel();
          SHOW_LENS = true;
          SHOW_MARKER = false;
          USE_SERVER = false;
@@ -179,14 +187,14 @@ class App extends TouchManager {
          break;
        case 2:
          help.helpSrc ="images/helps/";
-         model = new agentModel("div#model");
+         model = new agentModel();
          SHOW_LENS = true;
          SHOW_MARKER = false;
          USE_SERVER = false;
          break;
        case 3:
          help.helpSrc ="images/helps/";
-         model = new webglModel("div#model");
+         model = new webglModel();
          SHOW_LENS = false;
          SHOW_MARKER = false;
          USE_SERVER = true;
@@ -196,7 +204,7 @@ class App extends TouchManager {
          break;
        case 4:
          help.helpSrc ="images/helps/";
-         model = new lumpModel("div#model");
+         model = new lumpModel();
          // instantiate the JsAr tag
          marker = new Marker(centerX, centerY);
          SHOW_LENS = true;

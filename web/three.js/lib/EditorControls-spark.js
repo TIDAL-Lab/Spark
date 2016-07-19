@@ -5,6 +5,10 @@
  * @author WestLangley / http://github.com/WestLangley
  */
 
+//    Orbit - left mouse / touch: one finger move
+//    Zoom - middle mouse, or mousewheel / touch: two finger spread or squish
+//    Pan - right mouse, or arrow keys / touch: three finter swipe
+
 THREE.EditorControls = function ( object, domElement ) {
 
 	domElement = ( domElement !== undefined ) ? domElement : document;
@@ -170,7 +174,8 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		if ( event.button === 0 ) {
 
-			state = STATE.ROTATE;
+			//state = STATE.ROTATE;
+			state = STATE.PAN;
 
 		} else if ( event.button === 1 ) {
 
@@ -279,7 +284,9 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		switch ( event.touches.length ) {
 
-			case 1:
+			case 1: 
+				// EB: The Touch.pageX read-only property returns the X coordinate of the touch point relative to the viewport, including any scroll offset.
+
 				touches[ 0 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
 				touches[ 1 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
 				break;
@@ -319,18 +326,11 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		switch ( event.touches.length ) {
 
-			case 1:
+			case 1: // one-fingered touch: pan
 				touches[ 0 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
 				touches[ 1 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
-				scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
-				break;
+				//scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
 
-			case 2:
-				touches[ 0 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
-				touches[ 1 ].set( event.touches[ 1 ].pageX, event.touches[ 1 ].pageY, 0 );
-				distance = touches[ 0 ].distanceTo( touches[ 1 ] );
-				scope.zoom( new THREE.Vector3( 0, 0, prevDistance - distance ) );
-				prevDistance = distance;
 
 
 				var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
@@ -339,6 +339,23 @@ THREE.EditorControls = function ( object, domElement ) {
 				offset1.x = -offset1.x;
 
 				scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
+				break;
+
+			case 2: // two-fingered touch: zoom
+				touches[ 0 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
+				touches[ 1 ].set( event.touches[ 1 ].pageX, event.touches[ 1 ].pageY, 0 );
+				//scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
+				distance = touches[ 0 ].distanceTo( touches[ 1 ] );
+				scope.zoom( new THREE.Vector3( 0, 0, prevDistance - distance ) );
+				prevDistance = distance;
+
+
+				// var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
+				// var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
+				// offset0.x = -offset0.x;
+				// offset1.x = -offset1.x;
+
+				// scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
 
 				break;
 

@@ -23,15 +23,7 @@ part of SparkProject;
 
 class agentModel extends Model {
   
-  agentModel(String id) : super(id) { }
-  
-  void closeModel() {
-    IFrameElement frame = querySelector("div#model #model-frame");
-    frame.src = "";
-    document.querySelector("#model").style.display = "none";
-    this.component = null;
-    theApp.help.close();
-  }
+  agentModel() : super() { }
   
   void launchModel(Component c) { 
     this.component = c;
@@ -39,15 +31,21 @@ class agentModel extends Model {
     String r = c.resistance.toString();
     String v = c.voltageDrop.toString();
     
-    IFrameElement frame = document.querySelector("div#model #model-frame");
+    IFrameElement frame = document.querySelector("#model-frame");
     if (c is Wire) frame.src = "NetTango-models/wire.html?i=${i}&r=${r}&v=${v}";
     if (c is Resistor || c is Bulb) frame.src = "NetTango-models/resistor.html?i=${i}&r=${r}&v=${v}";
-    if (c is Battery) frame.src = "probe.html?i=${i}&r=${r}&v=${v}&type=${c.type}";
-//    if (c is Wire) frame.src = "http://spark-project.appspot.com/Wire?i=${i}&r=${r}&v=${v}";
-//    else frame.src = "http://spark-project.appspot.com/Resistor?i=${i}&r=${r}&v=${v}";    
+    if (c is Battery) frame.src = "lumpModel.html?i=${i}&r=${r}&v=${v}&type=${c.type}";
+    
     document.querySelector("#model").style.display = "block";
-    //document.querySelector("#help").style.display = "block";
     theApp.help.show();
+  }
+  
+  void closeModel() {
+    IFrameElement frame = querySelector("#model-frame");
+    frame.src = "";
+    document.querySelector("#model").style.display = "none";
+    this.component = null;
+    theApp.help.close();
   }
   
   /** update the model if it is open 

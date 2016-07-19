@@ -103,18 +103,21 @@ body {
 }
 .page-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  left: 180px;
-  width: 400px;
-  height: 60px;
-  border: none;
+  height: 40px;
   position: absolute;
+  margin: -40px -100px;
+  width: 200px;
+  border: none;
+  padding: none;
   outline: none;
-  display: inline;
+  display: block;
 }
 
 #page0-button {
   background: url("../images/buttons/page0-50.png") 0 0 no-repeat;
-  bottom: 260px;
+  background-size: 100%;
+  top: 50%;
+  left: 50%;
 }
 #page0-button:active
  { 
@@ -125,7 +128,9 @@ body {
 
 #page1-button {
   background: url("../images/buttons/page1-50.png") 0 0 no-repeat;
-  bottom: 200px;
+  background-size: 100%;
+  top: 65%;
+  left: 50%;
 }
 #page1-button:active
  { 
@@ -136,7 +141,9 @@ body {
  
 #page2-button {
   background: url("../images/buttons/page2-50.png") 0 0 no-repeat;
-  bottom: 140px;
+  background-size: 100%;
+  top: 80%;
+  left: 50%;
 }
 
 #page2-button:active
@@ -148,7 +155,9 @@ body {
  
 #page3-button {
   background: url("../images/buttons/page3-50.png") 0 0 no-repeat;
-  bottom: 80px;
+  background-size: 100%;
+  top: 95%;
+  left: 50%;
 }
 #page3-button:active
  { 

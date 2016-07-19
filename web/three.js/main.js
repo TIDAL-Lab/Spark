@@ -409,19 +409,19 @@ function watchElectron() {
 		scene.add(halo);
 		scene.add(lines);
 
-		// change the style of watch-button to be active
-		//button = document.querySelector("#watch-button");
-		//button.style.background = "url('../../images/buttons/watch2-active.png') 0 0 no-repeat"; 
-		//button.style.backgroundSize = "100%";
+		//change the style of watch-button to be active
+		button = document.querySelector("#watch-button");
+		button.style.background = "url('../../images/buttons/watch2-active.png') 0 0 no-repeat"; 
+		button.style.backgroundSize = "100%";
 		
 	}
 	else {
 		scene.remove(lines);
 		scene.remove(halo);
 
-		// change the style of watch-button to be normal
-		//button = document.querySelector("#watch-button");
-		//button.style.background = "url('../../images/buttons/watch2.png') 0 0 no-repeat / 100%"; // 100% is the size
+		//change the style of watch-button to be normal
+		button = document.querySelector("#watch-button");
+		button.style.background = "url('../../images/buttons/watch2.png') 0 0 no-repeat / 100%"; // 100% is the size
 	}
 	watch = !watch;
 	

@@ -73,22 +73,25 @@ class Help {
     div.style.display = "block";
     ButtonElement button = document.querySelector("#help-button");
     button.style.display = "none";
-    String type = theApp.model.component.type;
-    p.text = "This is a " + type;
-    switch (type) {
-      case "Battery":
-        p2.text = "Battery produces energy (voltage) for a circuit";
-        break;
-      case "Wire":
-        p2.text = "Wire is a conductive material that electrons can move through easily";
-        break;
-      case "Bulb":
-        p2.text = "Light bulb is a type of a resistor that can emit light";
-        break;
-      case "Resistor":
-        p2.text = "A resistor is a conductive material that can slow down the movement of electrons in a circuit";
-        break;
+    if (theApp.model.component != null) {
+      String type = theApp.model.component.type;
+      p.text = "This is a " + type;
+      switch (type) {
+        case "Battery":
+          p2.text = "Battery produces energy (voltage) for a circuit";
+          break;
+        case "Wire":
+          p2.text = "Wire is a conductive material that electrons can move through easily";
+          break;
+        case "Bulb":
+          p2.text = "Light bulb is a type of a resistor that can emit light";
+          break;
+        case "Resistor":
+          p2.text = "A resistor is a conductive material that can slow down the movement of electrons in a circuit";
+          break;
+      }      
     }
+
   }
   
   void showPage(num page) {
