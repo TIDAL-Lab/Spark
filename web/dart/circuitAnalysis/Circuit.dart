@@ -193,9 +193,14 @@ class Circuit {
     //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
     myObj = new JsObject.jsify(myObj);
        
-    // call the "doDeleteParse method on myObj (the code is in index.html)
-    var deleteParse = new JsObject(context['deleteParse'],[myObj]); // instantiate a JS "deleteParse" object
-    deleteParse.callMethod('doDeleteParse'); // call its method "doDeleteParse"
+//    // call the "doDeleteParse method on myObj (the code is in index.html)
+//    var deleteParse = new JsObject(context['deleteParse'],[myObj]); // instantiate a JS "deleteParse" object
+//    deleteParse.callMethod('doDeleteParse'); // call its method "doDeleteParse"
+    
+    var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
+    data.callMethod('doSendData'); // call its method "doSendData"
+    print("object sent");
+    print(myObj);
 
   }
   

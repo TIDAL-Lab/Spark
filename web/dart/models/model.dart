@@ -17,6 +17,7 @@ class Model {
   }
   
   void closeModel() { }
+  void updateModel() { }
   void reset() {
     
   }

@@ -165,7 +165,7 @@ class ControlPoint implements Touchable {
   bool containsTouch(Contact event) {
     num tx = event.touchX;
     num ty = event.touchY;
-    return (tx >= x - 13 && tx <= x + 13 && ty >= y - 13 && ty <= y + 13);
+    return (tx >= x - 24 && tx <= x + 24 && ty >= y - 24 && ty <= y + 24);
   }
 
   bool touchDown(Contact event) {

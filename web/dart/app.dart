@@ -32,8 +32,8 @@ int CONDITION = 3;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
-num CANVAS_RATIO = 0.55;
-num HELP_RATIO = 0.40;
+num CANVAS_RATIO = 0.65;
+num HELP_RATIO = 0.45;
 
 class App extends TouchManager {
 
@@ -108,11 +108,17 @@ class App extends TouchManager {
      
      // instantiate lens and help objects
      if (SHOW_LENS) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
+
      
+          
      // create the first battery
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);    
-     new Battery(centerX - 50, centerY - 50, centerX + 50, centerY - 50, voltage);     
+     new Battery(centerX - 50, centerY - 50, centerX + 50, centerY - 50, voltage); 
+     
+     if (condition == 3) theApp.model.launchModel();   // TEMP
+     
+     print("end of app");
    }
    
    void receiveMessage(evt) {
@@ -277,9 +283,10 @@ class App extends TouchManager {
      ctx.strokeRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
      ctx.fillRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
 
-     num boxW = deleteBoxImg.width / 7;
-     num boxH = deleteBoxImg.height / 7;
-     ctx.drawImageScaled(deleteBoxImg, 2 * canvasMargin, 2*canvasMargin, boxW, boxH);
+     num boxW = deleteBoxImg.width / 6;
+     num boxH = deleteBoxImg.height / 6;
+//     ctx.drawImageScaled(deleteBoxImg, 3 * canvasMargin, 3*canvasMargin, boxW, boxH);
+     ctx.drawImageScaled(deleteBoxImg, 5, 5, boxW, boxH);
      
 
      

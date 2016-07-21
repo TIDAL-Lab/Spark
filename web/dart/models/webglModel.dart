@@ -3,7 +3,8 @@ part of SparkProject;
 
 class webglModel extends Model {
    
-  webglModel() : super() {    
+  webglModel() : super() {  
+    //launchModel();
     
   }
   
@@ -22,6 +23,12 @@ class webglModel extends Model {
     
     document.querySelector("#model").style.display = "block";
     theApp.help.show();
+    
+    if (USE_SERVER) {
+      print("launch model");
+      //theApp.circuit.solve();
+      theApp.circuit.sendDataToServer();
+    }
   }
   
   void updateModel() {}

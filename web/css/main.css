@@ -103,10 +103,10 @@ body {
 }
 .page-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  height: 40px;
+  height: 60px;
   position: absolute;
-  margin: -40px -100px;
-  width: 200px;
+  margin: -60px -150px;
+  width: 300px;
   border: none;
   padding: none;
   outline: none;

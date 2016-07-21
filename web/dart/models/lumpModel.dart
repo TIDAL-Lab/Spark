@@ -36,7 +36,7 @@ class lumpModel extends Model {
       
       IFrameElement frame = document.querySelector("div#model #model-frame");
       String frameSource;
-      frameSource = "probe.html?i=${i}&r=${r}&v=${v}&type=${c.type}";
+      frameSource = "lumpModel.html?i=${i}&r=${r}&v=${v}&type=${c.type}";
       if (!frame.src.endsWith(frameSource)) frame.src = frameSource; // update only if it is updated!
     }
   }

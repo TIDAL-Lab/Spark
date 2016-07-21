@@ -177,6 +177,25 @@ class TouchManager {
       }
     }
   }
+  
+//  void _touchDown(var tframe) {
+//    bool flag = false;
+//    for (Touch touch in tframe.changedTouches) {
+//      if (flag) {
+//        print("test");
+//        return;
+//      }
+//      Contact t = new Contact.fromTouch(touch, parent);
+//      Touchable target = findTouchTarget(t);
+//      if (target != null) {
+//        if (target.touchDown(t)) {
+//          touch_bindings[t.id] = target;
+//          flag = true;
+//          print("test2");
+//        }
+//      }
+//    }
+//  }
    
    
   void _touchUp(var tframe) {

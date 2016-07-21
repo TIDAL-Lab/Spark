@@ -511,7 +511,9 @@ I paused working on the branching effect and instead adding some new features to
 1. changed the touch events (and also mouse events): 
 	one-fingered touch: pan 
 	two-fingered touch: zoom
-2. 
+2. I removed sending object to parse for condition = 3 because it's not necessary
+	instead, using pubnub I directly send the json object to the webgl model
+	
 
 ISSUES TO FIX LATER:
 
