@@ -3,8 +3,14 @@ part of SparkProject;
 
 class webglModel extends Model {
    
-  webglModel() : super() {  
-    //launchModel();
+  webglModel() : super() { 
+    IFrameElement frame = document.querySelector("#model-frame");
+    frame.src = "../three.js/Spark-webgl.html";
+    theApp.circuit.solve();
+    
+    // getting the window of the iframe
+    var receiver = frame.contentWindow;
+    receiver.postMessage("hello model iframe!!", 'http://localhost:8080');
     
   }
   
@@ -15,11 +21,11 @@ class webglModel extends Model {
   
   void launchModel() {
     IFrameElement frame = document.querySelector("#model-frame");
-    frame.src = "../three.js/Spark-webgl.html";
+    //frame.src = "../three.js/Spark-webgl.html";
     
     // getting the window of the iframe
     var receiver = frame.contentWindow;
-    receiver.postMessage("hello Elli Golli, I love you!!", 'http://localhost:8080');
+    receiver.postMessage("hello model iframe!!", 'http://localhost:8080');
     
     document.querySelector("#model").style.display = "block";
     theApp.help.show();
@@ -32,4 +38,8 @@ class webglModel extends Model {
   }
   
   void updateModel() {}
+  
+  void reset() {
+    launchModel();
+  }
 }

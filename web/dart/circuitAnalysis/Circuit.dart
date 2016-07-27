@@ -77,7 +77,7 @@ class Circuit {
     }
     
     updateComponents();
-    theApp.model.updateModel();
+    if (theApp.condition != 3) theApp.model.updateModel();
     if (USE_SERVER) {
       sendDataToServer();
     }    
@@ -199,8 +199,6 @@ class Circuit {
     
     var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
     data.callMethod('doSendData'); // call its method "doSendData"
-    print("object sent");
-    print(myObj);
 
   }
   

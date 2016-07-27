@@ -514,6 +514,20 @@ I paused working on the branching effect and instead adding some new features to
 2. I removed sending object to parse for condition = 3 because it's not necessary
 	instead, using pubnub I directly send the json object to the webgl model
 	
+*** notes on 7/21/2016
+1. I worked on sending data for condition 3, it is working fine, but there is an issue with initiating the model,
+	which I could not fix. I cannot figure out why it does not properly initiates the model. 
+	DO IT LATER!
+	ISSUE: weird launchmodel() issue, it does not first send data, but with the button it does!!!!
+2. working on the electrons movement in three.js model.
+
+3. working on the resistor container
+	issue: the current code renders the resistor as a CSG shape with two intersecting cones. for some reason,
+	it seems that adding resistors slows down the movement of electrons.
+	TEMP: I changed the container shape back to regular cylinder
+	Working on the ions instead.
+
+	
 
 ISSUES TO FIX LATER:
 

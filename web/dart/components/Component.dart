@@ -72,8 +72,8 @@ class Component implements Touchable {
     //setARImgSrc();
     
     theApp.addTouchable(this);
-    theApp.components.add(this);
-    theApp.circuit.addNewBranch(this);
+//    theApp.components.add(this);
+//    theApp.circuit.addNewBranch(this);
   }
   
   void setSlider () {   

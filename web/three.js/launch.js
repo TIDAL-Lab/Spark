@@ -10,11 +10,14 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 var myObj;
+
+
 window.addEventListener('message', function(event) {
 	if (event.origin !== 'http://localhost:8080') return;
-	console.log(event.data);
-	event.source.postMessage('hello back Elli Goli', event.origin);
+	console.log(event.data);  // this prints "hello model iframe"
+	event.source.postMessage("hello back", event.origin);
 }, false);
+
 
 doParse('init');
 
@@ -28,12 +31,12 @@ pubnub.subscribe({
     channel: 'ebz',
     message: function(m){
     	if (m == "init") {
-    		console.log("init webgl");
+    		//console.log("init webgl");
     		doParse('init');
     	}
     	else {
     		myObj = m;
-    		console.log("received object:" + myObj);
+    		//console.log("received object:" + myObj);
  			doParse('update');	
     	}
 

@@ -24,23 +24,21 @@ var batteryImg, resistorImg;
 var components = []; // an array of components
 var electrons, electronGeometry, electronMaterial;
 var raycaster;
-var compositeMesh;
+//var compositeMesh;
 
-var clock = new THREE.Clock();
 var ticks = 0;
 
 
-
-
-
-var updateFlag = false;
-var markerDetectedFlag = false;
 var markerRoot;  // the parent object of all the components and electrons for AR transformations
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 
-var mouseFlag = 0; // this flag is used to distinguish a mouse drag from a mouse click
+
+
+// FLAGS
+var updateFlag = false;
+var markerDetectedFlag = false;
 
 // COLORS:
 var red = 0xD11919;
@@ -52,7 +50,9 @@ var midnightBlue = 0x000099;
 var backgroundBlue = 0x337586;
 var orange = 0xFF9900;
 var darkOrange = 0xFF6600;
+var lightGray = 0xB2B2B2;
 
+var clickedComponent = null;   // the component that is tapped on to show information
 
 function doInit() {	
 	init();
@@ -68,21 +68,13 @@ function init() {
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
-	if (!ArFlag) {
+	if (ArFlag) { camera = new THREE.Camera(); }
+	else {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
-		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
-		camera.position.z = 700;
-	}
+		camera.position.z = 500;	}
 
-	if (ArFlag) {
-		camera = new THREE.Camera();
-	}
-	
-	
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
-	
-	//clock = new THREE.Clock();  //the clock automatically starts when instantiated
 	
 	THREE.ImageUtils.crossOrigin = 'anonymous';  	// enables using images from the image folder
 
@@ -123,7 +115,7 @@ function initComponents() {
 		components[k].updateJunctions();
 	}
 	
-	if (!ArFlag) electronSize = 10;
+	if (!ArFlag) electronSize = 8;
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: backgroundBlue , transparent: true } );
 	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
@@ -156,8 +148,6 @@ function animate() {
 
 	requestAnimationFrame( animate );
 	render(); 
-	//deviceControls.update();
-	//controls.update();
 }
 
 function render() {
@@ -166,17 +156,6 @@ function render() {
     }
  	renderer.autoClear = false;
 	renderer.clear();
-	var delta = clock.getDelta();
-	var time = clock.getElapsedTime(); // time is in seconds
-	//console.log(time);
-/*	for (i=0; i < components.length; i++) { 
-		if ( components[i].ammeter != null ) {
-			var delta = clock.getDelta();
-			var time = clock.getElapsedTime(); // time is in seconds
-			// console.log(delta);
-
-		}
-	}*/
 	/* order of rendering matters: first inputScene, then 3D scene overlayed on the inputScene */
 	if (ArFlag) renderer.render(inputScene, inputCamera);
 	/* if it is no-AR condition, render the scene; but if it is Ar condition, 
@@ -388,6 +367,7 @@ function displayGrid() {
 }
 
 var stop = false;
+
 function keepMoving() {
 	stop = !stop;   // the stop flag is used in the rendering function as a condition for running updateElectrons()
 }

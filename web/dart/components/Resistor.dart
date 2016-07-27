@@ -34,7 +34,9 @@ class Resistor extends Component {
     this.slider.style.display = "block";
     setSlider();
     //addSlider(x0, y0);
-    //theApp.circuit.addNewBranch(this); 
+
+    theApp.components.add(this);
+    theApp.circuit.addNewBranch(this);
   }
   
   CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {

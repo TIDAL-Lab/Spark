@@ -38,32 +38,30 @@ num HELP_RATIO = 0.45;
 class App extends TouchManager {
 
    CanvasRenderingContext2D ctx;
-   CanvasElement canvas;
-   
-   CanvasRenderingContext2D ctx2;
-   CanvasElement canvas2;
-   
+   CanvasElement canvas;   
 
    int width;
    int height;
   
    String id = "circuit";
-   List<Component> components;
-   List<ControlPoint> controlPoints;
-   Circuit circuit;
+   List<Component> components = new List<Component>();
+   List<ControlPoint> controlPoints = new List<ControlPoint>();
+   Circuit circuit = new Circuit();
    Toolbar selectionBar; 
    Toolbar editionBar;
    Model model;
    
    Component genericSliderComponent; //the component that is tapped on to change its value
+   Component webglComponent = null;
    Help help; // the help text
-   Lens lens; // the magnifying glass object
+   Lens2 lens; // the magnifying glass object
    ImageElement deleteBoxImg;   
    int canvasMargin = 0;
    Rectangle workingBox; // the box for building circuits
    //Rectangle containerBox;
    Marker marker;
    num centerX, centerY;
+   num frameCenterX, frameCenterY, frameWidth, frameHeight;
    
    int condition = CONDITION;
    
@@ -71,34 +69,24 @@ class App extends TouchManager {
    App() {
      theApp = this;
      
+     // receiving message from the iframe
+     window.onMessage.listen((evt) => receiveMessage(evt));
+     
      // size of the monitor 
      canvas = document.querySelector("#foreground");
      ctx = canvas.getContext("2d");
      
-     //canvas2 = document.querySelector("#help-canvas");
-     //ctx2 = canvas2.getContext("2d");
+     registerEvents(canvas);     
+     window.onResize.listen((evt) => resizeScreen()); 
+       
      help = new Help();
      setScreen();
      
-     registerEvents(canvas);     
-     window.onResize.listen((evt) => resizeScreen()); 
-     
-     // receiving message from the iframe
-     window.onMessage.listen((evt) => receiveMessage(evt));
-  
-     circuit = new Circuit();
-     components = new List<Component>();
-     controlPoints = new List<ControlPoint>();
      selectionBar = new Toolbar(this, "div#selection-toolbar");
      editionBar = new Toolbar(this, "div#edition-toolbar");
      
      
      setConditions();     
-     
-     // initiate delete box 
-     deleteBoxImg = new ImageElement();
-     deleteBoxImg.src = "images/trash-bin.png";
-     deleteBoxImg.onLoad.listen((event) { draw(); });
      
      //set the working box
      CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
@@ -106,23 +94,62 @@ class App extends TouchManager {
      centerX = workingBox.width / 2;
      centerY = workingBox.height / 2;
      
-     // instantiate lens and help objects
-     if (SHOW_LENS) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
-
+     // set the frame
+     frameCenterX = workingBox.width/2;
+     frameCenterY = workingBox.height/2;
+     frameWidth = 450;
+     frameHeight = 350;
      
-          
+     // initiate delete box 
+     deleteBoxImg = new ImageElement();
+     deleteBoxImg.src = "images/trash-bin.png";
+     deleteBoxImg.onLoad.listen((event) { draw(); });
+     
+     // instantiate lens and help objects
+     if (SHOW_LENS) {
+       //if (condition == 1) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
+       if (condition == 3) lens = new Lens2(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
+     }
+       
      // create the first battery
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);    
-     new Battery(centerX - 50, centerY - 50, centerX + 50, centerY - 50, voltage); 
+     new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage); 
      
-     if (condition == 3) theApp.model.launchModel();   // TEMP
-     
-     print("end of app");
+     if (condition == 3) {  // because condition 1 & 2 has input variables for launchmodel(component)
+       (model as webglModel).launchModel();  
+       print("condition 3");
+     }
    }
    
    void receiveMessage(evt) {
-     window.console.log(evt.data);
+     window.console.log('circuit received message');
+     if (evt.data is int) {         
+       int index = evt.data;
+       Component c = components[index];
+       theApp.webglComponent = c;
+       theApp.help.show();
+       //print("V: ${c.voltageDrop} I: ${c.current} R: ${c.resistance}");
+     }
+     else if (evt.data is String) {
+       print(evt.data);
+     }
+     else if (evt.data is List) {  // evt.data is a JSArray from touch controls
+       if (evt.data.length == 1) { // zoom data
+         var delta = evt.data[0] * 0.005;
+         //frameWidth *= (1 + delta);
+         //frameHeight *= (1 + delta);
+         //repaint();
+       }
+       else { //evt.data.length is 2 --> pan data
+         //print(evt.data.runtimeType.toString());
+         frameCenterX += evt.data[0]; 
+         frameCenterY -= evt.data[1];
+         repaint();
+       }
+
+
+     }
    }
    
    void setScreen() {
@@ -188,6 +215,8 @@ class App extends TouchManager {
          SHOW_LENS = true;
          SHOW_MARKER = false;
          USE_SERVER = false;
+         //CANVAS_RATIO = 0.65;
+         //HELP_RATIO = 0.1;
          document.querySelector("#lens-button").style.background = "transparent";
          document.querySelector("#page0-button").style.display = "none";
          break;
@@ -201,7 +230,7 @@ class App extends TouchManager {
        case 3:
          help.helpSrc ="images/helps/";
          model = new webglModel();
-         SHOW_LENS = false;
+         SHOW_LENS = true;
          SHOW_MARKER = false;
          USE_SERVER = true;
          CANVAS_RATIO = 0.55;
@@ -245,8 +274,13 @@ class App extends TouchManager {
        lens.y = canvas.height/2; // fix later
      }
 
-//     centerX = workingBox.width/2;
-//     centerY = workingBox.height/2;
+     centerX = workingBox.width/2;
+     centerY = workingBox.height/2;
+     
+     frameCenterX = workingBox.width/2;
+     frameCenterY = workingBox.height/2;
+     frameWidth = 450;
+     frameHeight = 350;
      
      // reset the sliders
      InputElement slider1 = document.querySelector("#battery-slider");
@@ -283,9 +317,18 @@ class App extends TouchManager {
      ctx.strokeRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
      ctx.fillRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
 
+     // draw the frame
+     if (condition == 3) {
+       ctx.strokeStyle = 'yellow';
+       ctx.lineWidth = 2;
+       ctx.fillStyle = "rgba(255,255,255,0.2)";
+  
+       ctx.strokeRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
+       ctx.fillRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
+     }
+     
      num boxW = deleteBoxImg.width / 6;
      num boxH = deleteBoxImg.height / 6;
-//     ctx.drawImageScaled(deleteBoxImg, 3 * canvasMargin, 3*canvasMargin, boxW, boxH);
      ctx.drawImageScaled(deleteBoxImg, 5, 5, boxW, boxH);
      
 

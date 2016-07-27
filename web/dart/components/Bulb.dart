@@ -39,7 +39,8 @@ class Bulb extends Component  {
     
     isOn = false;
     
-    //theApp.circuit.addNewBranch(this); 
+    theApp.components.add(this);
+    theApp.circuit.addNewBranch(this);
     
   }
   

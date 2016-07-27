@@ -20,14 +20,14 @@
 */
 part of SparkProject;
 
-class Lens implements Touchable {
+class Lens2 implements Touchable {
 
   num x, y;
   num iw, ih;
   num dragX, dragY;
   ImageElement img;
 
-  Lens(num x, num y) {
+  Lens2(num x, num y) {
     this.x = x;
     this.y = y;
     img = new ImageElement();
@@ -61,15 +61,20 @@ class Lens implements Touchable {
       for (Component c in theApp.components) {
         if (onComponent(c, mx, my)) {
           //if (c is Wire || c is Resistor || c is Bulb || c is Battery) {
-            (theApp.model as lumpModel).launchModel(c);
+            //(theApp.model as lumpModel).launchModel(c); // ADD as agentModel too!
+            theApp.webglComponent = c;
+            theApp.help.show();
             return;
           //}
         }
+        
       }
+      theApp.webglComponent = null;
+      theApp.help.show();
   
 //      document.query("#model").style.display = "none";
 //      theApp.model.component = null;
-      theApp.model.closeModel();
+      //theApp.model.closeModel();
     }
   }
   

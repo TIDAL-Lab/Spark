@@ -41,6 +41,7 @@ part 'sounds.dart';
 part 'slider.dart';
 part 'models/help.dart';
 part 'lens.dart';
+part 'lens2.dart';
 part 'marker.dart';
 //part 'connectServer.dart';
 part 'circuitAnalysis/Circuit.dart';
@@ -62,8 +63,6 @@ App theApp;
 void main() {
   initiate();
   new App();
-  
-
 }
 
 void initiate() {

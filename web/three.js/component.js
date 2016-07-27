@@ -10,7 +10,7 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var ionGeometry = new THREE.SphereGeometry( 5, 8, 8 );
+var ionGeometry = new THREE.SphereGeometry( 4, 16, 16 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 var offsetZ = 0.00;
@@ -28,7 +28,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   	this.electronCount; // Change it later
   	this.ionCount; //Change it later
   	this.l = Math.sqrt((endX-startX)*(endX-startX)+(endY-startY)*(endY-startY));
-  	this.w = 70;
+  	this.w = 110;
   	this.ions = [];
   	this.obstacles = [];
   	this.container;
@@ -40,8 +40,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
    	this.ammeter;
    	this.measureOn = false;
    	this.text2;
-   	this.time = clock.getElapsedTime();
-   	//this.time2 = 0;
 
   	if (this.compType == "Wire") {
   		//this.electronCount = 1;
@@ -51,6 +49,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		this.electronCount = 0;
   	}
   	else { 		// Resistor or Bulb
+  		//this.electronCount = 1;
   		this.electronCount = 15;
   	}
 
@@ -94,17 +93,41 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var containerGeometry;
 		var containerMaterial;
 		if (this.compType == "Resistor" || this.compType == "Bulb") {
-			containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
+			containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
+			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
 
-			var coneGeometry1 = new THREE.CylinderGeometry(this.w/2, this.w/10, this.l, 64, 64, true);
-			var coneGeometry2 = new THREE.CylinderGeometry(this.w/10, this.w/2, this.l, 64, 64, true);
-			//coneGeometry1.rotateY(10);
-			//coneGeometry2.translate(0,-this.l/2,0);
-			var coneBSP1 = new ThreeBSP(coneGeometry1);
-			var coneBSP2 = new ThreeBSP(coneGeometry2);
-			var union = coneBSP1.union(coneBSP2);
-			this.container = new THREE.Mesh( union.toGeometry(), containerMaterial);
-			this.container.geometry.computeFaceNormals();
+			// containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
+
+			// var cone1 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/2, this.w/10, this.l, 16, 16, true), containerMaterial);
+			// var cone2 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/10, this.w/2, this.l, 16, 16, true), containerMaterial);
+
+			// //coneGeometry1.rotateY(10);
+			// //cone2.position.y = -100;
+			// var coneBSP1 = new ThreeBSP(cone1);
+			// var coneBSP2 = new ThreeBSP(cone2);
+			// var union = coneBSP1.union(coneBSP2);
+			// this.container = union.toMesh(containerMaterial);
+
+/*			// New geometry idea
+			containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
+			var cylinder1 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/2, this.w/2, this.l/5, 16, 16, false), containerMaterial);
+			var cylinder2 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/2, this.w/2, this.l/5, 16, 16, false), containerMaterial);
+			var cylinder3 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/4, this.w/4, 3 * this.l/5, 16, 16, true), containerMaterial);
+			cylinder1.position.y = 2 * this.l/5;
+			cylinder2.position.y = - 2 * this.l/5;
+
+			var BSP1 = new ThreeBSP(cylinder1);
+			var BSP2 = new ThreeBSP(cylinder2);
+			var BSP3 = new ThreeBSP(cylinder3);
+			var union = BSP3.union(BSP2);
+			union = union.union(BSP1);
+			this.container = union.toMesh(containerMaterial);*/
+
+
+
+			//this.container = new THREE.Mesh( union.toGeometry(), containerMaterial);
+			//this.container.geometry.computeFaceNormals();
 			//var bsp = new ThreeBSP( mesh1 ); 
 			//bsp = bsp.union( new ThreeBSP( mesh2 ) ); // unit it with the other cone
 			//this.container = bsp.toMesh(containerMaterial);
@@ -115,17 +138,17 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			containerMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
 			var plusText = makeTextSprite( "+", 
-				{ fontsize: 84, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
-			plusText.position.set(-this.w/2, -this.l/2, 0);
+				{ fontsize: 150, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
+			plusText.position.set(-this.w*0.1, -this.l*0.1, 0);
 			var minusText = makeTextSprite( "-", 
-				{ fontsize: 84, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
-			minusText.position.set(-this.w/2, this.l*0.8, 0);
+				{ fontsize: 150, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
+			minusText.position.set(-this.w*0.1, this.l*0.5, 0);
 			this.container.add(plusText);
 			this.container.add(minusText);
 		} 
 		else {   // it's a wire
 			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
-			containerMaterial = new THREE.MeshBasicMaterial( { color: 0xB2B2B2 } );
+			containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
 
 			// var secondLayer =  new THREE.Mesh( containerGeometry, containerMaterial );
@@ -280,18 +303,21 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	this.createIons = function() {		
 		var count = 0;
-		var d = 30; // d is inverse of density of ions which is inversly proportional to resistance		
+		var d2 = 50;
+		var d = 0; // d is inverse of density of ions which is inversly proportional to resistance		
 		if (this.compType == "Resistor" || this.compType == "Bulb") {
-			var d = 30 - 4 * this.R;
+			var d2 = 20;
+			var d = this.R + 1;
 		}
-		//var d = 30 - 5 * 1;
-		for ( i = 1; i < this.l/d; i ++ ) {
-			for (j = 1; j < this.w/d; j++) {
-				var pos;
-				if ((i+j) % 3 == 0) {
+		var halfL = Math.round(this.l/2);
+		var halfW = Math.round(this.w/2);
+		
+		for ( i = - halfL; i <= halfL; i++) {
+			for ( j = - halfW; j <= halfW; j++) {
+				if (i % d2 == 0 & j % d2 == 0 & (i + j) % (20*(5-d)) == 0 ) {
 					pos = new THREE.Vector3();
-					pos.y = -this.l/2 + i * d; // I switched the order of x & y (from BoxGeometry)
-					pos.x = (-this.w/2 + j * d)*(1-0.12*(1+this.R));
+					pos.y = i; // I switched the order of x & y (from BoxGeometry)
+					pos.x = j;
 					pos.z = offsetZ;
 
 					var ion = new THREE.Mesh( ionGeometry, ionMaterial );
@@ -299,8 +325,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 					this.ions.push(ion);
 					this.container.add(ion);
 					count++;
-				}				
-
+				}
 			}
 		}
 
@@ -449,12 +474,33 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	}
 
-	this.clicked = function() {
+	this.clicked2 = function() {
 		if ( this.ammeter.visible == false ) {
 			this.ammeter.visible = true;
 		}
 		else {
 			this.ammeter.visible = false;
+		}
+	}
+
+
+	this.clicked = function() {
+		if (this == clickedComponent) { // if this is the same component as clicked last time
+			clickedComponent = null;
+			if (this.compType == "Battery") { this.container.material.color.set(darkGreen); }
+			else { this.container.material.color.set(lightGray); }
+			return;
+		}
+		else {
+    		var receiver = window.parent;
+			receiver.postMessage(this.ID, 'http://localhost:8080');
+
+			if (clickedComponent != null) {
+				if (clickedComponent.compType == "Battery") { clickedComponent.container.material.color.set(darkGreen); }
+				else { clickedComponent.container.material.color.set(lightGray); }
+			}
+			this.container.material.color.set(darkOrange);
+			clickedComponent = this;
 		}
 	}
 

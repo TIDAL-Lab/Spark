@@ -65,6 +65,8 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		object.position.add( delta );
 		center.add( delta );
+		var message = [delta.x, delta.y];
+		window.parent.postMessage(message, 'http://localhost:8080');
 
 		scope.dispatchEvent( changeEvent );
 
@@ -81,6 +83,10 @@ THREE.EditorControls = function ( object, domElement ) {
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
 		object.position.add( delta );
+
+		//console.log(delta);
+		var message = [delta.z];
+		window.parent.postMessage(message, 'http://localhost:8080');
 
 		scope.dispatchEvent( changeEvent );
 
@@ -136,6 +142,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		//console.log(components[0].force);
 
 	};
+
 
 	this.show = function () {    // to show measures of a component
 		//renderer.setClearColor ( 0x330086 );
@@ -329,10 +336,12 @@ THREE.EditorControls = function ( object, domElement ) {
 			case 1: // one-fingered touch: pan
 				touches[ 0 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
 				touches[ 1 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
+				
+
+				// Rotate
 				//scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
 
-
-
+				// Pan
 				var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
 				var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
 				offset0.x = -offset0.x;

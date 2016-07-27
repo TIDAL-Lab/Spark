@@ -24,6 +24,7 @@ class Help {
   ImageElement img;
   ParagraphElement p;
   ParagraphElement p2;
+  ParagraphElement p3;
   int page;
   String helpSrc;  // is set in setConditions in App class
   
@@ -36,6 +37,9 @@ class Help {
     
     p2 = new ParagraphElement();
     p2 = document.querySelector("#description");
+    
+    p3 = new ParagraphElement();
+    p3 = document.querySelector("#valuesText");
     
     var button = document.querySelector("#page0-button");
     if (button != null) button.onClick.listen((e) => showPage(0));
@@ -74,7 +78,8 @@ class Help {
     ButtonElement button = document.querySelector("#help-button");
     button.style.display = "none";
     if (theApp.model.component != null) {
-      String type = theApp.model.component.type;
+      Component c = theApp.model.component;
+      String type = c.type;
       p.text = "This is a " + type;
       switch (type) {
         case "Battery":
@@ -89,7 +94,44 @@ class Help {
         case "Resistor":
           p2.text = "A resistor is a conductive material that can slow down the movement of electrons in a circuit";
           break;
-      }      
+      }
+    }
+    
+    else if (theApp.webglComponent != null) {
+
+      Component c = theApp.webglComponent;
+      String type = c.type;
+      var iFormated = c.current.toStringAsPrecision(3);
+      var vFormated = c.voltageDrop.toStringAsPrecision(3);
+      var rFormated = c.resistance.toStringAsPrecision(1);
+      var brightness = c.current/0.3;
+      var bFormated = brightness.toStringAsPrecision(2);
+      
+      p.text = "This is a " + type;
+      switch (type) {
+        case "Battery":
+          p2.text = "Battery produces energy (voltage) for a circuit";
+          break;
+        case "Wire":
+          p2.text = "Wire is a conductive material that electrons can move through easily";
+          break;
+        case "Bulb":
+          p2.text = "Light bulb is a type of a resistor that can emit light";
+          break;
+        case "Resistor":
+          p2.text = "A resistor is a conductive material that can slow down the movement of electrons in a circuit";
+          break;
+      }
+      if (c.type == "Battery") p3.text = "Current=${iFormated} Resistance=${rFormated} Voltage=${vFormated}" ;
+      else if (c.type == "Bulb") p3.text = "Current=${iFormated} Resistance=${rFormated} Brightness=${bFormated}" ;
+      else p3.text = "Current=${iFormated} Resistance=${rFormated}" ;
+    }
+    
+    else  { // component is null
+      p.text = "";
+      p2.text = "";
+      p3.text = "";
+      
     }
 
   }

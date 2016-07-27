@@ -64,6 +64,8 @@ function createElectrons( electronGeometry, component ) {
 	    	vY,		//  
 	    	vZ);		// z
 		
+		electron.count = 0;   // count the number of times bouncing off
+
 		// transform the velocity vector --> world space  ----> NO! this is unnecessary!!
 		// var length = electron.velocity.length();
 		// electron.velocity.transformDirection(component.container.matrixWorld); //normalized
@@ -80,6 +82,7 @@ function createElectrons( electronGeometry, component ) {
 }
 
 function updateElectron(electron, component) {
+	//console.log(electron.velocity.length());
 	if ( ticks % 100 == 0) {
 		component.updateAmmeter();   //recalculates the rate of flow
 	}
@@ -164,6 +167,7 @@ function moveElectron(electron, component) {
 	if (Math.abs(electronLocal.y) <= component.l/2) {
 		if (Math.abs(electronLocal.x) > component.w/2) {
 			electron.velocity.multiplyScalar(-1);
+			electron.add(electron.velocity);   // TEMP
 			//console.log("it is getting out");
 			//electron.sub(electron.velocity);
 		}
@@ -172,7 +176,10 @@ function moveElectron(electron, component) {
 		var x = electronLocal.x;
 		var y = Math.abs(electronLocal.y) - component.l/2
 		var distance = Math.sqrt(( x * x ) + ( y * y ));
-		if ( distance > component.w/2 ) {electron.velocity.multiplyScalar(-1);}
+		if ( distance > component.w/2 ) {
+			electron.velocity.multiplyScalar(-1);
+			//electron.add(electron.velocity);
+		}
 	} 
 
 
@@ -226,43 +233,102 @@ function collision( electron, obstacles ) {
 */
 
 function bounceBack( electron, obstacle, component ) {
-	electron.velocity.sub(component.force);
-	// first, calculate the normal vector in world coordinate
-	var normalMatrix = new THREE.Matrix3().getNormalMatrix( component.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
+	if (electron.count == 0) {
+		electron.count = 1;
+		electron.velocity.sub(component.force);
+		// first, calculate the normal vector in world coordinate
+		var normalMatrix = new THREE.Matrix3().getNormalMatrix( component.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
 
-	var n = obstacle.face.normal;
+		var n = obstacle.face.normal;
 
-	// this part is for 2D movement of electrons (z=0)
-	
-	if (twoD) {
-		n.z = 0.0; // project the normal vector on the xy plane (in local space of container)
+		// this part is for 2D movement of electrons (z=0)
+		
+		if (twoD) {
+			n.z = 0.0; // project the normal vector on the xy plane (in local space of container)
+		}
+		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
+		if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
+		if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
+		//console.log(worldNormal);
+		if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction");
+		// now calculate the reflection, non-AR condtion
+		if (!ArFlag) {
+			var reflection = electron.velocity.clone().reflect(worldNormal);
+			electron.velocity = reflection;
+		}
+
+		// calculate the reflection for AR condition
+		if (ArFlag) {
+			var length = electron.velocity.length();
+			var direction = new THREE.Vector3();
+			direction.copy(electron.velocity);
+			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
+			var reflection = direction.reflect(worldNormal);
+			var m = new THREE.Matrix4();
+			m = m.getInverse(electrons.matrixWorld);
+			reflection.transformDirection(m);
+			electron.velocity = reflection.multiplyScalar(length);
+		}
+
+		//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
+		//stop=!stop;
 	}
-	var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
-	if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
-	if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
-	//console.log(worldNormal);
-	if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction");
-	// now calculate the reflection, non-AR condtion
-	if (!ArFlag) {
-		var reflection = electron.velocity.clone().reflect(worldNormal);
-		electron.velocity = reflection;
-	}
+	else if ( obstacle.object == component.startJunction || 
+			 obstacle.object == component.endJunction ) {
+				electron.velocity.sub(component.force);
+		// first, calculate the normal vector in world coordinate
+		var normalMatrix = new THREE.Matrix3().getNormalMatrix( component.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
 
-	// calculate the reflection for AR condition
-	if (ArFlag) {
-		var length = electron.velocity.length();
-		var direction = new THREE.Vector3();
-		direction.copy(electron.velocity);
-		direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
-		var reflection = direction.reflect(worldNormal);
-		var m = new THREE.Matrix4();
-		m = m.getInverse(electrons.matrixWorld);
-		reflection.transformDirection(m);
-		electron.velocity = reflection.multiplyScalar(length);
-	}
+		var n = obstacle.face.normal;
 
-	if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
-	//stop=!stop;
+		// this part is for 2D movement of electrons (z=0)
+		
+		if (twoD) {
+			n.z = 0.0; // project the normal vector on the xy plane (in local space of container)
+		}
+		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
+		if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
+		if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
+		//console.log(worldNormal);
+		if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction");
+		// now calculate the reflection, non-AR condtion
+		if (!ArFlag) {
+			var reflection = electron.velocity.clone().reflect(worldNormal);
+			electron.velocity = reflection;
+		}
+
+		// calculate the reflection for AR condition
+		if (ArFlag) {
+			var length = electron.velocity.length();
+			var direction = new THREE.Vector3();
+			direction.copy(electron.velocity);
+			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
+			var reflection = direction.reflect(worldNormal);
+			var m = new THREE.Matrix4();
+			m = m.getInverse(electrons.matrixWorld);
+			reflection.transformDirection(m);
+			electron.velocity = reflection.multiplyScalar(length);
+		}
+
+		//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
+		//stop=!stop;
+		electron.count = 0;
+
+	} 
+	else {
+			// initiate a 2D velocity (no z direction)
+			var vX = Math.random() * velocity * 2 - velocity; // a random value b/w -velocity & velocity
+		    var vY = Math.sqrt( velocity * velocity - vX*vX);   // component.results in a constant velocity	
+			// I need to give a random sign to vY with 50-50 probability
+		    if ( Math.round(Math.random()) == 1 ) vY *= -1;
+		    vZ = 0.0;
+		electron.velocity = new THREE.Vector3(
+	    	vX,		// x
+	    	vY,		//  
+	    	vZ);		// z
+		electron.count = 0;
+
+	}
  }
  
 	

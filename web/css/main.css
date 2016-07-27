@@ -103,10 +103,10 @@ body {
 }
 .page-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  height: 60px;
+  height: 40px;
   position: absolute;
-  margin: -60px -150px;
-  width: 300px;
+  margin: -40px -100px;
+  width: 200px;
   border: none;
   padding: none;
   outline: none;
@@ -195,17 +195,16 @@ body {
   50% { background-color: #007388; -webkit-box-shadow: 0 0 9px #007388; }
   100% { background-color: #005368; -webkit-box-shadow: 0 0 3px #005368; }
 }
-
-.secondText {
+.bigText {
    outline: none;
    color: rgb(5, 5, 5);
    position: absolute;
    text-align: center;
-   top: 100px;
-   left: 50px;
+   top: 0px;
+   left: 0px;
    border: none;
    width: 600px;
-   height: 10px;
+   height: 0px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
@@ -214,13 +213,14 @@ body {
    display: inline;
    z-index: 10;
 }
-.bigText {
+
+.secondText {
    outline: none;
    color: rgb(5, 5, 5);
    position: absolute;
    text-align: center;
-   top: 50px;
-   left: 50px;
+   top: 35px;
+   left: 0px;
    border: none;
    width: 600px;
    height: 10px;
@@ -228,7 +228,27 @@ body {
    margin-left: 1px;
    margin-right: 1px;
    font-family: Comic Sans MS;
-   font-size:30px;
+   font-size:12px;
+   display: inline;
+   z-index: 10;
+}
+
+.thirdText {
+   outline: none;
+   color: rgb(5, 5, 5);
+   position: absolute;
+   text-align: center;
+   top: 55px;
+   left: 0px;
+   border: none;
+   width: 600px;
+   height: 10px;
+   word-spacing: 30px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: Comic Sans MS;
+   font-size:12px;
    display: inline;
    z-index: 10;
 }

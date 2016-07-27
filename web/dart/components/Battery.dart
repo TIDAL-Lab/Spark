@@ -36,7 +36,10 @@ class Battery extends Component  {
     this.slider = document.querySelector("#generic-slider");
     this.slider.style.display = "block";
     setSlider();
-    //addSlider(x0, y0);       
+    //addSlider(x0, y0); 
+    
+    theApp.components.add(this);
+    theApp.circuit.addNewBranch(this);
   }
     
     CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {
