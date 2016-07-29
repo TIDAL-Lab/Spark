@@ -22,7 +22,8 @@ var mouseX = 0, mouseY = 0;
 var sphere; //image element for particles
 var batteryImg, resistorImg;
 var components = []; // an array of components
-var electrons, electronGeometry, electronMaterial;
+var electronVertices, electronGeometry, electronMaterial;
+var electronObjects = [];
 var raycaster;
 //var compositeMesh;
 
@@ -109,7 +110,7 @@ function initComponents() {
     return (a.graphLabel - b.graphLabel);
 	});*/
 	for (k=0; k < components.length; k++) {
-		components[k].init(electronGeometry, k); // sends k as the component ID				
+		components[k].init(k); // sends k as the component ID				
 	}
 	for (k=0; k < components.length; k++) {
 		components[k].updateJunctions();
@@ -117,7 +118,7 @@ function initComponents() {
 	
 	if (!ArFlag) electronSize = 8;
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: backgroundBlue , transparent: true } );
-	electrons = new THREE.PointCloud ( electronGeometry, electronMaterial );
+	electronVertices = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
 	markerRoot = new THREE.Mesh();
 	for (k=0; k < components.length; k++) {
@@ -125,7 +126,7 @@ function initComponents() {
 	}
 	//createConnectedMeshes();
 	//markerRoot.add(compositeMesh);
-	markerRoot.add(electrons);	
+	markerRoot.add(electronVertices);	
 	if (ArFlag) markerRoot.matrixAutoUpdate = false;
 	scene.add( markerRoot );
 }
@@ -141,7 +142,9 @@ function update() {
 		var obj = scene.children[c];
 		scene.remove(obj);
 	}
+	electronObjects = [];
 	initComponents();
+
 }
 
 function animate() {
@@ -168,18 +171,18 @@ function render() {
 
 function updateElectrons() {
 	ticks++;
-	var eVertices = electrons.geometry.vertices;
+	var eVertices = electronVertices.geometry.vertices;
 
 	for ( k = 0; k < eVertices.length; k++ ) {
 		var electron = eVertices[k];
-		updateElectron(electron, components[electron.componentID] ); // the compoentID shows the 
-																	// index for the components array
-		//components[electron.componentID].updateElectron(electron); 																	
+		var electronObject = electronObjects[k];
+		electronObject.updateElectron();
+		electron = electronObject.position;									
 	}
-	electrons.geometry.verticesNeedUpdate = true;
+	electronVertices.geometry.verticesNeedUpdate = true;
 	if (watch) {
 		//var randomIndex = Math.floor(Math.random() * eVertices.length);
-		var electron = eVertices[0];
+		var electron = electronObjects[0];
 		// var dir = electron.velocity.normalize();
 		// var length = electron.velocity.length();
 		// var arrowHelper = new THREE.ArrowHelper( dir, electron, length, darkGreen );
@@ -187,15 +190,15 @@ function updateElectrons() {
 		var trackMaterial = new THREE.LineBasicMaterial({ color: darkOrange });
 		var trackGeometry = new THREE.Geometry();
 		trackGeometry.vertices.push(
-			electron,
-			new THREE.Vector3().addVectors(electron, electron.velocity)
+			electron.position,
+			new THREE.Vector3().addVectors(electron.position, electron.velocity)
 		);
 		var line = new THREE.Line( trackGeometry, trackMaterial );
 		lines.add( line );
 		// var geometry = new THREE.CircleGeometry( 5, 32 );
 		// var material = new THREE.MeshBasicMaterial( { color: orange } );
 		// var circle = new THREE.Mesh( geometry, material );
-		halo.position.set(electron.x, electron.y, electron.z);
+		halo.position.set(electron.position.x, electron.position.y, electron.position.z);
 		// scene.add(circle);
 		// halo.position = electron;
 		// halo.needsUpdate = true;
@@ -382,7 +385,6 @@ function watchElectron() {
 		var geometry = new THREE.CircleGeometry( 5, 16 );
 		var material = new THREE.MeshBasicMaterial( { color: darkOrange } );
 		halo = new THREE.Mesh( geometry, material );
-		halo.material.visible = false;
 		// halo.material.transparent = true;
 		// halo.material.opacity = 0.5;
 		halo.material.visible = true;

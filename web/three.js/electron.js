@@ -20,15 +20,11 @@ function createElectrons( electronGeometry, component ) {
 	for ( i = 0; i < component.electronCount; i ++ ) {
 
 		var electron = new THREE.Vector3();
-/*			// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
-		electron.x = Math.random() * (component.l - 5) - (component.l - 5) /2; //the x coordinate changes based on component length 
-		electron.y = Math.random() * (component.w - 5) - (component.w - 5)/2; // component width 
-		//electron.z = 0.0;
-		electron.z = Math.random() * (component.h - 5) - (component.h - 5)/2; // component width*/
+
+		// INIT XYZ POSITION
 
 		// I added a constant 5 to the calculation below to avoid creating electrons right on the edge.
-		// temp: 2/5 becuase of the cone resistors
-		electron.x = Math.random() * (component.w - 5)*2/5 - (component.w - 5)/5; //the x coordinate changes based on component length 
+		electron.x = Math.random() * (component.w - 5) - (component.w - 5)/2; //the x coordinate changes based on component length 
 		electron.y = Math.random() * (component.l - 5) - (component.l - 5)/2; // component width 
 		
 		if (twoD) {
@@ -39,76 +35,55 @@ function createElectrons( electronGeometry, component ) {
 			electron.z = Math.random() * zLimit - zLimit/2; // calculations of random xz coordinate on a circle shape (cross section of a cylinder on xz plane)
 		}	
 
-		// now initiate electron velocity
-		if (twoD) {
-			// initiate a 2D velocity (no z direction)
+		// INIT VELOCITY
+
+		if (twoD) { // initiate a 2D velocity (no z direction)
+			
 			var vX = Math.random() * velocity * 2 - velocity; // a random value b/w -velocity & velocity
 		    var vY = Math.sqrt( velocity * velocity - vX*vX);   // component.results in a constant velocity	
-			// I need to give a random sign to vY with 50-50 probability
-		    if ( Math.round(Math.random()) == 1 ) vY *= -1;
+		    if ( Math.round(Math.random()) == 1 ) vY *= -1; // I need to give a random sign to vY with 50-50 probability
 		    vZ = 0.0;
 		}
-		else {
-			// initiate a 3D velocity
+		else { // initiate a 3D velocity		
 			var vX = Math.random() * velocity * 2 - velocity;
 			var vYZ = Math.sqrt( velocity * velocity - vX * vX );
 			var vY = Math.random() * vYZ * 2 - vYZ;
-			var vZ = Math.sqrt( vYZ * vYZ - vY * vY); // component.results in a constant velocity in 3D		    
-		    // I need to give a random sign to vY & vZ with 50-50 probability
-		    if ( Math.round(Math.random()) == 1 ) vY *= -1;
+			var vZ = Math.sqrt( vYZ * vYZ - vY * vY); // component.results in a constant velocity in 3D		     
+		    if ( Math.round(Math.random()) == 1 ) vY *= -1; // I need to give a random sign to vY & vZ with 50-50 probability
 		    if ( Math.round(Math.random()) == 1 ) vZ *= -1;
 		}
 
 		electron.velocity = new THREE.Vector3(
-	    	vX,		// x
-	    	vY,		//  
-	    	vZ);		// z
-		
-		electron.count = 0;   // count the number of times bouncing off
-
-		// transform the velocity vector --> world space  ----> NO! this is unnecessary!!
-		// var length = electron.velocity.length();
-		// electron.velocity.transformDirection(component.container.matrixWorld); //normalized
-		// electron.velocity.multiplyScalar(length);
+	    	vX,		
+	    	vY,		  
+	    	vZ);
 		
 		//translate the electron to be inside the component
-		//component.container.localToWorld(electron); // component.changes the position of electron from local to world
 		electron.applyMatrix4( component.container.matrixWorld );
 		electron.componentID = component.ID;
+		electron.component = component;
 		electronGeometry.vertices.push( electron );
+
+		electron.reflectCount = 0;   // count the number of times bouncing off
+		electron.status = "init";  // for debugging (issue with electrons leaving the container)
 
 	}	
 
 }
 
-function updateElectron(electron, component) {
-	//console.log(electron.velocity.length());
+function updateElectron(electron) {
+	var component = electron.component;
+
 	if ( ticks % 100 == 0) {
 		component.updateAmmeter();   //recalculates the rate of flow
 	}
 	electron.velocity.add(component.force);
 	var obstacle = collision(electron, component.obstacles);
 	if (obstacle == null) { 	// no colision
-/*		// make sure it is not out of container
-		var nextPosition = new THREE.Vector3().copy(electron); // next position
-		nextPosition.add(electron.velocity);
-		var nextVector = new THREE.Vector3().copy(electron.velocity);
-		//nextVector.multiplyScalar(-1);
-		component.container.material.side = THREE.FrontSide; 
-		component.startJunction.material.side = THREE.FrontSide;
-		component.endJunction.material.side = THREE.FrontSide;
-		var nextObstacle = collision(electron, component.obstacles);
-		if (nextObstacle == null) {
-			moveElectron(electron, component.force);
-			component.container.material.side = THREE.BackSide; 
-			component.startJunction.material.side = THREE.BackSide;
-			component.endJunction.material.side = THREE.BackSide;
-		}
-		else {
-			console.log("STOP");
-		}*/
 
 		moveElectron(electron, component);
+		findElectronsOutside(electron, component);
+
 	}
 	else {   // a collision is detected
 		
@@ -120,18 +95,14 @@ function updateElectron(electron, component) {
 			}
 			else {   // if the junction is not connected, bounce back the electron
 
-				bounceBack(electron, obstacle, component);
+				bounceBack(electron, obstacle.face.normal, component);
 			}
 		}
 		else if (obstacle.object == component.ammeter) {
 			collideAmmeter(electron, obstacle, component);
 		}
-/*			else if (component.ammeter != null && obstacle.object == component.ammeter.children[0]) { 
-			component.moveElectron(electron);     // do nothing for the sprite text label!
-			console.log("weird");
-		}*/
-		else {  // the obstacle is either component walls or ions, so bounce it back
-			bounceBack(electron, obstacle, component);
+		else {  // the obstacle is ions, so bounce it back (change: no component walls as obstacles anymore)
+			bounceBack(electron, obstacle.face.normal, component);
 		}
 		
 	}
@@ -155,43 +126,57 @@ function moveElectron(electron, component) {
 	var v = electron.velocity.length();
 	if (electron.velocity.length() > velocityMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
 		electron.velocity.setLength(velocityMax-0.01);
-		//electron.velocity.sub( force );
 	}
 	if (electron.velocity.length() > velocityMax) console.log("error: velocity exceeds the max velocity");
 
 	// move the electron
 	electron.add( electron.velocity );
+	electron.status = "moved";
 
+	//findElectronsOutside( electron, component );
+}
+
+function findElectronsOutside( electron, component ) {
 	// check if it is in the container box
 	var electronLocal = worldToLocal(electron, component);
 	if (Math.abs(electronLocal.y) <= component.l/2) {
-		if (Math.abs(electronLocal.x) > component.w/2) {
-			electron.velocity.multiplyScalar(-1);
-			electron.add(electron.velocity);   // TEMP
-			//console.log("it is getting out");
-			//electron.sub(electron.velocity);
+		if (Math.abs(electronLocal.x) >= component.w/2) { // the electron is outside of the container cylinder
+			electron.sub(electron.velocity);
+			// Make sure it's not out of the box anymore
+			var local2 = worldToLocal(electron, component);
+			if (Math.abs(local2.y) <= component.l/2) {
+				if (Math.abs(local2.x) >= component.w/2) { 
+					console.log("ERROR WALL");
+					stop = !stop; 
+				} }
+			var normal = new THREE.Vector3(1,0,0);
+			if (electronLocal.x > 0) normal.multiplyScalar(-1);
+			bounceBack(electron, normal, component);
+			console.log("bounced off a wall");
+
 		}
 	}
-	else {   // it's inside the two junctions
+	else {   // the electron is outside of the two junctions
 		var x = electronLocal.x;
 		var y = Math.abs(electronLocal.y) - component.l/2
 		var distance = Math.sqrt(( x * x ) + ( y * y ));
-		if ( distance > component.w/2 ) {
-			electron.velocity.multiplyScalar(-1);
-			//electron.add(electron.velocity);
+		if ( distance >= component.w/2 ) {
+			electron.sub(electron.velocity);
+			// Make sure it's not out of the box anymore
+			var local2 = worldToLocal(electron, component);
+			if (Math.abs(local2.y) <= component.l/2) {
+				if (Math.abs(local2.x) >= component.w/2) { 
+					console.log("ERROR JUNCTION");
+					stop = !stop; } }
+			var normal = new THREE.Vector3(-x , -y, 0);
+			if (electronLocal.y < 0) normal.y = y;
+			bounceBack(electron, normal, component);
+			console.log("bounced off a junction");
+
 		}
 	} 
-
-
-	// var direction = new THREE.Vector3();
-	// direction.copy(electron.velocity);  // in local space / force is already added
-	// direction.transformDirection(electrons.matrixWorld); //transform direction to world space also normalizes the vector
-	// var origin = new THREE.Vector3();
-	// origin.copy(electron);
-	// origin.applyMatrix4(electrons.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
-	// electron.add(direction);
-
 }
+
 var arrowHelper = new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,0), 10, darkGreen );
 function collision( electron, obstacles ) {
 	// CHECK for AR, I think I should uncomment this for AR
@@ -203,8 +188,8 @@ function collision( electron, obstacles ) {
 	origin.applyMatrix4(electrons.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
 */
 	//scene.remove(arrowHelper);
-	var dir = new THREE.Vector3().copy(electron.velocity).normalize();
 	var length = electron.velocity.length();
+	var dir = new THREE.Vector3().copy(electron.velocity).normalize();	
 	var origin = new THREE.Vector3().copy(electron); 
 	//arrowHelper = new THREE.ArrowHelper( dir, origin, length+electronSize/2, darkGreen );
 	//scene.add(arrowHelper);
@@ -212,11 +197,11 @@ function collision( electron, obstacles ) {
 	raycaster.set(origin, dir);
 
 	//raycaster.set( electron, electron.velocity);
-	//var distance = 10;
-	raycaster.near = 0.0000;
-	raycaster.far = electron.velocity.length() + electronSize/2;
+	// var distance = length + (electronSize * 2);
+	raycaster.near = 0.001;
+	raycaster.far = length + (electronSize * 2);
 	var collisions = raycaster.intersectObjects(obstacles, false);
-	// if (collisions.length > 0 && collisions[0].distance <= distance) {
+	//if (collisions.length > 0 && collisions[0].distance <= distance) {
 	if ( collisions.length > 0 ) {
 		//console.log(collisions.length);	
 	 	return collisions[0];
@@ -232,103 +217,51 @@ function collision( electron, obstacles ) {
 * reflection formula:  r=d−2(d⋅n)n (where d is the ray, and n is a normalized normal, and d.n is a dot product)
 */
 
-function bounceBack( electron, obstacle, component ) {
-	if (electron.count == 0) {
-		electron.count = 1;
-		electron.velocity.sub(component.force);
-		// first, calculate the normal vector in world coordinate
-		var normalMatrix = new THREE.Matrix3().getNormalMatrix( component.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
+function bounceBack( electron, normal, component ) {  // normal is the face normal in local space
+	//electron.velocity.sub(component.force);
+	// first, calculate the normal vector in world coordinate
+	var normalMatrix = new THREE.Matrix3().getNormalMatrix( component.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
 
-		var n = obstacle.face.normal;
+	// this part is for 2D movement of electrons (z=0)
+	if (twoD) { normal.z = 0.0; } // project the normal vector on the xy plane (in local space of container)
 
-		// this part is for 2D movement of electrons (z=0)
-		
-		if (twoD) {
-			n.z = 0.0; // project the normal vector on the xy plane (in local space of container)
-		}
-		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
-		if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
-		if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
-		//console.log(worldNormal);
-		if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction");
-		// now calculate the reflection, non-AR condtion
-		if (!ArFlag) {
-			var reflection = electron.velocity.clone().reflect(worldNormal);
-			electron.velocity = reflection;
-		}
+	var worldNormal = normal.clone().applyMatrix3( normalMatrix ).normalize();
+	// if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
+	// if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
 
-		// calculate the reflection for AR condition
-		if (ArFlag) {
-			var length = electron.velocity.length();
-			var direction = new THREE.Vector3();
-			direction.copy(electron.velocity);
-			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
-			var reflection = direction.reflect(worldNormal);
-			var m = new THREE.Matrix4();
-			m = m.getInverse(electrons.matrixWorld);
-			reflection.transformDirection(m);
-			electron.velocity = reflection.multiplyScalar(length);
-		}
 
-		//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
-		//stop=!stop;
+	if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction");
+	
+	// now calculate the reflection
+	reflect( electron, worldNormal );
+
+	//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
+	electron.status = "bounced back";
+
+ }
+
+
+ function reflect(electron, worldNormal) {
+ 	//non-AR condtion
+ 	if (!ArFlag) {
+		var reflection = electron.velocity.clone().reflect(worldNormal);
+		electron.velocity = reflection;
 	}
-	else if ( obstacle.object == component.startJunction || 
-			 obstacle.object == component.endJunction ) {
-				electron.velocity.sub(component.force);
-		// first, calculate the normal vector in world coordinate
-		var normalMatrix = new THREE.Matrix3().getNormalMatrix( component.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
 
-		var n = obstacle.face.normal;
-
-		// this part is for 2D movement of electrons (z=0)
-		
-		if (twoD) {
-			n.z = 0.0; // project the normal vector on the xy plane (in local space of container)
-		}
-		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
-		if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
-		if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
-		//console.log(worldNormal);
-		if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction");
-		// now calculate the reflection, non-AR condtion
-		if (!ArFlag) {
-			var reflection = electron.velocity.clone().reflect(worldNormal);
-			electron.velocity = reflection;
-		}
-
-		// calculate the reflection for AR condition
-		if (ArFlag) {
-			var length = electron.velocity.length();
-			var direction = new THREE.Vector3();
-			direction.copy(electron.velocity);
-			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
-			var reflection = direction.reflect(worldNormal);
-			var m = new THREE.Matrix4();
-			m = m.getInverse(electrons.matrixWorld);
-			reflection.transformDirection(m);
-			electron.velocity = reflection.multiplyScalar(length);
-		}
-
-		//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
-		//stop=!stop;
-		electron.count = 0;
-
-	} 
-	else {
-			// initiate a 2D velocity (no z direction)
-			var vX = Math.random() * velocity * 2 - velocity; // a random value b/w -velocity & velocity
-		    var vY = Math.sqrt( velocity * velocity - vX*vX);   // component.results in a constant velocity	
-			// I need to give a random sign to vY with 50-50 probability
-		    if ( Math.round(Math.random()) == 1 ) vY *= -1;
-		    vZ = 0.0;
-		electron.velocity = new THREE.Vector3(
-	    	vX,		// x
-	    	vY,		//  
-	    	vZ);		// z
-		electron.count = 0;
-
+	// calculate the reflection for AR condition
+	if (ArFlag) {
+		var length = electron.velocity.length();
+		var direction = new THREE.Vector3();
+		direction.copy(electron.velocity);
+		direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
+		var reflection = direction.reflect(worldNormal);
+		var m = new THREE.Matrix4();
+		m = m.getInverse(electrons.matrixWorld);
+		reflection.transformDirection(m);
+		electron.velocity = reflection.multiplyScalar(length);
 	}
+
+
  }
  
 	
@@ -351,7 +284,7 @@ function collideConnectedJunction( electron, obstacle, component ) {
 	var thisJunction = obstacle.object;
 	//var connectedComponent = thisJunction.connectedComponents[0];
 	var nextComponent = component.findNextComponent( thisJunction );
-	if ( nextComponent == null ) {bounceBack(electron, obstacle, component);}	
+	if ( nextComponent == null ) {bounceBack(electron, obstacle.face.normal, component);}	
 	else {
 
 		//first check if the connected component is a battery
@@ -369,13 +302,13 @@ function collideConnectedJunction( electron, obstacle, component ) {
 					if (afterObstacle != null) {    // this is to avoid electrons stucking in overlap area
 						if ( afterObstacle.object == afterComponent.startJunction 
 							|| afterObstacle.object == afterComponent.endJunction ) {
-							bounceBack(electron, afterObstacle, component);
+							bounceBack(electron, afterObstacle.face.normal, component);
 						}
 					}
                 }
 				else {  // if the battery is not connected from the other side (or is connected but I=0)
 						//	 bounce back the electron
-					bounceBack(electron, obstacle, component);
+					bounceBack(electron, obstacle.face.normal, component);
 				}
 			}
 			else {     //it is connected to battery's end junction
@@ -388,29 +321,35 @@ function collideConnectedJunction( electron, obstacle, component ) {
 					if (afterObstacle != null) {    // this is to avoid electrons stucking in overlap area
 						if ( afterObstacle.object == afterComponent.startJunction 
 							|| afterObstacle.object == afterComponent.endJunction ) {
-							bounceBack(electron, afterObstacle, component);
+							bounceBack(electron, afterObstacle.face.normal, component);
 						}
 					}
 				}
 				else { // if the battery is not connected from the other side, bounce back the electron
-					bounceBack(electron, obstacle, component);
+					bounceBack(electron, obstacle.face.normal, component);
 				}
 			}
 
 		}
 
 		else {   // if the connected component is not a battery
+			//updateElectronComponent(electron);   // WRITE LATER
 			electron.componentID = thisJunction.connectedComponentIDs[0];
+			electron.component = components[electron.componentID];
 			var nextObstacle = collision(electron, nextComponent.obstacles);
 			if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
 				if ( nextObstacle.object == nextComponent.startJunction 
 					|| nextObstacle.object == nextComponent.endJunction ) {
-					bounceBack(electron, obstacle, component);
+					bounceBack(electron, obstacle.face.normal, component);
 				}
 			}	
 		}
 	}
 
+
+}
+
+function updateElectronComponent( electron ) {
 
 }
 
@@ -437,4 +376,5 @@ function passFromBattery( electron, firstJunction, secondJunction, battery ) {
 	electron.velocity.multiplyScalar(2/electron.velocity.length());   // after passing the battery set the velocity to 2 again	
 
 	electron.componentID = secondJunction.connectedComponentIDs[0];	
+	electron.component = components[electron.componentID];
 }

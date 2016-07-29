@@ -137,9 +137,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		scope.dispatchEvent( changeEvent );
 
-		// TEST
-		//console.log(electrons.geometry.vertices[0].velocity);
-		//console.log(components[0].force);
+
 
 	};
 

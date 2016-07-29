@@ -123,7 +123,7 @@ class App extends TouchManager {
    }
    
    void receiveMessage(evt) {
-     window.console.log('circuit received message');
+     //window.console.log('circuit received message');
      if (evt.data is int) {         
        int index = evt.data;
        Component c = components[index];

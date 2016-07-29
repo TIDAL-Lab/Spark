@@ -53,12 +53,12 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		this.electronCount = 15;
   	}
 
-  	this.init = function( electronGeometry, ID ) {
+  	this.init = function( ID ) {
   		this.ID = ID;		
 		this.createContainer();
 		this.createAmmeter();
 		this.computeForce();
-		createElectrons(electronGeometry, this);
+		this.createElectrons( this );
 	}
 
 	this.computeForce = function() {
@@ -198,7 +198,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		if (this.compType != "Battery") { this.createIons(); }
 		
 		this.container.material.side = THREE.BackSide;  // for collision detection code
-  		this.obstacles.push(this.container); // for collision detection code
+  		//this.obstacles.push(this.container); // for collision detection code
   		this.obstacles.push(this.startJunction);
   		this.obstacles.push(this.endJunction);
 
@@ -502,6 +502,14 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			this.container.material.color.set(darkOrange);
 			clickedComponent = this;
 		}
+	}
+
+	this.createElectrons = function( component ) {
+			for ( i = 0; i < component.electronCount; i ++ ) {
+				var electron = new Electron(component);
+				electronObjects.push(electron);
+				electronGeometry.vertices.push( electron.position );
+			}
 	}
 
 }

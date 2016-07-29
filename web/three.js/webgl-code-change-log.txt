@@ -527,7 +527,46 @@ I paused working on the branching effect and instead adding some new features to
 	TEMP: I changed the container shape back to regular cylinder
 	Working on the ions instead.
 
+*** notes on 7/25/2016
+1. using the postmessage and communication between window and model iframe, I am now sending data from the webgl model
+	to the circuit side. Information being sent: component ID of the component being clicked. And information about 
+	panning and zooming. I the circuit side, I added a frame that represents the part of the working area that the electron
+	model is showing. The frame pans and gets larger/smaller by touch interactions on the electron model.
 	
+
+*** notes on 7/27/2016
+1. I am now working on the electrons movement code to fix a number of issues.
+
+*** notes on 7/28/2016
+1. working on the electron movement and having strange issues!
+
+2. I wanted to make a class for component and electron. I changed the component code to use "class" and constructor
+	instead of "function", but then the code gave me errors for not defining variables such as i,j,k etc. I don't know why
+	I get such errors, so I decided to bring it back to the old version. I should ask Mike later.
+	
+3. I changed the electron.js code to make a class representation of electrons --> electronObject.js:
+	Now, I have a class for electron, which is the electron object.
+	The problem is that I can use that class as vetices for the particle system
+	To solve this problem, I created two arrays, one is the electronVertices, which is the particle system, 
+	and the other one is the electronObjects, which holds all the other information about the electrons (velocity, component, etc)
+	This way, at each update run, it updates the elements of the electronObjects array, and after that it sets the particles
+	vertices to the electron.positions.
+	
+
+Things to fix before tomorrow meeting
+1. electron movement
+2. fix the frame size/position
+3. Add the counter
+4. Fix the watch-an-electron feature
+5. limit the number of components on webgl model to the ones that are inside the frame (not all the components in the working area)
+6. limit the ions in obstacles to the ones in the neighborhood (Not necessary for now)
+
+MOVE ELECTRON CHECK LATER:
+bounce back reverse normal vector --> correct?
+
+Slowing down issue
+1. When I stretch the wire, it becomes very slow --> test if it is because of more ions or the larger container.
+2. check if changing clone() to copy makes a difference
 
 ISSUES TO FIX LATER:
 
