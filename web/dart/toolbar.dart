@@ -31,11 +31,11 @@ class Toolbar {
    
   Toolbar(this.app, String id) {
     
-    num centerX = app.width / 2;
-    num centerY = app.height / 2;
-    
-    num w = app.width;
-    num h = app.height;
+//    num centerX = app.width / 2;
+//    num centerY = app.height / 2;
+//    
+//    num w = app.width;
+//    num h = app.height;
     
     ButtonElement button;
     
@@ -72,7 +72,7 @@ class Toolbar {
     if (button != null) button.onClick.listen((evt) => this.app.reset());
     
     button = document.querySelector("$id #lens-button");
-    if (button != null) button.onClick.listen((evt) => (this.app.model as webglModel).launchModel());
+    if (button != null) button.onClick.listen((evt) => (this.app.model as webglModel).resetModel());
       
     /* update the values of sliders, whenever it is changed */
     InputElement slider1 = document.querySelector("#battery-slider");

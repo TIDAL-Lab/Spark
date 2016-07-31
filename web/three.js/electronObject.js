@@ -11,8 +11,8 @@
  */
 
 var electronSize = 40;
-var velocity = 4;
-var velocityMax = 10;
+var velocity = 2;
+var velocityMax = 20;
 var lossFactor = 0.9;
 
 function Electron( component ) {
@@ -59,15 +59,12 @@ function Electron( component ) {
 		this.position.applyMatrix4( component.container.matrixWorld );
 		this.componentID = component.ID;
 		this.component = component;
-		this.reflectCount = 0;   // count the number of times bouncing off
+		this.reflectedTimes = 0;   // count the number of times bouncing off
 		this.status = "init";  // for debugging (issue with electrons leaving the container)	
 
 	this.updateElectron = function() {
 		var component = this.component;
 
-		if ( ticks % 100 == 0) {
-			component.updateAmmeter();   //recalculates the rate of flow
-		}
 		this.velocity.add(component.force);
 		var obstacle = this.collision(component.obstacles);
 		if (obstacle == null) { 	// no colision
@@ -123,6 +120,7 @@ function Electron( component ) {
 	// move the electron
 	this.position.add( this.velocity );
 	this.status = "moved";
+	this.reflectedTimes = 0;
 
 	this.findElectronsOutside();
 	}
@@ -192,7 +190,8 @@ function Electron( component ) {
 		//raycaster.set( electron, electron.velocity);
 		// var distance = length + (electronSize * 2);
 		raycaster.near = 0.001;
-		raycaster.far = length + (electronSize * 2);
+		//raycaster.far = length + electronSize;
+		raycaster.far = length;
 		var collisions = raycaster.intersectObjects(obstacles, false);
 		//if (collisions.length > 0 && collisions[0].distance <= distance) {
 		if ( collisions.length > 0 ) {
@@ -224,6 +223,12 @@ function Electron( component ) {
 
 		//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
 		this.status = "bounced back";
+		if (this.reflectedTimes > 1) {  // check if the electron is stuck
+			this.velocity.setLength(velocity);
+			//this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
+			//console.log(this.reflectedTimes);
+		}
+		this.reflectedTimes  += 1;
 
 	 }
 
@@ -256,7 +261,7 @@ function Electron( component ) {
 	}
 
 	this.collideConnectedJunction = function( obstacle, component ) {
-		this.velocity.sub(component.force);
+		//this.velocity.sub(component.force);
 		var thisJunction = obstacle.object;
 		//var connectedComponent = thisJunction.connectedComponents[0];
 		var nextComponent = component.findNextComponent( thisJunction );

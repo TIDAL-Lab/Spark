@@ -72,7 +72,7 @@ function init() {
 	if (ArFlag) { camera = new THREE.Camera(); }
 	else {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
-		camera.position.z = 500;	}
+		camera.position.z = 900;	}
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
@@ -171,6 +171,11 @@ function render() {
 
 function updateElectrons() {
 	ticks++;
+	if ( ticks % 100 == 0) {
+		for (i = 0; i < components.length; i++) {
+			components[i].updateAmmeter();   //recalculates the rate of flow
+		}
+	}
 	var eVertices = electronVertices.geometry.vertices;
 
 	for ( k = 0; k < eVertices.length; k++ ) {

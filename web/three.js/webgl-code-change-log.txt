@@ -539,6 +539,12 @@ I paused working on the branching effect and instead adding some new features to
 
 *** notes on 7/28/2016
 1. working on the electron movement and having strange issues!
+	note: before I had the code subtract the force from velocity if it was bouncing off --> I fixed that
+	no need to do that, it should reflect the electron with the updated velocity, not the old one.
+	
+	ISSUE: electrons get stuck in between obstacles.
+	TEMP SOLUTION: if the electron does not move for two (or more) ticks, change it's length to initial velocity
+	also I can try rotating it for 90 degrees, to redirect it from the trap.
 
 2. I wanted to make a class for component and electron. I changed the component code to use "class" and constructor
 	instead of "function", but then the code gave me errors for not defining variables such as i,j,k etc. I don't know why

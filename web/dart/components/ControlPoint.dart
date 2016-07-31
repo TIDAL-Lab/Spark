@@ -148,8 +148,8 @@ class ControlPoint implements Touchable {
   }
   /* TODO */
   bool inBox(num deltaX, num deltaY) {
-    if (x + deltaX < theApp.workingBox.width && y + deltaY < theApp.workingBox.height
-        && myConjoint.x + deltaX < theApp.workingBox.width && myConjoint.y + deltaY < theApp.workingBox.height) {
+    if (x + deltaX < theApp.workingBoxWidth && y + deltaY < theApp.workingBoxHeight
+        && myConjoint.x + deltaX < theApp.workingBoxWidth && myConjoint.y + deltaY < theApp.workingBoxHeight) {
       return true;
     }
     return false;

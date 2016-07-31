@@ -222,8 +222,8 @@ class Component implements Touchable {
   }
   
   bool inBox(num deltaX, num deltaY) {
-    if (start.x + deltaX+10 < theApp.workingBox.width && start.y + deltaY < theApp.workingBox.height 
-        && end.x + deltaX+10 < theApp.workingBox.width  && end.y + deltaY < theApp.workingBox.height) {
+    if (start.x + deltaX+10 < theApp.workingBoxWidth && start.y + deltaY < theApp.workingBoxHeight 
+        && end.x + deltaX+10 < theApp.workingBoxWidth  && end.y + deltaY < theApp.workingBoxHeight) {
       return true;
     }
     return false;

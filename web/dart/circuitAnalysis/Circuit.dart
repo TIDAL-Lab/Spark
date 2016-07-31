@@ -161,18 +161,18 @@ class Circuit {
         offsetY = theApp.marker.y;
       }
       else {   // non-AR condition
-        offsetX = theApp.workingBox.width/2;
-        offsetY = theApp.workingBox.height/2;
+        offsetX = theApp.workingBoxWidth/2;
+        offsetY = theApp.workingBoxHeight/2;
       }
       
       var compObj = {'type': c.type,
                                           'voltageDrop': c.voltageDrop,
                                           'current': c.current,
                                           'resistance': c.resistance,
-                                          //'startX': (c.start.x -theApp.workingBox.width/2),
-                                          //'startY':(theApp.workingBox.height/2 - c.start.y),
-                                          //'endX': (c.end.x - theApp.workingBox.width/2),
-                                          //'endY': (theApp.workingBox.height/2 - c.end.y),
+                                          //'startX': (c.start.x -theApp.workingBoxWidth/2),
+                                          //'startY':(theApp.workingBoxHeight/2 - c.start.y),
+                                          //'endX': (c.end.x - theApp.workingBoxWidth/2),
+                                          //'endY': (theApp.workingBoxHeight/2 - c.end.y),
                                           'startX': 1.0*(c.start.x -offsetX),
                                           'startY':1.0*(offsetY - c.start.y),
                                           'endX': 1.0*(c.end.x - offsetX),

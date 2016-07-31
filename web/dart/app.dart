@@ -32,8 +32,8 @@ int CONDITION = 3;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
-num CANVAS_RATIO = 0.65;
-num HELP_RATIO = 0.45;
+num CANVAS_RATIO = 0.0;
+num HELP_RATIO = 0.0;
 
 class App extends TouchManager {
 
@@ -54,14 +54,14 @@ class App extends TouchManager {
    Component genericSliderComponent; //the component that is tapped on to change its value
    Component webglComponent = null;
    Help help; // the help text
-   Lens2 lens; // the magnifying glass object
+   Lens lens; // the magnifying glass object
    ImageElement deleteBoxImg;   
    int canvasMargin = 0;
-   Rectangle workingBox; // the box for building circuits
-   //Rectangle containerBox;
+   //Rectangle workingBox; // the box for building circuits
    Marker marker;
    num centerX, centerY;
-   num frameCenterX, frameCenterY, frameWidth, frameHeight;
+   num workingBoxWidth, workingBoxHeight;
+   num frameCenterX, frameCenterY, frameWidth, frameHeight; // the frame that maps the connection to the electron model (condition 3)
    
    int condition = CONDITION;
    
@@ -80,36 +80,21 @@ class App extends TouchManager {
      window.onResize.listen((evt) => resizeScreen()); 
        
      help = new Help();
-     setScreen();
      
      selectionBar = new Toolbar(this, "div#selection-toolbar");
      editionBar = new Toolbar(this, "div#edition-toolbar");
-     
-     
-     setConditions();     
-     
-     //set the working box
-     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
-     workingBox = new Rectangle(0, 0, CANVAS_RATIO*canvas.width, toolbarRect.top);
-     centerX = workingBox.width / 2;
-     centerY = workingBox.height / 2;
-     
-     // set the frame
-     frameCenterX = workingBox.width/2;
-     frameCenterY = workingBox.height/2;
-     frameWidth = 450;
-     frameHeight = 350;
      
      // initiate delete box 
      deleteBoxImg = new ImageElement();
      deleteBoxImg.src = "images/trash-bin.png";
      deleteBoxImg.onLoad.listen((event) { draw(); });
      
+     setConditions();
+     setScreen();
+       
+   
      // instantiate lens and help objects
-     if (SHOW_LENS) {
-       //if (condition == 1) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
-       if (condition == 3) lens = new Lens2(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
-     }
+     if (SHOW_LENS) { lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2); }
        
      // create the first battery
      InputElement slider = querySelector("#battery-slider");
@@ -118,33 +103,40 @@ class App extends TouchManager {
      
      if (condition == 3) {  // because condition 1 & 2 has input variables for launchmodel(component)
        (model as webglModel).launchModel();  
-       print("condition 3");
      }
    }
    
-   void receiveMessage(evt) {
+   void receiveMessage(evt) { // receives message from the iframe
      //window.console.log('circuit received message');
      if (evt.data is int) {         
        int index = evt.data;
-       Component c = components[index];
-       theApp.webglComponent = c;
-       theApp.help.show();
-       //print("V: ${c.voltageDrop} I: ${c.current} R: ${c.resistance}");
+       if (index == -1) {
+         theApp.webglComponent = null;
+         theApp.help.show();
+       }
+       else {
+        Component c = components[index];
+        theApp.webglComponent = c;
+        theApp.help.show();
+        //print("V: ${c.voltageDrop} I: ${c.current} R: ${c.resistance}");
+       }
      }
      else if (evt.data is String) {
        print(evt.data);
      }
      else if (evt.data is List) {  // evt.data is a JSArray from touch controls
        if (evt.data.length == 1) { // zoom data
-         var delta = evt.data[0] * 0.005;
-         //frameWidth *= (1 + delta);
-         //frameHeight *= (1 + delta);
-         //repaint();
+         var delta = evt.data[0];
+         frameWidth += delta;
+         frameHeight += delta*0.75;
+//         frameWidth *= (1 + delta);
+//         frameHeight *= (1 + delta);
+         repaint();
        }
        else { //evt.data.length is 2 --> pan data
          //print(evt.data.runtimeType.toString());
-         frameCenterX += evt.data[0]; 
-         frameCenterY -= evt.data[1];
+         frameCenterX += evt.data[0]*0.5; 
+         frameCenterY -= evt.data[1]*0.5;
          repaint();
        }
 
@@ -152,40 +144,64 @@ class App extends TouchManager {
      }
    }
    
+   void setConditions() {
+     switch ( condition ) {
+       case 1:     // no electron model
+         help.helpSrc = "images/helps-control/";
+         model = new lumpModel();
+         SHOW_LENS = true;
+         SHOW_MARKER = false;
+         USE_SERVER = false;
+         CANVAS_RATIO = 0.65;
+         HELP_RATIO = 0.4;
+         document.querySelector("#lens-button").style.display = "none";
+         document.querySelector("#page0-button").style.display = "none";
+         break;
+       case 2:
+         help.helpSrc ="images/helps/";
+         model = new agentModel();
+         SHOW_LENS = true;
+         SHOW_MARKER = false;
+         USE_SERVER = false;
+         break;
+       case 3:
+         help.helpSrc ="images/helps/";
+         model = new webglModel();
+         SHOW_LENS = false;
+         SHOW_MARKER = false;
+         USE_SERVER = true;
+         CANVAS_RATIO = 0.55;
+         HELP_RATIO = 0.4;
+         break;
+       case 4:
+         help.helpSrc ="images/helps/";
+         model = new lumpModel();
+         // instantiate the JsAr tag
+         marker = new Marker(centerX, centerY);
+         SHOW_LENS = true;
+         SHOW_MARKER = true;
+         USE_SERVER = true;
+         break;
+     }
+   }
+   
    void setScreen() {
      width = window.innerWidth;
      height = window.innerHeight;
      
-     //canvas.width = (width*CANVAS_RATIO).toInt();
      canvas.width = width;
      canvas.height = height;
-     
 
-     
-//     var workspace = document.querySelector("#workspace");
-     var w1 = (width*CANVAS_RATIO).toInt();
-//     var h1 = height.toInt();
-//     workspace.style.width = "${w1}px";
-//     workspace.style.height = "${h1}px";
-//     
-     var modelspace = document.querySelector("#model");
+     var w1 = (width*CANVAS_RATIO).toInt();    
      var w2 = (width*(1-CANVAS_RATIO)).toInt();
      var h2 = (height*(1-HELP_RATIO)).toInt();
+     var h3 = (height*(HELP_RATIO)).toInt();
+     
+     var modelspace = document.querySelector("#model");
      modelspace.style.width = "${w2}px";     
      modelspace.style.height = "${h2}px";
      modelspace.style.left = "${w1}px"; 
-//     
-//     var textspace = document.querySelector("#help");
-     var h3 = (height*(HELP_RATIO)).toInt();
-//     textspace.style.width = "${w2}px";
-//     textspace.style.height = "${h3-20}px";
-//     textspace.style.left = "${w1}px";
-//     textspace.style.top = "${h2+10}px";
-//     
-//     canvas2.width = w2;
-//     canvas2.height = h3;
-//     
-     
+
      var toolbar = document.querySelector("#edition-toolbar");
      toolbar.style.right = "${w2}px";
      
@@ -202,53 +218,20 @@ class App extends TouchManager {
      img.style.width = div.style.width;
      img.style.height = div.style.height;
      
-//     help.x = w1+50;
-//     help.y = h2+10;
+     // set the working box
+     //set the working box
+     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge;
+     workingBoxWidth = CANVAS_RATIO*canvas.width;
+     workingBoxHeight = toolbarRect.top;
+     centerX = workingBoxWidth / 2;
+     centerY = workingBoxHeight / 2;
      
-   }
-   
-   void setConditions() {
-     switch ( condition ) {
-       case 1:     // no electron model
-         help.helpSrc = "images/helps-control/";
-         model = new lumpModel();
-         SHOW_LENS = true;
-         SHOW_MARKER = false;
-         USE_SERVER = false;
-         //CANVAS_RATIO = 0.65;
-         //HELP_RATIO = 0.1;
-         document.querySelector("#lens-button").style.background = "transparent";
-         document.querySelector("#page0-button").style.display = "none";
-         break;
-       case 2:
-         help.helpSrc ="images/helps/";
-         model = new agentModel();
-         SHOW_LENS = true;
-         SHOW_MARKER = false;
-         USE_SERVER = false;
-         break;
-       case 3:
-         help.helpSrc ="images/helps/";
-         model = new webglModel();
-         SHOW_LENS = true;
-         SHOW_MARKER = false;
-         USE_SERVER = true;
-         CANVAS_RATIO = 0.55;
-         HELP_RATIO = 0.4;
-         theApp.setScreen();
-         break;
-       case 4:
-         help.helpSrc ="images/helps/";
-         model = new lumpModel();
-         // instantiate the JsAr tag
-         marker = new Marker(centerX, centerY);
-         SHOW_LENS = true;
-         SHOW_MARKER = true;
-         USE_SERVER = true;
-         break;
-     }
-   }
-   
+     // set the frame, only for non-AR condition
+     frameCenterX = centerX;
+     frameCenterY = centerY;
+     frameWidth = w2;
+     frameHeight = h2;     
+   }   
    
    /* Resize the window
     */
@@ -267,21 +250,17 @@ class App extends TouchManager {
      circuit.updateComponents();
      document.querySelector("#model").style.display = "none";
      document.querySelector("#generic-slider").style.display = "none";
-     model.reset();
+     model.resetModel();
      setScreen();
      if (SHOW_LENS) {
        lens.x = CANVAS_RATIO*canvas.width*3/4; // fix later
        lens.y = canvas.height/2; // fix later
      }
 
-     centerX = workingBox.width/2;
-     centerY = workingBox.height/2;
+     centerX = workingBoxWidth/2;
+     centerY = workingBoxHeight/2;
      
-     frameCenterX = workingBox.width/2;
-     frameCenterY = workingBox.height/2;
-     frameWidth = 450;
-     frameHeight = 350;
-     
+   
      // reset the sliders
      InputElement slider1 = document.querySelector("#battery-slider");
      slider1.value = "2.0";
@@ -298,28 +277,17 @@ class App extends TouchManager {
 
    /* Draw */
    void draw() {
-     CssRect toolbarRect = document.querySelector("#selection-toolbar").borderEdge; 
-     workingBox = new Rectangle(0, 0, CANVAS_RATIO*canvas.width, toolbarRect.top);   
      ctx.clearRect(0, 0, canvas.width, canvas.height);
-     //ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-     /*
-     ctx.save();
-     ctx.fillStyle = "rgba(250,250,250,0.8)";
-     ctx.textAlign = 'left';
-     ctx.textBaseline = 'top';
-     ctx.font = '34px sans-serif'; /* other fonts: verdana */
-     ctx.fillText("SPARK", 20, 20);
-      */
-     
+
      ctx.strokeStyle = 'white';
      ctx.lineWidth = 2;
      ctx.fillStyle = "rgba(255,255,255,0.2)";
-     ctx.strokeRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
-     ctx.fillRect(theApp.workingBox.left, theApp.workingBox.top, theApp.workingBox.width, theApp.workingBox.height);
+     ctx.strokeRect(0, 0, workingBoxWidth, workingBoxHeight);
+     ctx.fillRect(0, 0, workingBoxWidth, workingBoxHeight);
 
      // draw the frame
      if (condition == 3) {
-       ctx.strokeStyle = 'yellow';
+       ctx.strokeStyle = 'transparent';
        ctx.lineWidth = 2;
        ctx.fillStyle = "rgba(255,255,255,0.2)";
   

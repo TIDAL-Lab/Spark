@@ -127,7 +127,7 @@ class Help {
       else p3.text = "Current=${iFormated} Resistance=${rFormated}" ;
     }
     
-    else  { // component is null
+    else { // component is null
       p.text = "";
       p2.text = "";
       p3.text = "";

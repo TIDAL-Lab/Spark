@@ -62,20 +62,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.computeForce = function() {
-		//this.volt = 0.001;
-		//this.direction = 1;
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
-	  	this.force.y = this.direction * this.volt; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
-	  	if (this.compType == "Wire") { this.force.y *= 100; }
-	  	//if (this.compType == "Resistor" || this.compType == "Bulb") { this.force.y /= 10; }
+	  	this.force.y = this.direction * this.current/10; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
+	  	//if (this.compType == "Wire") { this.force.y *= 100; }
 	  	this.force.z = 0.0;
 
 	  	// transform the force vector --> world space
 		var length = this.force.length();
 		this.force.transformDirection(this.container.matrixWorld); //normalized
 		this.force.multiplyScalar(length);
-		//console.log(this.force);
 	}
 
 	this.createContainer = function() {
@@ -92,48 +88,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// TEST: cone container for resistor
 		var containerGeometry;
 		var containerMaterial;
-		if (this.compType == "Resistor" || this.compType == "Bulb") {
-			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
-			containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
-			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
-
-			// containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
-
-			// var cone1 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/2, this.w/10, this.l, 16, 16, true), containerMaterial);
-			// var cone2 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/10, this.w/2, this.l, 16, 16, true), containerMaterial);
-
-			// //coneGeometry1.rotateY(10);
-			// //cone2.position.y = -100;
-			// var coneBSP1 = new ThreeBSP(cone1);
-			// var coneBSP2 = new ThreeBSP(cone2);
-			// var union = coneBSP1.union(coneBSP2);
-			// this.container = union.toMesh(containerMaterial);
-
-/*			// New geometry idea
-			containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
-			var cylinder1 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/2, this.w/2, this.l/5, 16, 16, false), containerMaterial);
-			var cylinder2 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/2, this.w/2, this.l/5, 16, 16, false), containerMaterial);
-			var cylinder3 = new THREE.Mesh( new THREE.CylinderGeometry(this.w/4, this.w/4, 3 * this.l/5, 16, 16, true), containerMaterial);
-			cylinder1.position.y = 2 * this.l/5;
-			cylinder2.position.y = - 2 * this.l/5;
-
-			var BSP1 = new ThreeBSP(cylinder1);
-			var BSP2 = new ThreeBSP(cylinder2);
-			var BSP3 = new ThreeBSP(cylinder3);
-			var union = BSP3.union(BSP2);
-			union = union.union(BSP1);
-			this.container = union.toMesh(containerMaterial);*/
-
-
-
-			//this.container = new THREE.Mesh( union.toGeometry(), containerMaterial);
-			//this.container.geometry.computeFaceNormals();
-			//var bsp = new ThreeBSP( mesh1 ); 
-			//bsp = bsp.union( new ThreeBSP( mesh2 ) ); // unit it with the other cone
-			//this.container = bsp.toMesh(containerMaterial);
-			//this.container.position.y = this.l;
-		}
-		else if (this.compType == "Battery") { 
+		if (this.compType == "Battery") { 
 			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 1, true);
 			containerMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
@@ -146,15 +101,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			this.container.add(plusText);
 			this.container.add(minusText);
 		} 
-		else {   // it's a wire
+		else {   // it's a wire, resistor, or a bulb
 			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
-			containerMaterial = new THREE.MeshBasicMaterial( { color: lightGray } );
+			containerMaterial = new THREE.MeshBasicMaterial( { color: gray } );
+			if (this.compType == "Wire") { containerMaterial.color.set(lightGray); }
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
-
-			// var secondLayer =  new THREE.Mesh( containerGeometry, containerMaterial );
-			// this.container.add(secondLayer);
-			// this.obstacles.push(secondLayer);
 		}
+
 		containerMaterial.transparent = true;
 		containerMaterial.opacity = 0.7;
 		containerMaterial.depthTest = true;  // this seems to help with showing the electrons always on top
@@ -449,7 +402,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// 	{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
 		// spriteText1.position.set(-this.w, -standardLength/5, 0);
 
-		this.text2 = " rate = " + this.ammeter.count.toFixed(2) + " ";
+		//this.text2 = " rate = " + this.ammeter.count.toFixed(2) + " ";
 		this.text2 = " rate = " + " ";
 		var spriteText2 = makeTextSprite( this.text2, 
 			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
@@ -460,8 +413,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	}
 
 	this.updateAmmeter = function() {
-		var rate = this.ammeter.count/(ticks-10);
-		//var rate = this.ammeter.count;
+		//var rate = this.ammeter.count/(ticks-10);
+		var rate = this.ammeter.count;
 
 		this.text2 = " rate = " + Math.abs(rate.toFixed(2)) + " ";
 		this.ammeter.remove(this.ammeter.children[0]);  // used to be children[1] when I had text 1
@@ -470,7 +423,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		spriteText2.position.set(-this.w, standardLength/5, 0);
 		
 		this.ammeter.add( spriteText2 );
-		//this.ammeter.count = 0;
+		this.ammeter.count = 0;
 
 	}
 
@@ -483,24 +436,41 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		}
 	}
 
-
-	this.clicked = function() {
-		if (this == clickedComponent) { // if this is the same component as clicked last time
-			clickedComponent = null;
-			if (this.compType == "Battery") { this.container.material.color.set(darkGreen); }
-			else { this.container.material.color.set(lightGray); }
-			return;
+	this.showAmmeter = function( flag ) {
+		if ( flag ) {
+			this.ammeter.visible = true;
 		}
 		else {
+			this.ammeter.visible = false;
+		}
+	}
+
+
+	this.clicked = function() {
+		if (this == clickedComponent) { // if this is the same component as clicked last time, unclick it
+			clickedComponent = null;
+			var receiver = window.parent;
+			receiver.postMessage(-1, 'http://localhost:8080');
+
+			if (this.compType == "Battery") { this.container.material.color.set(darkGreen); }
+			else if (this.compType == "Wire") { this.container.material.color.set(lightGray); }
+			else { this.container.material.color.set(gray); }
+			this.showAmmeter(false);
+			return;
+		}
+		else { // if this is the first time this component is clicked
     		var receiver = window.parent;
 			receiver.postMessage(this.ID, 'http://localhost:8080');
 
 			if (clickedComponent != null) {
 				if (clickedComponent.compType == "Battery") { clickedComponent.container.material.color.set(darkGreen); }
-				else { clickedComponent.container.material.color.set(lightGray); }
+				else if (clickedComponent.compType == "Wire") { clickedComponent.container.material.color.set(lightGray); }
+				else { clickedComponent.container.material.color.set(gray); }
+				clickedComponent.showAmmeter(false);
 			}
 			this.container.material.color.set(darkOrange);
 			clickedComponent = this;
+			if (this.compType != "Battery") this.showAmmeter(true);
 		}
 	}
 
