@@ -48,9 +48,9 @@ class Resistor extends Component {
     ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    ctx.font = '12px sans-serif'; /* other fonts: verdana */
+    ctx.font = '14px sans-serif'; /* other fonts: verdana */
     
-    ctx.fillText("R = ${resistance}", -20,-22);
+    ctx.fillText("R = ${resistance}", -18,-25);
 
     return ctx;
     }

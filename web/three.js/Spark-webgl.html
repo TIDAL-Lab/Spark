@@ -13,7 +13,8 @@
     -->
   		<script src="lib/jquery.min.js"></script>
   		<script src="lib/parse-1.2.19.min.js"></script>
-  		<script src="lib/pubnub-3.7.14.min.js"></script>
+  	<!--	<script src="lib/pubnub-3.7.14.min.js"></script>  -->
+  		<script src="https://cdn.pubnub.com/pubnub-3.15.2.js"></script>
   		<script src="lib/underscore.js"></script>
 
   		<!-- the following scripts are the three.js scripts -->
@@ -44,21 +45,20 @@
 	    <canvas id="inputCapture" width="320" height="240" style="display: none"></canvas>
 	    <canvas id="debugCanvas" width="320" height="240" style="display: none"></canvas>
 
-    <!--
+    
 	    <button onclick="keepMoving()"> move electrons</button>
 	    <button onclick="updateElectrons()"> next move</button>
-	    <button onclick="displayGrid()"> grid on</button> -->
+	    <button onclick="displayGrid()"> grid on</button> 
 	    
 	    <button id="watch-button" onclick="watchElectron()"></button>
 
 	    <script src="AR_mediastream-spark.js"></script>
-	    
-	 	<script src="main.js"></script>
-	 	<script src="launch.js"></script>
+	 	<script src="main.js"></script>	 	
 		<!-- the following scripts are various classes in the code -->
 		<script src="component.js"></script>
 		<!-- the following scripts are the functional scripts for Spark -->	
 		<script src="electronObject.js"></script>
+		<script src="launch.js"></script>
 		<script type="text/javascript">
 		// moved to launch.js
 		</script>

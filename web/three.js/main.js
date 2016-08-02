@@ -10,7 +10,10 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var ArFlag = false;
+
+
+var ArFlag = true;
+var twoScreen = true;
 var twoD = true; //electron movement is either 2D (z=0) or 3D
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
@@ -45,10 +48,12 @@ var markerDetectedFlag = false;
 var red = 0xD11919;
 var darkRed = 0x990000;
 var green = 0x008F00;
+var lightGreen = 0xbfff80;
 var darkGreen = 0x003300;
 var gray = 0x808080;
 var midnightBlue = 0x000099;
-var backgroundBlue = 0x337586;
+var blue = 0x337586;
+var backgroundBlue = 0x5C919E;
 var orange = 0xFF9900;
 var darkOrange = 0xFF6600;
 var lightGray = 0xB2B2B2;
@@ -117,7 +122,7 @@ function initComponents() {
 	}
 	
 	if (!ArFlag) electronSize = 8;
-	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: backgroundBlue , transparent: true } );
+	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: blue , transparent: true } );
 	electronVertices = new THREE.PointCloud ( electronGeometry, electronMaterial );
 
 	markerRoot = new THREE.Mesh();
@@ -137,6 +142,10 @@ function doUpdate() {
 }
 
 function update() {
+	//change the style of watch-button to be normal
+	button = document.querySelector("#watch-button");
+	button.style.background = "url('../../images/buttons/watch2.png') 0 0 no-repeat / 100%"; // 100% is the size
+
 	// remove all children of scene
 	for (c = scene.children.length-1; c >= 0; c--) { 
 		var obj = scene.children[c];
@@ -171,7 +180,7 @@ function render() {
 
 function updateElectrons() {
 	ticks++;
-	if ( ticks % 100 == 0) {
+	if ( ticks % 10 == 0) {
 		for (i = 0; i < components.length; i++) {
 			components[i].updateAmmeter();   //recalculates the rate of flow
 		}
@@ -187,12 +196,8 @@ function updateElectrons() {
 	electronVertices.geometry.verticesNeedUpdate = true;
 	if (watch) {
 		//var randomIndex = Math.floor(Math.random() * eVertices.length);
-		var electron = electronObjects[0];
-		// var dir = electron.velocity.normalize();
-		// var length = electron.velocity.length();
-		// var arrowHelper = new THREE.ArrowHelper( dir, electron, length, darkGreen );
-		// scene.add(arrowHelper);
-		var trackMaterial = new THREE.LineBasicMaterial({ color: darkOrange });
+		var electron = electronObjects[randomElectronIndex];
+		var trackMaterial = new THREE.LineBasicMaterial({ color: lightGreen });
 		var trackGeometry = new THREE.Geometry();
 		trackGeometry.vertices.push(
 			electron.position,
@@ -300,7 +305,7 @@ function makeTextSprite( message, parameters )
 		parameters["fontsize"] : 18;
 	
 	var borderThickness = parameters.hasOwnProperty("borderThickness") ? 
-		parameters["borderThickness"] : 4;
+		parameters["borderThickness"] : 2;
 	
 	var borderColor = parameters.hasOwnProperty("borderColor") ?
 		parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
@@ -311,13 +316,16 @@ function makeTextSprite( message, parameters )
 	//var spriteAlignment = THREE.SpriteAlignment.topLeft;
 		
 	var canvas = document.createElement('canvas');
+	//canvas.width = 100;
 	var context = canvas.getContext('2d');
 	context.font = "Bold " + fontsize + "px " + fontface;
     
 	// get size data (height depends only on font size)
 	var metrics = context.measureText( message );
+	//console.log(metrics.width);
 	var textWidth = metrics.width;
-	
+	//var textWidth = 700;
+
 	// background color
 	context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
 								  + backgroundColor.b + "," + backgroundColor.a + ")";
@@ -326,7 +334,7 @@ function makeTextSprite( message, parameters )
 								  + borderColor.b + "," + borderColor.a + ")";
 
 	context.lineWidth = borderThickness;
-	roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+	roundRect(context, borderThickness/2, borderThickness/2, textWidth + 2*borderThickness, fontsize * 1.4 + borderThickness, 6);
 	// 1.4 is extra height factor for text below baseline: g,j,p,q.
 	
 	// text color
@@ -335,7 +343,7 @@ function makeTextSprite( message, parameters )
 	context.fillText( message, borderThickness, fontsize + borderThickness);
 	
 	// canvas contents will be used for a texture
-	var texture = new THREE.Texture(canvas) 
+	var texture = new THREE.Texture(canvas); 
 	texture.needsUpdate = true;
 
 	var spriteMaterial = new THREE.SpriteMaterial( 
@@ -348,6 +356,7 @@ function makeTextSprite( message, parameters )
 // function for drawing rounded rectangles
 function roundRect(ctx, x, y, w, h, r) 
 {
+	//console.log(w);
     ctx.beginPath();
     ctx.moveTo(x+r, y);
     ctx.lineTo(x+w-r, y);
@@ -383,18 +392,23 @@ function keepMoving() {
 var watch = false;
 var halo;
 var lines; // an object that holds the tracking lines as its children
+var randomElectronIndex;
 function watchElectron() {
 	if (!watch) {
 		// add an object to hold the tracking lines
 		lines = new THREE.Object3D();
-		var geometry = new THREE.CircleGeometry( 5, 16 );
-		var material = new THREE.MeshBasicMaterial( { color: darkOrange } );
+		var geometry = new THREE.CircleGeometry( 10, 16 );
+		var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
 		halo = new THREE.Mesh( geometry, material );
 		// halo.material.transparent = true;
 		// halo.material.opacity = 0.5;
 		halo.material.visible = true;
 		scene.add(halo);
 		scene.add(lines);
+
+		// pick a random number
+		randomElectronIndex = Math.floor(Math.random() * electronObjects.length);
+		//console.log(randomElectronIndex);
 
 		//change the style of watch-button to be active
 		button = document.querySelector("#watch-button");

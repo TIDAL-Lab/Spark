@@ -40,6 +40,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
    	this.ammeter;
    	this.measureOn = false;
    	this.text2;
+   	this.prevCount = 0;
 
   	if (this.compType == "Wire") {
   		//this.electronCount = 1;
@@ -64,14 +65,16 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	this.computeForce = function() {
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
-	  	this.force.y = this.direction * this.current/10; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
-	  	//if (this.compType == "Wire") { this.force.y *= 100; }
+	  	this.force.y = this.direction * this.current; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
+	  	if (this.compType == "Wire") { this.force.y/5; }
 	  	this.force.z = 0.0;
 
 	  	// transform the force vector --> world space
 		var length = this.force.length();
 		this.force.transformDirection(this.container.matrixWorld); //normalized
 		this.force.multiplyScalar(length);
+
+		this.velocityMax = velocity + this.current * 20;
 	}
 
 	this.createContainer = function() {
@@ -403,27 +406,41 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// spriteText1.position.set(-this.w, -standardLength/5, 0);
 
 		//this.text2 = " rate = " + this.ammeter.count.toFixed(2) + " ";
-		this.text2 = " rate = " + " ";
-		var spriteText2 = makeTextSprite( this.text2, 
-			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
-		spriteText2.position.set(-this.w, standardLength/5, 0);
+		// var rate = this.ammeter.count;
+		// console.log(rate);
+
+		// this.text2 = Math.abs(rate.toFixed(2)) + " electrons per clock tick";
+		// //this.text2 = " 0 electrons per clock tick " ;
+		// var spriteText2 = makeTextSprite( this.text2, 
+		// 	{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
+		// spriteText2.position.set(-this.w, standardLength/5, 0);
 		
 	    //this.ammeter.add( spriteText1 );
-	    this.ammeter.add( spriteText2 );
+	    //this.ammeter.add( spriteText2 );
 	}
 
 	this.updateAmmeter = function() {
 		//var rate = this.ammeter.count/(ticks-10);
-		var rate = this.ammeter.count;
+		var rate = (this.ammeter.count + this.prevCount)/2;
 
-		this.text2 = " rate = " + Math.abs(rate.toFixed(2)) + " ";
+
+		//this.text2 = Math.abs(rate.toFixed(2)) + " electrons per clock tick ";
+		//this.text2 = "Speed = " + Math.abs(rate.toFixed(0));
+		if ( Math.round(Math.random()) == 1 ) {
+			this.text2 = Math.floor(this.current * 20) + " electrons";
+		}
+		else {
+			this.text2 = Math.ceil(this.current * 20) + " electrons";
+		}
+		
 		this.ammeter.remove(this.ammeter.children[0]);  // used to be children[1] when I had text 1
 		var spriteText2 = makeTextSprite( this.text2, 
-			{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:128, b:0, a:0.8} } );
-		spriteText2.position.set(-this.w, standardLength/5, 0);
+			{ fontsize: 54, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
+		spriteText2.position.set(this.w, 0, 0);
 		
 		this.ammeter.add( spriteText2 );
 		this.ammeter.count = 0;
+		this.prevCount = rate;
 
 	}
 

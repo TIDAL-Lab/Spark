@@ -146,6 +146,14 @@ class Component implements Touchable {
       ctx.fillStyle = "rgba(43,76,85,1.0)";
       //ctx.fillStyle = "rgba(205,165,110,1)";
       ctx.fillRect(-d/2, -10, d, 20);
+      
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.font = '14px sans-serif'; /* other fonts: verdana */
+      
+      ctx.fillText("R = ${resistance}", -18,-7);
+      
     }
     /* draw a box containing the component, if its model is launched */
     if (theApp.model.component == this) {
@@ -341,10 +349,7 @@ class Component implements Touchable {
       removeConnectedComponents();
       Sounds.playSound("crunch");
       App.repaint();
-      if (USE_SERVER) {
-        theApp.circuit.sendDataToServer();
-      }
-      
+      theApp.circuit.sendData();      
       return;
     }
     
@@ -393,11 +398,7 @@ class Component implements Touchable {
       }
     }
     App.repaint();
-    //print(USE_SERVER);
-    if (USE_SERVER) {
-      //print("use server");
-      theApp.circuit.sendDataToServer();
-    }    
+    theApp.circuit.sendData();    
   }
 
   void touchDrag(Contact event) {

@@ -79,7 +79,7 @@ class Marker implements Touchable {
     /* if the lens is over component launch its model */
     //findComponent(); 
     App.repaint();
-    theApp.circuit.sendDataToServer();
+    theApp.circuit.sendData();
   }
    
   // This gets fired only after a touchDown lands on the touchable object

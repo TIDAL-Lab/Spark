@@ -5,7 +5,7 @@ class webglModel extends Model {
   IFrameElement frame = document.querySelector("#model-frame");
   
   webglModel() : super() { 
-    frame.src = "../three.js/Spark-webgl.html";
+    frame.src = "../three.js/Spark-webgl.html";    
     theApp.circuit.solve();
     
     // getting the window of the iframe
@@ -20,33 +20,20 @@ class webglModel extends Model {
   }
   
   void launchModel() {    
-    // getting the window of the iframe
-    var receiver = frame.contentWindow;
-    receiver.postMessage("hello model iframe!!", 'http://localhost:8080');
     
+    context.callMethod('publishPubnub', []);    
     document.querySelector("#model").style.display = "block";
     theApp.help.show();
     
-    if (USE_SERVER) {
-      print("launch model");
-      //theApp.circuit.solve();
-      theApp.circuit.sendDataToServer();
-    }
+    theApp.circuit.solve();
   }
   
   void updateModel() {}
   
   void resetModel() {
-    //launchModel();
-    frame.src = "../three.js/Spark-webgl.html";
-    
+    //launchModel();    
     document.querySelector("#model").style.display = "block";
     theApp.help.show();
-    
-    if (USE_SERVER) {
-      print("reset model");
-      //theApp.circuit.solve();
-      theApp.circuit.sendDataToServer();
-    }
+    theApp.circuit.solve();
   }
 }

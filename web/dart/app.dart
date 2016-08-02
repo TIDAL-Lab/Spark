@@ -28,7 +28,7 @@ part of SparkProject;
  * 3 --> webgl nonAR: circuit model on the same screen
  * 4 --> webgl AR
  */
-int CONDITION = 3;
+int CONDITION = 4;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
@@ -49,7 +49,7 @@ class App extends TouchManager {
    Circuit circuit = new Circuit();
    Toolbar selectionBar; 
    Toolbar editionBar;
-   Model model;
+   Model model = null;
    
    Component genericSliderComponent; //the component that is tapped on to change its value
    Component webglComponent = null;
@@ -68,6 +68,8 @@ class App extends TouchManager {
       
    App() {
      theApp = this;
+     
+     context.callMethod('initPubnub', []);
      
      // receiving message from the iframe
      window.onMessage.listen((evt) => receiveMessage(evt));
@@ -94,16 +96,15 @@ class App extends TouchManager {
        
    
      // instantiate lens and help objects
-     if (SHOW_LENS) { lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2); }
+     if (SHOW_LENS) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
+     
+     // instantiate the JsAr tag
+     if (SHOW_MARKER) marker = new Marker(centerX, centerY);
        
      // create the first battery
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);    
      new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage); 
-     
-     if (condition == 3) {  // because condition 1 & 2 has input variables for launchmodel(component)
-       (model as webglModel).launchModel();  
-     }
    }
    
    void receiveMessage(evt) { // receives message from the iframe
@@ -167,20 +168,21 @@ class App extends TouchManager {
        case 3:
          help.helpSrc ="images/helps/";
          model = new webglModel();
+         (model as webglModel).launchModel(); 
          SHOW_LENS = false;
          SHOW_MARKER = false;
-         USE_SERVER = true;
+         USE_SERVER = false;
          CANVAS_RATIO = 0.55;
          HELP_RATIO = 0.4;
          break;
        case 4:
          help.helpSrc ="images/helps/";
-         model = new lumpModel();
-         // instantiate the JsAr tag
-         marker = new Marker(centerX, centerY);
-         SHOW_LENS = true;
+         model = new Model();  // not really using this
+         SHOW_LENS = false;
          SHOW_MARKER = true;
          USE_SERVER = true;
+         CANVAS_RATIO = 0.75;
+         HELP_RATIO = 0.3;
          break;
      }
    }

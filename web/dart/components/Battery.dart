@@ -48,13 +48,13 @@ class Battery extends Component  {
       ctx.drawImageScaled(img, -iw/2, -ih/2, iw, ih);
      if (!isBurnt) { 
      ctx.fillStyle = "rgb(120,180,35)";
-     ctx.fillRect(-5, -10, 30, 20);
+     ctx.fillRect(-5, -10, 35, 20);
      ctx.fillStyle = "rgb(0, 0, 0)";
      ctx.textAlign = 'left';
      ctx.textBaseline = 'top';
-     ctx.font = '10px sans-serif'; /* other fonts: verdana */
+     ctx.font = '13px sans-serif'; /* other fonts: verdana */
      
-     ctx.fillText("V = ${voltageDrop}", -2,-5);
+     ctx.fillText("V = ${voltageDrop}", -4,-7);
      }
      else { // if the battery is burnt, draw the warning
        num warningW = warning.width / 2.5;

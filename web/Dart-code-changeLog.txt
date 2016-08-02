@@ -53,3 +53,18 @@ THINGS TO FIX LATER:
 *** notes on 7/18/2016
 1. modifying the way that the circuit is connected to different models for different conditions	
 	it is currently a big mess
+	
+*** notes on 7/31/2016
+1. before the working box was a rectangle object, which made updating the width and height of it difficult and messy
+	now I changed it, there is no object anymore, and just drawing a rectangle in the draw() function based on
+	updated width and height after reseting or resizing the window (similar to the frame rectangle)
+2. I now use the USE_SERVER flag inside the sendData() function (inside circuit object) 
+	if it is condition 3 (non-AR) it does not send data to server, but using pubnub it sends it directly to the iframe
+	but if it is condition 4 (AR) it sends data to server
+	both functions for sending data (both conditions 3 & 4) are written in sendData.js file.
+	
+*** notes on 8/1/2016
+1. trying to fix the issue with initiating the electron model when the app starts
+	(right now, it does not show the battery on the electron model before the first interaction)
+	ok, I sort of fixed some of the issues, but still the pubnub publish/subscribe works strangely
+2. working on condition 4, trying to make the AR working.

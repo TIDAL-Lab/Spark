@@ -11,8 +11,8 @@
  */
 
 var electronSize = 40;
-var velocity = 2;
-var velocityMax = 20;
+var velocity = 4;
+//var velocityMax = 20;
 var lossFactor = 0.9;
 
 function Electron( component ) {
@@ -112,17 +112,18 @@ function Electron( component ) {
 	// this.force.multiplyScalar(length); 
 	
 	var v = this.velocity.length();
-	if (this.velocity.length() > velocityMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
-		this.velocity.setLength(velocityMax-0.01);
+	var vMax = this.component.velocityMax;
+	if (this.velocity.length() > vMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
+		this.velocity.setLength(vMax-0.01);
 	}
-	if (this.velocity.length() > velocityMax) console.log("error: velocity exceeds the max velocity");
+	if (this.velocity.length() > vMax) console.log("error: velocity exceeds the max velocity");
 
 	// move the electron
 	this.position.add( this.velocity );
 	this.status = "moved";
 	this.reflectedTimes = 0;
 
-	this.findElectronsOutside();
+	//this.findElectronsOutside();
 	}
 
 
@@ -171,13 +172,15 @@ function Electron( component ) {
 	var arrowHelper = new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,0), 10, darkGreen );
 	this.collision = function( obstacles ) {
 		// OLD ELECTRON CODE: CHECK for AR, I think I should uncomment this for AR
-	/*	var direction = new THREE.Vector3();
-		direction.copy(electron.velocity);  // in local space / force is already added
-		direction.transformDirection(electrons.matrixWorld); //transform direction to world space also normalizes the vector
-		var origin = new THREE.Vector3();
-		origin.copy(electron);
-		origin.applyMatrix4(electrons.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
-	*/
+		if (ArFlag) {
+			var direction = new THREE.Vector3();
+			direction.copy(this.velocity);  // in local space / force is already added
+			direction.transformDirection(electronVertices.matrixWorld); //transform direction to world space also normalizes the vector
+			var origin = new THREE.Vector3();
+			origin.copy(this);
+			origin.applyMatrix4(electronVertices.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
+		}
+	
 		//scene.remove(arrowHelper);
 		var length = this.velocity.length();
 		var dir = new THREE.Vector3().copy(this.velocity).normalize();	
@@ -245,10 +248,10 @@ function Electron( component ) {
 			var length = this.velocity.length();
 			var direction = new THREE.Vector3();
 			direction.copy(this.velocity);
-			direction.transformDirection(electrons.matrixWorld); //transform direction also normalizes the vector
+			direction.transformDirection(electronVertices.matrixWorld); //transform direction also normalizes the vector
 			var reflection = direction.reflect(worldNormal);
 			var m = new THREE.Matrix4();
-			m = m.getInverse(electrons.matrixWorld);
+			m = m.getInverse(electronVertices.matrixWorld);
 			reflection.transformDirection(m);
 			this.velocity = reflection.multiplyScalar(length);
 		}
@@ -341,17 +344,17 @@ function Electron( component ) {
 		if (ArFlag) {  //AR condition
 			// first transform the electron position with the world matrix, move it to the next component
 			// then use inverse matrix to transform the position back to the electrons local position
-			this.position.applyMatrix4(electrons.matrixWorld);
+			this.position.applyMatrix4(electronVertices.matrixWorld);
 			this.position.add(pushVector);
 			var m = new THREE.Matrix4();
-			m = m.getInverse(electrons.matrixWorld);
-			this.applyMatrix4(m);
+			m = m.getInverse(electronVertices.matrixWorld);
+			this.position.applyMatrix4(m);
 		}
 		else {   // non-AR condition
 			this.position.add(pushVector);
 		}
 
-		this.velocity.multiplyScalar(2/this.velocity.length());   // after passing the battery set the velocity to 2 again	
+		//this.velocity.multiplyScalar(2/this.velocity.length());   // after passing the battery set the velocity to 2 again	
 
 		this.componentID = secondJunction.connectedComponentIDs[0];	
 		this.component = components[this.componentID];

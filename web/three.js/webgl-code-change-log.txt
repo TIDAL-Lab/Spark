@@ -558,8 +558,7 @@ I paused working on the branching effect and instead adding some new features to
 	This way, at each update run, it updates the elements of the electronObjects array, and after that it sets the particles
 	vertices to the electron.positions.
 	
-
-Things to fix before tomorrow meeting
+Things to fix:
 1. electron movement
 2. fix the frame size/position
 3. Add the counter
@@ -573,6 +572,21 @@ bounce back reverse normal vector --> correct?
 Slowing down issue
 1. When I stretch the wire, it becomes very slow --> test if it is because of more ions or the larger container.
 2. check if changing clone() to copy makes a difference
+
+
+*** notes on 7/31/2016
+1. I set up a frame on the circuit side that maps what part of the working area is being show in the electron model
+	the mapping is working all fine now, with size changing whit the zooming/panning events on the iframe
+2. I started working on condition 4:
+
+	I now have two html files one for running as an iframe 
+	
+	
+LATER: instead of using three.min.js use three.js file and then comment the part that gives warning on
+		"texture is not power of two ..."
+
+
+
 
 ISSUES TO FIX LATER:
 

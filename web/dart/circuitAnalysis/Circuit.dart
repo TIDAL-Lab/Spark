@@ -77,10 +77,9 @@ class Circuit {
     }
     
     updateComponents();
-    if (theApp.condition != 3) theApp.model.updateModel();
-    if (USE_SERVER) {
-      sendDataToServer();
-    }    
+    if (theApp.condition == 1) theApp.model.updateModel();
+    sendData();
+    
   }
 
 
@@ -137,7 +136,8 @@ class Circuit {
    * 3. called by component.touchUp method, when componets are dragged OR components are deleted
    * 4. called by controlpoint.touchup method, when components are dragged
    */
-  void sendDataToServer() {
+  void sendData() {
+   
   
     //var myObj = new JsArray();
     var myObj = [];
@@ -189,17 +189,23 @@ class Circuit {
     }
     //print(JSON.encode(myObj));
     
-
+    
     //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
     myObj = new JsObject.jsify(myObj);
-       
-//    // call the "doDeleteParse method on myObj (the code is in index.html)
-//    var deleteParse = new JsObject(context['deleteParse'],[myObj]); // instantiate a JS "deleteParse" object
-//    deleteParse.callMethod('doDeleteParse'); // call its method "doDeleteParse"
     
-    var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
-    data.callMethod('doSendData'); // call its method "doSendData"
-
+    
+    if (USE_SERVER) {  // send data to parse
+      print("sending data to parse");
+      // call the "doDeleteParse method on myObj (the code is in sendData.js)
+      var deleteParse = new JsObject(context['deleteParse'],[myObj]); // instantiate a JS "deleteParse" object
+      deleteParse.callMethod('doDeleteParse'); // call its method "doDeleteParse"
+    }
+    else { 
+      theApp.webglComponent = null;
+      if (theApp.model != null) theApp.help.show();
+      var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
+      data.callMethod('doSendData'); // call its method "doSendData"
+    }
   }
   
   /** find the connected components in the graph, create the data to be sent to Parse
@@ -282,9 +288,7 @@ class Circuit {
     n1.adjacents.add(n2);
     n2.adjacents.add(n1);
     findSpanningForest();
-    if (USE_SERVER) {
-      sendDataToServer();
-    }    
+    sendData();    
   }
   
   /*int returnDirection(double x0,double x1,double y0,double y1){
@@ -327,7 +331,7 @@ class Circuit {
     this.nodes.remove(n2);
     this.edges.remove(e);
     findSpanningForest();
-    //sendDataToServer(); // no need to call it here, send data to server is done in the touchup function    
+    //sendData(); // no need to call it here, send data is done in the touchup function    
   }
  
   

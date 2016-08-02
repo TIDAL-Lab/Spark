@@ -191,7 +191,7 @@ class ControlPoint implements Touchable {
     makeConnection();
     updateCircuit();    
     App.repaint();
-    theApp.circuit.sendDataToServer();
+    theApp.circuit.sendData();
   }
 
   void touchDrag(Contact event) {
