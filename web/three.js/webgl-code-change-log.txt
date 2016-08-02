@@ -469,7 +469,7 @@ Things that I am going to fix today:
 	FIXED: i needed to first transform the electron position with the electrons world matrix, add the push vector to it
 			and then transform electron position back to the local matrix for electrons.
 			
-3. working on ISSUE004: make it work for junctions with moer than two connected components
+3. working on ISSUE004: make it work for junctions with more than two connected components
 	plan:
 	a. right now junctions has a filed called "connectedComponentID" which is a number value
 		I have to change that to an array to consider more than one connections
@@ -585,8 +585,11 @@ Slowing down issue
 LATER: instead of using three.min.js use three.js file and then comment the part that gives warning on
 		"texture is not power of two ..."
 
-
-
+*** notes on 8/2/2016
+1. I fixed the issues with adding back the AR condition.
+	I compared my updated code with the stable commit on June 4th (6/4/2016): "DONE: The passFromBattery works for AR condition"
+	And yaaaay, it is working now :)
+2. 
 
 ISSUES TO FIX LATER:
 

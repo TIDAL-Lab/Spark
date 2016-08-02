@@ -194,6 +194,14 @@ function updateElectrons() {
 		electron = electronObject.position;									
 	}
 	electronVertices.geometry.verticesNeedUpdate = true;
+	// ARTEST
+	for ( k = 0; k < eVertices.length; k++ ) {
+		var pos1 = eVertices[k];
+		var pos2 = electronObjects[k].position;
+		if (pos1 != pos2) {
+			console.log("there is a bug here: " + pos1.x + " " + pos2.x); 
+		}									
+	}
 	if (watch) {
 		//var randomIndex = Math.floor(Math.random() * eVertices.length);
 		var electron = electronObjects[randomElectronIndex];

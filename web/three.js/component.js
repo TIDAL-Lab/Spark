@@ -42,6 +42,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
    	this.text2;
    	this.prevCount = 0;
 
+   	// AR condition
+   	this.initialMatrix = new THREE.Matrix4(); //the matrix for finding the world to local position of electrons
+
   	if (this.compType == "Wire") {
   		//this.electronCount = 1;
   		this.electronCount = Math.round( 15 * this.l/standardLength); // this.l might not be an integer
@@ -66,8 +69,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
 	  	this.force.y = this.direction * this.current; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
-	  	if (this.compType == "Wire") { this.force.y/5; }
+	  	if (this.compType == "Wire") { this.force.y *= 0.2; }
 	  	this.force.z = 0.0;
+
 
 	  	// transform the force vector --> world space
 		var length = this.force.length();
@@ -153,10 +157,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		// create ions and add them to the box
 		if (this.compType != "Battery") { this.createIons(); }
 		
-		this.container.material.side = THREE.BackSide;  // for collision detection code
-  		//this.obstacles.push(this.container); // for collision detection code
-  		this.obstacles.push(this.startJunction);
-  		this.obstacles.push(this.endJunction);
+
 
 		//transform the container
 		// first set its position
@@ -171,13 +172,20 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var sign = Math.sign(vector.z);		
 		var rotationAngle = angle*sign;
 		this.container.rotation.z = rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
-		//this.container.rotation.x = Math.PI/6;
 		// I need to manually update the matrix for electrons
-		this.container.updateMatrixWorld(); // because it is not in the render() loop yet 
 
-		//var edges = new THREE.FaceNormalsHelper( this.container, 4, darkGreen, 2 );
-		//var wireframe = new THREE.WireframeHelper( this.container, 0x00ff00 );
-		//scene.add(wireframe);
+		
+
+		this.container.updateMatrixWorld(); // because it is not in the render() loop yet 
+		
+		// set the matrix for finding the world to local position of electrons
+		this.initialMatrix.copy(this.container.matrixWorld);
+
+
+		this.container.material.side = THREE.BackSide;  // for collision detection code
+  		this.obstacles.push(this.container); // for collision detection code
+  		this.obstacles.push(this.startJunction);
+  		this.obstacles.push(this.endJunction);
 	}
 
 	this.createJunction = function(thetaStart, yPos) {
@@ -207,11 +215,13 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		return junction;
 	}
 
+	// not being used right now
 	this.updateJunctions = function() {
 		this.formJunctionCurrents( this.startJunction, "start" );
 		this.formJunctionCurrents( this.endJunction, "end" );
 	}
 
+	// not being used right now
 	this.formJunctionCurrents = function ( junction, string ) {  // REMOVE STRING: it's only for testing
 		for ( i = 0; i < junction.connectedComponents.length; i ++ ) {
 			var component = junction.connectedComponents[i];
@@ -292,6 +302,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
   		}	
 	}
 
+	// not being used right now
 	this.findNextComponent = function( junction ) {
 		return junction.outComponents[0];
 		if (junction.probabilities.length == 0) {

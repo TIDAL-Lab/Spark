@@ -61,6 +61,7 @@ function Electron( component ) {
 		this.component = component;
 		this.reflectedTimes = 0;   // count the number of times bouncing off
 		this.status = "init";  // for debugging (issue with electrons leaving the container)	
+		this.testFlag = false;
 
 	this.updateElectron = function() {
 		var component = this.component;
@@ -97,45 +98,54 @@ function Electron( component ) {
 		
 	}
 
-	this.worldToLocal = function() {
+	this.worldToLocalOld = function(position) {   //only works for non-AR condition, not for AR
 		var m = new THREE.Matrix4();
 		m = m.getInverse(this.component.container.matrixWorld);
-		var local = new THREE.Vector3().copy(this.position);
+		var local = new THREE.Vector3().copy(position);
 		local.applyMatrix4(m);
 		return local;
 	}
 
-	this.moveElectron = function() {
-	// // transform the force vector
-	// var length = this.force.length();
-	// this.force.transformDirection(this.container.matrixWorld); //normalized
-	// this.force.multiplyScalar(length); 
-	
-	var v = this.velocity.length();
-	var vMax = this.component.velocityMax;
-	if (this.velocity.length() > vMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
-		this.velocity.setLength(vMax-0.01);
+
+	this.worldToLocal = function(position) {
+		var m = new THREE.Matrix4();
+		//m = m.getInverse(this.component.container.matrixWorld);
+		m = m.getInverse(this.component.initialMatrix);
+		var local = new THREE.Vector3().copy(position);
+		local.applyMatrix4(m);
+		return local;
 	}
-	if (this.velocity.length() > vMax) console.log("error: velocity exceeds the max velocity");
 
-	// move the electron
-	this.position.add( this.velocity );
-	this.status = "moved";
-	this.reflectedTimes = 0;
 
-	//this.findElectronsOutside();
+	this.moveElectron = function() {
+		
+		var v = this.velocity.length();
+		var vMax = this.component.velocityMax;
+		if (this.velocity.length() > vMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
+			this.velocity.setLength(vMax-0.01);
+		}
+		if (this.velocity.length() > vMax) console.log("error: velocity exceeds the max velocity");
+
+		this.position.add( this.velocity );
+		this.status = "moved";
+		this.reflectedTimes = 0;
+
+		this.findElectronsOutside();
 	}
 
 
 	this.findElectronsOutside = function() {
+		this.testFlag = false;
 		// check if it is in the container box
 		var component = this.component;
-		var electronLocal = this.worldToLocal();
+		//console.log("before: " + this.position.y);
+		var electronLocal = this.worldToLocal(this.position);
+		//console.log("after: " + electronLocal.y);
 		if (Math.abs(electronLocal.y) <= component.l/2) {
 			if (Math.abs(electronLocal.x) >= component.w/2) { // the electron is outside of the container cylinder
 				this.position.sub(this.velocity);
 				// Make sure it's not out of the box anymore
-				var local2 = this.worldToLocal();
+				var local2 = this.worldToLocal(this.position);
 				if (Math.abs(local2.y) <= component.l/2) {
 					if (Math.abs(local2.x) >= component.w/2) { 
 						console.log("ERROR WALL");
@@ -143,6 +153,7 @@ function Electron( component ) {
 					} }
 				var normal = new THREE.Vector3(1,0,0);
 				if (electronLocal.x > 0) normal.multiplyScalar(-1);
+				this.testFlag = true;
 				this.bounceBack(normal, component);
 				//console.log("bounced off a wall");
 
@@ -155,7 +166,7 @@ function Electron( component ) {
 			if ( distance >= component.w/2 ) {
 				this.position.sub(this.velocity);
 				// Make sure it's not out of the box anymore
-				var local2 = this.worldToLocal();
+				var local2 = this.worldToLocal(this.position);
 				if (Math.abs(local2.y) <= component.l/2) {
 					if (Math.abs(local2.x) >= component.w/2) { 
 						console.log("ERROR JUNCTION");
@@ -169,26 +180,28 @@ function Electron( component ) {
 		} 
 	}
 
-	var arrowHelper = new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,0), 10, darkGreen );
+	//var arrowHelper = new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,0), 10, darkGreen );
 	this.collision = function( obstacles ) {
-		// OLD ELECTRON CODE: CHECK for AR, I think I should uncomment this for AR
+		var length = this.velocity.length();
 		if (ArFlag) {
 			var direction = new THREE.Vector3();
 			direction.copy(this.velocity);  // in local space / force is already added
 			direction.transformDirection(electronVertices.matrixWorld); //transform direction to world space also normalizes the vector
 			var origin = new THREE.Vector3();
-			origin.copy(this);
+			origin.copy(this.position);
 			origin.applyMatrix4(electronVertices.matrixWorld);    // CHECK LATER: it seems it's already transformed when electrons are created
 		}
 	
+		else {
+			var direction = new THREE.Vector3().copy(this.velocity).normalize();	
+			var origin = new THREE.Vector3().copy(this.position); 
+		}
+
 		//scene.remove(arrowHelper);
-		var length = this.velocity.length();
-		var dir = new THREE.Vector3().copy(this.velocity).normalize();	
-		var origin = new THREE.Vector3().copy(this.position); 
 		//arrowHelper = new THREE.ArrowHelper( dir, origin, length+electronSize/2, darkGreen );
 		//scene.add(arrowHelper);
 
-		raycaster.set(origin, dir);
+		raycaster.set(origin, direction);
 
 		//raycaster.set( electron, electron.velocity);
 		// var distance = length + (electronSize * 2);
@@ -214,18 +227,20 @@ function Electron( component ) {
 		// this part is for 2D movement of electrons (z=0)
 		if (twoD) { normal.z = 0.0; } // project the normal vector on the xy plane (in local space of container)
 
-		var worldNormal = normal.clone().applyMatrix3( normalMatrix ).normalize();
+		var worldNormal = new THREE.Vector3().copy(normal).applyMatrix3( normalMatrix ).normalize();
+		//var worldNormal = normal.clone().applyMatrix3( normalMatrix ).normalize();
 		// if (obstacle.object == component.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
 		// if (obstacle.object == component.startJunction || obstacle.object == component.endJunction) worldNormal.multiplyScalar( -1 );    // check this later!
 
 
-		if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction");
+		//if (Math.abs(worldNormal.z) > 0.2) console.log("normal vector in z direction " + this.testFlag);
 		
 		// now calculate the reflection
 		this.reflect( worldNormal );
 
 		//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
 		this.status = "bounced back";
+
 		if (this.reflectedTimes > 1) {  // check if the electron is stuck
 			this.velocity.setLength(velocity);
 			//this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
