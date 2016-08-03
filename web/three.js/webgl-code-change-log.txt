@@ -589,7 +589,13 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 1. I fixed the issues with adding back the AR condition.
 	I compared my updated code with the stable commit on June 4th (6/4/2016): "DONE: The passFromBattery works for AR condition"
 	And yaaaay, it is working now :)
-2. 
+
+2. working on freezing the screen
+	--> it is working now
+	
+3. 
+
+4. working on the size of components and AR tag and the correct mapping
 
 ISSUES TO FIX LATER:
 

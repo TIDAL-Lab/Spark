@@ -11,10 +11,15 @@
  */
 
 
-
+// Static flags
 var ArFlag = true;
 var twoScreen = true;
 var twoD = true; //electron movement is either 2D (z=0) or 3D
+
+// Dynamic FLAGS
+var updateFlag = false;  //(launch): when updating the circuit, updateFlag = true => pause the rendering while the circuit object is being parsed
+var markerDetectedFlag = false;  //not being used now
+var freezeFlag = false;
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 var container;
@@ -40,9 +45,7 @@ var windowHalfY = window.innerHeight / 2;
 
 
 
-// FLAGS
-var updateFlag = false;
-var markerDetectedFlag = false;
+
 
 // COLORS:
 var red = 0xD11919;
@@ -74,10 +77,16 @@ function init() {
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
-	if (ArFlag) { camera = new THREE.Camera(); }
+	if (ArFlag) { 
+		//camera = new THREE.Camera(); 
+		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
+	}
 	else {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
-		camera.position.z = 900;	}
+		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+		camera.position.z = 900;	
+	}
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
@@ -169,7 +178,7 @@ function render() {
  	renderer.autoClear = false;
 	renderer.clear();
 	/* order of rendering matters: first inputScene, then 3D scene overlayed on the inputScene */
-	if (ArFlag) renderer.render(inputScene, inputCamera);
+	if (ArFlag && !freezeFlag) renderer.render(inputScene, inputCamera);
 	/* if it is no-AR condition, render the scene; but if it is Ar condition, 
 	wait until a marker is detected */
 	//if ( (ArFlag && markerDetectedFlag) || (!ArFlag) ) renderer.render( scene, camera );
@@ -434,4 +443,26 @@ function watchElectron() {
 	}
 	watch = !watch;
 	
+}
+
+
+function freezeAR() {
+	button = document.querySelector("#freeze-button");
+	if (!freezeFlag) {  // freeze the scene
+
+		//change the style of freeze-button to be active		
+		button.style.background = "url('../../images/buttons/capture.png') 0 0 no-repeat"; 
+		button.style.backgroundSize = "100%";
+	}
+
+	else {   //unfreeze the scene
+
+		//change the style of freeze-button to be active
+		button.style.background = "url('../../images/buttons/freeze.png') 0 0 no-repeat"; 
+		button.style.backgroundSize = "100%";
+
+	}
+
+	freezeFlag = !freezeFlag;
+
 }

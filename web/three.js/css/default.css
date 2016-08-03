@@ -42,7 +42,7 @@ a {
 
 
 #watch-button:active
- { 
+ { /* with current code, the active css doesn't seem necessary*/
    background: url("../../images/buttons/watch2-active.png") 0 0 no-repeat;
    background-size: 100%;
    background-position: 2px 2px; 
@@ -53,4 +53,19 @@ a {
 #watch-button:hover {
   border: none;
   padding: none;
+}
+
+#freeze-button {
+  -webkit-transform: rotate(360deg); /* Chrome & Safari */
+  background: url("../../images/buttons/freeze.png") 0 0 no-repeat;
+  background-size: 100%; 
+  height: 50px;
+  width: 200px;
+  position: absolute;
+  margin: -50px -100px;
+  top: 20%;
+  left: 20%;
+  border: none;
+  padding: none;
+  display: block;
 }

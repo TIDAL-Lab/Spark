@@ -66,7 +66,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		object.position.add( delta );
 		center.add( delta );
 		var message = [delta.x, delta.y];
-		window.parent.postMessage(message, 'http://localhost:8080');
+		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
 		scope.dispatchEvent( changeEvent );
 
@@ -86,7 +86,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		//console.log(delta);
 		var message = [delta.z];
-		window.parent.postMessage(message, 'http://localhost:8080');
+		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
 		scope.dispatchEvent( changeEvent );
 

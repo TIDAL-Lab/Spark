@@ -103,7 +103,7 @@ function JsArInit() {
 
         // Use the imageReader to detect the markers
         // (The 2nd parameter is a threshold)
-        if (detector.detectMarkerLite(imageReader, threshold) > 0) {
+        if (detector.detectMarkerLite(imageReader, threshold) > 0 && !freezeFlag) {
             markerDetectedFlag = true;
             // If any markers were detected, get the transform matrix of the first one
             detector.getTransformMatrix(0, resultMatrix);

@@ -478,7 +478,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		if (this == clickedComponent) { // if this is the same component as clicked last time, unclick it
 			clickedComponent = null;
 			var receiver = window.parent;
-			receiver.postMessage(-1, 'http://localhost:8080');
+			if (!twoScreen) receiver.postMessage(-1, 'http://localhost:8080');
 
 			if (this.compType == "Battery") { this.container.material.color.set(darkGreen); }
 			else if (this.compType == "Wire") { this.container.material.color.set(lightGray); }
@@ -488,7 +488,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		}
 		else { // if this is the first time this component is clicked
     		var receiver = window.parent;
-			receiver.postMessage(this.ID, 'http://localhost:8080');
+			if (!twoScreen) receiver.postMessage(this.ID, 'http://localhost:8080');
 
 			if (clickedComponent != null) {
 				if (clickedComponent.compType == "Battery") { clickedComponent.container.material.color.set(darkGreen); }
