@@ -95,7 +95,7 @@ function JsArInit() {
     jsFrames.registerAnimation(function () {
         markerDetectedFlag = false;
         // Capture the current frame from the inputStream
-        inputCapture.getContext('2d').drawImage(input, 0, 0, width, height);
+        inputCapture.getContext('2d').drawImage(input, 0, 0, width*WIDTH_RATIO, height);
 
         // then we need to tell the image reader and the input scene that the input has changed
         inputCapture.changed = true;

@@ -479,6 +479,10 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			clickedComponent = null;
 			var receiver = window.parent;
 			if (!twoScreen) receiver.postMessage(-1, 'http://localhost:8080');
+			else { // clear the measures in the voltmeter image
+
+
+			}
 
 			if (this.compType == "Battery") { this.container.material.color.set(darkGreen); }
 			else if (this.compType == "Wire") { this.container.material.color.set(lightGray); }
@@ -489,6 +493,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		else { // if this is the first time this component is clicked
     		var receiver = window.parent;
 			if (!twoScreen) receiver.postMessage(this.ID, 'http://localhost:8080');
+			else { // show the measures in the voltmeter image
+				showValues(this.compType, this.volt, this.current, this.R);
+			}
 
 			if (clickedComponent != null) {
 				if (clickedComponent.compType == "Battery") { clickedComponent.container.material.color.set(darkGreen); }

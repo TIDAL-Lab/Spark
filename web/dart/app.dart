@@ -99,7 +99,7 @@ class App extends TouchManager {
      if (SHOW_LENS) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
      
      // instantiate the JsAr tag
-     if (SHOW_MARKER) marker = new Marker(centerX, centerY);
+     if (SHOW_MARKER) marker = new Marker(centerX+100, centerY+100);
        
      // create the first battery
      InputElement slider = querySelector("#battery-slider");

@@ -592,8 +592,16 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 
 2. working on freezing the screen
 	--> it is working now
+	I fixed the camera for both AR and non-AR conditions
 	
-3. 
+3. adding the info window:
+	Firt I tried to rescale the inputscene by playing with the renderer.setSize or renderer.setViewport
+	ISSUE: it interferes with the touch interaction --> displacement for selecting components, etc.
+	I rescaled the inputscene to occupy just a portion of whole window:
+	inputCapture.getContext('2d').drawImage(input, 0, 0, width*0.6, height);
+	This works fine, but the issue that the electron model can render outside of the image size :(
+	I should  fix this later.
+	
 
 4. working on the size of components and AR tag and the correct mapping
 

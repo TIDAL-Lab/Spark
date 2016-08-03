@@ -10,6 +10,7 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
+if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 // Static flags
 var ArFlag = true;
@@ -21,7 +22,22 @@ var updateFlag = false;  //(launch): when updating the circuit, updateFlag = tru
 var markerDetectedFlag = false;  //not being used now
 var freezeFlag = false;
 
-if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+var WIDTH_RATIO;
+
+// COLORS:
+var red = 0xD11919;
+var darkRed = 0x990000;
+var green = 0x008F00;
+var lightGreen = 0xbfff80;
+var darkGreen = 0x003300;
+var gray = 0x808080;
+var midnightBlue = 0x000099;
+var blue = 0x337586;
+var backgroundBlue = 0x5C919E;
+var orange = 0xFF9900;
+var darkOrange = 0xFF6600;
+var lightGray = 0xB2B2B2;
+
 var container;
 var camera, scene, renderer, controls;
 var inputScene, inputCamera;
@@ -43,27 +59,18 @@ var markerRoot;  // the parent object of all the components and electrons for AR
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 
-
-
-
-
-// COLORS:
-var red = 0xD11919;
-var darkRed = 0x990000;
-var green = 0x008F00;
-var lightGreen = 0xbfff80;
-var darkGreen = 0x003300;
-var gray = 0x808080;
-var midnightBlue = 0x000099;
-var blue = 0x337586;
-var backgroundBlue = 0x5C919E;
-var orange = 0xFF9900;
-var darkOrange = 0xFF6600;
-var lightGray = 0xB2B2B2;
-
 var clickedComponent = null;   // the component that is tapped on to show information
 
 function doInit() {	
+	if (twoScreen) {
+		WIDTH_RATIO = 0.6;		
+	}
+	else {
+		WIDTH_RATIO = 1;
+		var helpDiv = document.querySelector("#help-window");
+		helpDiv.style.display = "none";
+	}
+
 	init();
 	if (ArFlag) JsArInit();
 	if (!ArFlag) animate(); //for non-AR condition; for AR condition the jsFrames.registerAnimation() function is used 
@@ -99,6 +106,8 @@ function init() {
 	renderer.setClearColor ( backgroundBlue ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth , window.innerHeight );
+
+	//if (twoScreen) renderer.setViewport ( 0, 0, window.innerWidth*0.6, window.innerHeight );
 	//renderer.setSize( width * 2 , height * 2 );
 	
 	document.body.appendChild( renderer.domElement );
@@ -252,9 +261,7 @@ function createConnectedMeshes() {
 		var clonedComponent = components[k].container.clone(); // flag is by default true -> recursively clone the children
 		connectedMeshes[labelCounter].push( clonedComponent );
 	}
-	
-	//console.log('number of connected graphs: ' + connectedMeshes.length);
-	//console.log(connectedMeshes);
+
 	
 	// Now, create a CSG union mesh
 	var compositeMeshes = new Array(connectedMeshes.length); // create an array of composite meshes, one for each connected graph
@@ -311,158 +318,3 @@ function onWindowResize() {
 
 }
 
-function makeTextSprite( message, parameters )
-{
-	if ( parameters === undefined ) parameters = {};
-	
-	var fontface = parameters.hasOwnProperty("fontface") ? 
-		parameters["fontface"] : "Arial";
-	
-	var fontsize = parameters.hasOwnProperty("fontsize") ? 
-		parameters["fontsize"] : 18;
-	
-	var borderThickness = parameters.hasOwnProperty("borderThickness") ? 
-		parameters["borderThickness"] : 2;
-	
-	var borderColor = parameters.hasOwnProperty("borderColor") ?
-		parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
-	
-	var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-		parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
-
-	//var spriteAlignment = THREE.SpriteAlignment.topLeft;
-		
-	var canvas = document.createElement('canvas');
-	//canvas.width = 100;
-	var context = canvas.getContext('2d');
-	context.font = "Bold " + fontsize + "px " + fontface;
-    
-	// get size data (height depends only on font size)
-	var metrics = context.measureText( message );
-	//console.log(metrics.width);
-	var textWidth = metrics.width;
-	//var textWidth = 700;
-
-	// background color
-	context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
-								  + backgroundColor.b + "," + backgroundColor.a + ")";
-	// border color
-	context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
-								  + borderColor.b + "," + borderColor.a + ")";
-
-	context.lineWidth = borderThickness;
-	roundRect(context, borderThickness/2, borderThickness/2, textWidth + 2*borderThickness, fontsize * 1.4 + borderThickness, 6);
-	// 1.4 is extra height factor for text below baseline: g,j,p,q.
-	
-	// text color
-	context.fillStyle = "rgba(0, 0, 0, 1.0)";
-
-	context.fillText( message, borderThickness, fontsize + borderThickness);
-	
-	// canvas contents will be used for a texture
-	var texture = new THREE.Texture(canvas); 
-	texture.needsUpdate = true;
-
-	var spriteMaterial = new THREE.SpriteMaterial( 
-		{ map: texture } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
-	var sprite = new THREE.Sprite( spriteMaterial );
-	sprite.scale.set(100,50,1.0);
-	return sprite;	
-}
-
-// function for drawing rounded rectangles
-function roundRect(ctx, x, y, w, h, r) 
-{
-	//console.log(w);
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-    ctx.fill();
-	ctx.stroke();   
-}
-
-var gridHelper = new THREE.GridHelper( window.innerWidth, 10, 0x0000ff, 0x808080 );
-gridHelper.position.y = 0.0;
-gridHelper.rotateX(Math.PI/2);
-var toggle = true;
-
-function displayGrid() {
-	if (toggle) {scene.add(gridHelper);}
-	else {scene.remove(gridHelper);}
-	toggle = !toggle;
-}
-
-var stop = false;
-
-function keepMoving() {
-	stop = !stop;   // the stop flag is used in the rendering function as a condition for running updateElectrons()
-}
-
-var watch = false;
-var halo;
-var lines; // an object that holds the tracking lines as its children
-var randomElectronIndex;
-function watchElectron() {
-	if (!watch) {
-		// add an object to hold the tracking lines
-		lines = new THREE.Object3D();
-		var geometry = new THREE.CircleGeometry( 10, 16 );
-		var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
-		halo = new THREE.Mesh( geometry, material );
-		// halo.material.transparent = true;
-		// halo.material.opacity = 0.5;
-		halo.material.visible = true;
-		scene.add(halo);
-		scene.add(lines);
-
-		// pick a random number
-		randomElectronIndex = Math.floor(Math.random() * electronObjects.length);
-		//console.log(randomElectronIndex);
-
-		//change the style of watch-button to be active
-		button = document.querySelector("#watch-button");
-		button.style.background = "url('../../images/buttons/watch2-active.png') 0 0 no-repeat"; 
-		button.style.backgroundSize = "100%";
-		
-	}
-	else {
-		scene.remove(lines);
-		scene.remove(halo);
-
-		//change the style of watch-button to be normal
-		button = document.querySelector("#watch-button");
-		button.style.background = "url('../../images/buttons/watch2.png') 0 0 no-repeat / 100%"; // 100% is the size
-	}
-	watch = !watch;
-	
-}
-
-
-function freezeAR() {
-	button = document.querySelector("#freeze-button");
-	if (!freezeFlag) {  // freeze the scene
-
-		//change the style of freeze-button to be active		
-		button.style.background = "url('../../images/buttons/capture.png') 0 0 no-repeat"; 
-		button.style.backgroundSize = "100%";
-	}
-
-	else {   //unfreeze the scene
-
-		//change the style of freeze-button to be active
-		button.style.background = "url('../../images/buttons/freeze.png') 0 0 no-repeat"; 
-		button.style.backgroundSize = "100%";
-
-	}
-
-	freezeFlag = !freezeFlag;
-
-}

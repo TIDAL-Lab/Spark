@@ -45,13 +45,34 @@
 	    <canvas id="inputCapture" width="320" height="240" style="display: none"></canvas>
 	    <canvas id="debugCanvas" width="320" height="240" style="display: none"></canvas>
 
-    
-	    <button onclick="keepMoving()"> move electrons</button>
+    	
+<!-- 	    <button onclick="keepMoving()"> move electrons</button>
 	    <button onclick="updateElectrons()"> next move</button>
-	    <button onclick="displayGrid()"> grid on</button> 
+	    <button onclick="displayGrid()"> grid on</button>  -->
 	    
 	    <button id="watch-button" onclick="watchElectron()"></button>
 	    <button id="freeze-button" onclick="freezeAR()" style="display: none"></button>
+
+	    <div id="help-window">
+	    	<img id="voltmeter-image"></img>
+		   <div id="values" class="value-text">
+		     <p id="current-value"></p>
+		     <p id="resistance-value"></p>
+		     <p id="voltage-value"></p>
+		     <p id="brightness-factor"></p>
+		   </div>
+   			<img id = "help-image">
+      		<button id = "close-help-button"></button>
+      		<div id = "main-page">
+		        <p id="type" class="bigText"></p>
+		        <p id="description" class="secondText"></p>
+		        <button id = "page0-button" class = "page-button"></button>
+		        <button id = "page1-button" class = "page-button"></button>
+		        <button id = "page2-button" class = "page-button"></button>
+		        <button id = "page3-button" class = "page-button"></button>
+		    </div>
+      		<button id = "back-button" style="display: none;"></button>
+	    </div>
 
 	    <script src="AR_mediastream-spark.js"></script>
 	 	<script src="main.js"></script>	 	
@@ -59,6 +80,7 @@
 		<script src="component.js"></script>
 		<!-- the following scripts are the functional scripts for Spark -->	
 		<script src="electronObject.js"></script>
+		<script src="elements.js"></script>
 		<script src="launch.js"></script>
 		<script type="text/javascript">
 		// moved to launch.js
