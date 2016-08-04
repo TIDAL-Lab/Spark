@@ -149,7 +149,7 @@ function Electron( component ) {
 				if (Math.abs(local2.y) <= component.l/2) {
 					if (Math.abs(local2.x) >= component.w/2) { 
 						console.log("ERROR WALL");
-						stop = !stop; 
+						//stop = !stop; 
 					} }
 				var normal = new THREE.Vector3(1,0,0);
 				if (electronLocal.x > 0) normal.multiplyScalar(-1);
@@ -170,7 +170,8 @@ function Electron( component ) {
 				if (Math.abs(local2.y) <= component.l/2) {
 					if (Math.abs(local2.x) >= component.w/2) { 
 						console.log("ERROR JUNCTION");
-						stop = !stop; } }
+						//stop = !stop; 
+					} }
 				var normal = new THREE.Vector3(-x , -y, 0);
 				if (electronLocal.y < 0) normal.y = y;
 				this.bounceBack(normal, component);

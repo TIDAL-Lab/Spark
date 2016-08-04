@@ -35,6 +35,9 @@ if (twoScreen) {
     var image = document.querySelector("#voltmeter-image");
 	image.src = "../images/buttons/voltmeter3.png";
 
+	var p = document.querySelector("#comp-type");
+	p.innerHTML = "Tap on one component to see its measures";
+
 }        
     // button = document.querySelector("#close-help-button");
     // if (button != null) button.onClick.listen((e) => close());
@@ -70,27 +73,46 @@ function showValues(type, v, i, r) {
 	var rFormated = r.toPrecision(1);
 	var bFormated = brightness.toPrecision(2);
 
-	var p = document.querySelector("#current-value");
-	p.text = "Current = " + iFormated.toString();
-	p.style.top = "20px";
+	var p = document.querySelector("#comp-type");
+	p.innerHTML = type;
+
+	p = document.querySelector("#current-value");
+	p.innerHTML = "Current = " + iFormated.toString();
 
 	p = document.querySelector("#resistance-value");
-	p.text = "Resistance = " + rFormated.toString();
-
-	p.style.top = "60px";
+	p.innerHTML = "Resistance = " + rFormated.toString();
 
 	p = document.querySelector("#voltage-value");
-	if (type == 'Battery') p.text = "Voltage = " + vFormated.toString();
-	else p.text = "Voltage Drop = " + vFormated.toString();
+	if (type == 'Battery') p.innerHTML = "Voltage = " + vFormated.toString();
+	//else p.innerHTML = "Voltage Drop = " + vFormated.toString();
+	else p.innerHTML = "";
 
-	p.style.top = "100px";
-
-	if (type == "Bulb") {
-		p = document.querySelector("#brightness-factor");
-		p.text = "Brightness Factor = " + bFormated.toString();
-		console.log(p.text);
-		p.style.top = "140px";
+	p = document.querySelector("#brightness-factor");
+	if (type == "Bulb") {		
+		p.innerHTML = "Brightness Factor = " + bFormated.toString();
 	}
+	else {
+		p.innerHTML = "";
+ 	}
+}
+ 
+
+function clearValues() {
+
+	var p = document.querySelector("#comp-type");
+	p.innerHTML = "Tap on one component to see its measures";
+
+	p = document.querySelector("#current-value");
+	p.innerHTML = "";
+
+	p = document.querySelector("#resistance-value");
+	p.innerHTML = "";
+
+	p = document.querySelector("#voltage-value");
+	p.innerHTML = "";
+
+	p = document.querySelector("#brightness-factor");
+	p.innerHTML = "";
  
 }
 
@@ -108,8 +130,11 @@ function watchElectron() {
 		// halo.material.transparent = true;
 		// halo.material.opacity = 0.5;
 		halo.material.visible = true;
-		scene.add(halo);
-		scene.add(lines);
+
+		//scene.add(halo);
+		//scene.add(lines);
+		markerRoot.add(halo);
+		markerRoot.add(lines);
 
 		// pick a random number
 		randomElectronIndex = Math.floor(Math.random() * electronObjects.length);
@@ -122,8 +147,8 @@ function watchElectron() {
 		
 	}
 	else {
-		scene.remove(lines);
-		scene.remove(halo);
+		markerRoot.remove(lines);
+		markerRoot.remove(halo);
 
 		//change the style of watch-button to be normal
 		button = document.querySelector("#watch-button");

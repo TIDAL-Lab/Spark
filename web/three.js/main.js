@@ -13,7 +13,7 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 // Static flags
-var ArFlag = true;
+var ArFlag = false;
 var twoScreen = true;
 var twoD = true; //electron movement is either 2D (z=0) or 3D
 
@@ -63,7 +63,16 @@ var clickedComponent = null;   // the component that is tapped on to show inform
 
 function doInit() {	
 	if (twoScreen) {
-		WIDTH_RATIO = 0.6;		
+		WIDTH_RATIO = 0.65;	
+		var width = window.innerWidth;
+		var height = window.innerHeight;
+		var h = height;
+		var w = width*(1-WIDTH_RATIO);
+
+		var helpDiv = document.querySelector("#help-window");
+		helpDiv.style.width = w.toString() + "px";
+		helpDiv.style.height = h.toString() + "px";
+
 	}
 	else {
 		WIDTH_RATIO = 1;
@@ -88,6 +97,7 @@ function init() {
 		//camera = new THREE.Camera(); 
 		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
+		camera.position.z = 900;
 	}
 	else {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );

@@ -59,8 +59,8 @@ THREE.EditorControls = function ( object, domElement ) {
 	this.pan = function ( delta ) {
 
 		var distance = object.position.distanceTo( center );
-
-		delta.multiplyScalar( distance * 0.001 );
+		//console.log(distance);
+		if (!ArFlag) delta.multiplyScalar( distance * 0.001 );
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
 		object.position.add( delta );
@@ -82,8 +82,8 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
-		object.position.add( delta );
-
+		if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
+		object.position.add(delta); 
 		//console.log(delta);
 		var message = [delta.z];
 		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');

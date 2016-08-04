@@ -161,7 +161,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		//transform the container
 		// first set its position
-		this.container.position.set(center.x, center.y, center.z);
+		this.container.position.set(center.x-400, center.y, center.z);
 		// then rotates it
 		// calculate the rotation angle of the component on the XY plane (-180 to 180 from +x axis)
 		var startToEnd = new THREE.Vector3().subVectors( this.endPoint, this.startPoint );
@@ -480,8 +480,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			var receiver = window.parent;
 			if (!twoScreen) receiver.postMessage(-1, 'http://localhost:8080');
 			else { // clear the measures in the voltmeter image
-
-
+				clearValues();
 			}
 
 			if (this.compType == "Battery") { this.container.material.color.set(darkGreen); }
