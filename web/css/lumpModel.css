@@ -5,26 +5,14 @@
    -webkit-tap-highlight-color: rgba(0,0,0,0);    
 }
 
-.toolbar {
-   background-color: rgba(0, 0, 0, 0.0);
-   border-radius: 10px;
-   /* border: 2px solid white; */
-   position: absolute;
-   width: 230px;
-   height: 230px;
-   top: 0px;
-   left: 140px;
-   text-align: center;
-   padding: 2px;
-   z-index: 2;
-}
+
 p {
    outline: none;
-   color: rgb(255, 255, 255);
+   color: rgb(55, 55, 55);
    position: absolute;
-   text-align: center;
+   text-align: left;
    border: none;
-   width: 300px;
+   width: 400px;
    height: 10px;
    border-radius: none;
    margin-left: 1px;

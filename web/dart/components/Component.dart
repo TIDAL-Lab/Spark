@@ -322,7 +322,7 @@ class Component implements Touchable {
     num cy = screenToComponentY(tx, ty);
     num cw = sqrt((start.x - end.x)*(start.x - end.x) + (start.y - end.y)*(start.y - end.y)) - 20;
     num ch = ih;
-    return (cx.abs() <= cw/2 && cy.abs() <= ch*2);
+    return (cx.abs() <= cw/2 && cy.abs() <= ch);
   }
 
   bool touchDown(Contact event) {

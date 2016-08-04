@@ -179,7 +179,7 @@ class App extends TouchManager {
          help.helpSrc ="images/helps/";
          model = new Model();  // not really using this
          SHOW_LENS = false;
-         SHOW_MARKER = true;
+         SHOW_MARKER = false;
          USE_SERVER = true;
          CANVAS_RATIO = 0.75;
          HELP_RATIO = 0.3;

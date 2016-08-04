@@ -602,8 +602,24 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 	This works fine, but the issue that the electron model can render outside of the image size :(
 	I should  fix this later.
 	
-
+	--> added the voltmeter image, and the help pages
+	ISSUE: the measure values don't show on the window! I cannot figure out why!
+	SOLVED: I figured it out! Silly! I copied the code from dart! in dart it is p.text but in js it is p.innerHTML!!!
+	
 4. working on the size of components and AR tag and the correct mapping
+	it is working quite fine now.
+	
+5. fixed the issue with touch interactions (zoom/pan)
+	to have it working for AR condition, I had to set the camera.position.z, otherwise it does not work
+
+6. I changed the camera setups, right now for both AR and non-AR conditions, it is a perspective camera
+	I don't remember why it was not working with the AR condition, and I had to use the base class for cameras: Camera()
+	But magically it is working fine now!
+	
+7. I fixed the watch-an-electron function,
+	before, I was adding/removing the tracking line/halo to the scene, but to have it working with AR condition
+	I had to change that to markerRoot. So it is working fine now.
+	
 
 ISSUES TO FIX LATER:
 

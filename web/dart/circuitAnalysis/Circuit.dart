@@ -156,6 +156,7 @@ class Circuit {
       }
       var offsetX = 0;
       var offsetY = 0;
+      var scaleFactor = 1.0;
       if ( SHOW_MARKER ) {  // AR condition
         offsetX = theApp.marker.x ;
         offsetY = theApp.marker.y;
@@ -173,10 +174,10 @@ class Circuit {
                                           //'startY':(theApp.workingBoxHeight/2 - c.start.y),
                                           //'endX': (c.end.x - theApp.workingBoxWidth/2),
                                           //'endY': (theApp.workingBoxHeight/2 - c.end.y),
-                                          'startX': 1.0*(c.start.x -offsetX),
-                                          'startY':1.0*(offsetY - c.start.y),
-                                          'endX': 1.0*(c.end.x - offsetX),
-                                          'endY': 1.0*(offsetY - c.end.y),
+                                          'startX': scaleFactor*(c.start.x -offsetX),
+                                          'startY':scaleFactor*(offsetY - c.start.y),
+                                          'endX': scaleFactor*(c.end.x - offsetX),
+                                          'endY': scaleFactor*(offsetY - c.end.y),
                                           'direction': c.direction,
                                           'innerWall':1,
                                           'connection': rowArray,

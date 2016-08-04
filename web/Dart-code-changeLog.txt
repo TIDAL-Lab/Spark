@@ -68,3 +68,5 @@ THINGS TO FIX LATER:
 	(right now, it does not show the battery on the electron model before the first interaction)
 	ok, I sort of fixed some of the issues, but still the pubnub publish/subscribe works strangely
 2. working on condition 4, trying to make the AR working.
+
+*** notes on 8/3/2016
