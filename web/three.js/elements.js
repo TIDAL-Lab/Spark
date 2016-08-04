@@ -35,8 +35,12 @@ if (twoScreen) {
     var image = document.querySelector("#voltmeter-image");
 	image.src = "../images/buttons/voltmeter3.png";
 
+	// set the voltmeter image
+    var image = document.querySelector("#legend-image");
+	image.src = "../images/legend-image.png";
+
 	var p = document.querySelector("#comp-type");
-	p.innerHTML = "Tap on one component to see its measures";
+	p.innerHTML = "Tap on a component to see its measures";
 
 }        
     // button = document.querySelector("#close-help-button");
@@ -100,7 +104,7 @@ function showValues(type, v, i, r) {
 function clearValues() {
 
 	var p = document.querySelector("#comp-type");
-	p.innerHTML = "Tap on one component to see its measures";
+	p.innerHTML = "Tap on a component to see its measures";
 
 	p = document.querySelector("#current-value");
 	p.innerHTML = "";
