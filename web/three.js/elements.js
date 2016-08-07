@@ -10,6 +10,10 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
+ 	// set the voltmeter image
+    var image = document.querySelector("#legend-image");
+	image.src = "../images/legend-image.png";
+
 if (twoScreen) {
 	var button = document.querySelector("#page0-button");
     //button.addEventListener("click", showPage(0));
@@ -35,9 +39,7 @@ if (twoScreen) {
     var image = document.querySelector("#voltmeter-image");
 	image.src = "../images/buttons/voltmeter3.png";
 
-	// set the voltmeter image
-    var image = document.querySelector("#legend-image");
-	image.src = "../images/legend-image.png";
+
 
 	var p = document.querySelector("#comp-type");
 	p.innerHTML = "Tap on a component to see its measures";
@@ -186,7 +188,7 @@ function freezeAR() {
 
 
 
-function makeTextSprite( message, parameters )
+function makeTextSprite( message, message2, scaleFactor, parameters )
 {
 	if ( parameters === undefined ) parameters = {};
 	
@@ -208,10 +210,9 @@ function makeTextSprite( message, parameters )
 	//var spriteAlignment = THREE.SpriteAlignment.topLeft;
 		
 	var canvas = document.createElement('canvas');
-	//canvas.width = 100;
 	var context = canvas.getContext('2d');
-	context.font = "Bold " + fontsize + "px " + fontface;
-    
+	//context.font = "Bold " + fontsize + "px " + fontface;
+    context.font = fontsize + "px " + fontface;
 	// get size data (height depends only on font size)
 	var metrics = context.measureText( message );
 	//console.log(metrics.width);
@@ -226,14 +227,14 @@ function makeTextSprite( message, parameters )
 								  + borderColor.b + "," + borderColor.a + ")";
 
 	context.lineWidth = borderThickness;
-	roundRect(context, borderThickness/2, borderThickness/2, textWidth + 2*borderThickness, fontsize * 1.4 + borderThickness, 6);
+	roundRect(context, borderThickness/2, borderThickness/2, textWidth + 2*borderThickness, 2 * fontsize * 1.4 + borderThickness, 10);
 	// 1.4 is extra height factor for text below baseline: g,j,p,q.
 	
 	// text color
 	context.fillStyle = "rgba(0, 0, 0, 1.0)";
 
 	context.fillText( message, borderThickness, fontsize + borderThickness);
-	
+	context.fillText( message2, borderThickness, 2 * fontsize + borderThickness);
 	// canvas contents will be used for a texture
 	var texture = new THREE.Texture(canvas); 
 	texture.needsUpdate = true;
@@ -241,7 +242,9 @@ function makeTextSprite( message, parameters )
 	var spriteMaterial = new THREE.SpriteMaterial( 
 		{ map: texture } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
 	var sprite = new THREE.Sprite( spriteMaterial );
-	sprite.scale.set(100,50,1.0);
+	
+	sprite.scale.set(scaleFactor*0.5 * fontsize, scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
+	//sprite.scale.set(100,50,1.0);
 	return sprite;	
 }
 

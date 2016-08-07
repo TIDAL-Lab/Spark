@@ -74,7 +74,7 @@ body {
   left: 0px;
   border: none;
   background-color: rgba(255, 255, 255, 0.0);
-  padding: 3px;
+  padding: 0px;
   font-family: Arial, Helvetica, sans-serif;
   z-index: 0;
   display: block;
@@ -97,8 +97,8 @@ body {
 #help-image {
   border: none;
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 2px;
+  right: 0px;
   outline: none;
 }
 .page-button {
@@ -214,21 +214,20 @@ body {
 
 .secondText {
    outline: none;
-   color: rgb(5, 5, 5);
+   color: black;
    position: absolute;
    text-align: center;
-   top: 130px;
-   left: 0px;
    border: none;
-   width: 450px;
-   height: 20px;
+   width: 320px;
+   height: 10px;
+   top: 40px;
+   right: 10px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
-   font-family: Comic Sans MS;
-   font-size:18px;
-   display: inline;
-   z-index: 10;
+   font-family: kristen ITC, Helvetica, sans-serif;
+   font-size:24px;
+   display: inline-block;
 }
 
 .thirdText {
@@ -250,4 +249,94 @@ body {
    font-size:20px;
    display: block;
    z-index: 10;
+}
+
+/* testing new additions */
+#measure-values {
+   background-color: rgba(0, 0, 0, 0.0);
+   border-radius: 10px;
+   /* border: 2px solid white; */
+   position: absolute;
+   width: 230px;
+   height: 230px;
+   top: 0px;
+   right: 0px;
+   text-align: center;
+   padding: 2px;
+   z-index: 2;
+}
+
+.type-text {
+   outline: none;
+   color: lightGreen;
+   position: absolute;
+   text-align: center;
+   border: none;
+   width: 150px;
+   height: 10px;
+   left: 35px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: kristen ITC, Helvetica, sans-serif;
+   font-size:18px;
+   display: inline-block;
+}
+
+.value-text {
+   outline: none;
+   color: rgb(255, 255, 255);
+   position: absolute;
+   text-align: center;
+   border: none;
+   width: 150px;
+   height: 10px;
+   left: 35px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: kristen ITC, Helvetica, sans-serif;
+   font-size:10px;
+   display: inline-block;
+}
+
+#comp-type {
+  top: 40px;
+}
+
+#current-value {
+  top: 85px;
+}
+
+#resistance-value {
+  top: 110px;
+}
+
+#voltage-value {
+  top: 135px;
+}
+
+#brightness-factor {
+  top: 160px;
+   
+}
+
+#help-window {
+  border-style: none;
+  border-color: none;
+  background-color: #327586;
+  position: absolute;
+  width: 200px;
+  height: 500px;
+  top: 5px;
+  left: 2px;
+
+  z-index: 0;
+}
+
+#voltmeter-image {
+  width: 200px;
+  position: absolute;
+  top: 40px;
+  left: 12px;
 }

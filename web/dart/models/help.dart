@@ -107,30 +107,48 @@ class Help {
       var brightness = c.current/0.3;
       var bFormated = brightness.toStringAsPrecision(2);
       
-      p.text = "This is a " + type;
+//      p.text = "This is a " + type;
+//      switch (type) {
+//        case "Battery":
+//          p2.text = "Battery produces energy (voltage) for a circuit";
+//          break;
+//        case "Wire":
+//          p2.text = "Wire is a conductive material that electrons can move through easily";
+//          break;
+//        case "Bulb":
+//          p2.text = "Light bulb is a type of a resistor that can emit light";
+//          break;
+//        case "Resistor":
+//          p2.text = "Resistor is a conductive material that can slow down the movement of electrons in a circuit";
+//          break;
+//      }
+      
       switch (type) {
-        case "Battery":
-          p2.text = "Battery produces energy (voltage) for a circuit";
-          break;
         case "Wire":
-          p2.text = "Wire is a conductive material that electrons can move through easily";
+          showPage(0);
           break;
-        case "Bulb":
-          p2.text = "Light bulb is a type of a resistor that can emit light";
+        case "Battery":
+          showPage(1);
           break;
         case "Resistor":
-          p2.text = "A resistor is a conductive material that can slow down the movement of electrons in a circuit";
+          showPage(2);
+          break;
+        case "Bulb":
+          showPage(3);
           break;
       }
-      if (c.type == "Battery") p3.text = "Current=${iFormated} Resistance=${rFormated} Voltage=${vFormated}" ;
-      else if (c.type == "Bulb") p3.text = "Current=${iFormated} Resistance=${rFormated} Brightness=${bFormated}" ;
-      else p3.text = "Current=${iFormated} Resistance=${rFormated}" ;
+      
+//      if (c.type == "Battery") p3.text = "Current=${iFormated} Resistance=${rFormated} Voltage=${vFormated}" ;
+//      else if (c.type == "Bulb") p3.text = "Current=${iFormated} Resistance=${rFormated} Brightness=${bFormated}" ;
+//      else p3.text = "Current=${iFormated} Resistance=${rFormated}" ;
+      showValues(c.type, vFormated, iFormated, rFormated, bFormated);
     }
     
     else { // component is null
-      p.text = "";
-      p2.text = "";
-      p3.text = "";
+//      p.text = "";
+//      p2.text = "";
+//      p3.text = "";
+      clearValues();
       
     }
 
@@ -141,8 +159,8 @@ class Help {
     var div = document.querySelector("#main-page");
     div.style.display = "none";
     
-    var button = document.querySelector("#back-button");
-    button.style.display = "inline";
+//    var button = document.querySelector("#back-button");
+//    button.style.display = "inline";
   }
   
   void back() {
@@ -150,8 +168,8 @@ class Help {
     var button = document.querySelector("#back-button");
     button.style.display = "none";
     
-    var div = document.querySelector("#main-page");
-    div.style.display = "block";
+//    var div = document.querySelector("#main-page");
+//    div.style.display = "block";
     
 
   }
@@ -180,4 +198,56 @@ class Help {
     div.style.display = "none";
   }
 
+}
+
+void showValues(type, v, i, r, b) {
+  //print("showing the values");
+  
+  var p = document.querySelector("#description");
+  p.text = "";
+  
+  p = document.querySelector("#comp-type");
+  p.text = type;
+
+  p = document.querySelector("#current-value");
+  p.text = "Current = " + i.toString();
+
+  p = document.querySelector("#resistance-value");
+  p.text = "Resistance = " + r.toString();
+
+  p = document.querySelector("#voltage-value");
+  if (type == 'Battery') p.text = "Voltage = " + v.toString();
+  //else p.innerHTML = "Voltage Drop = " + vFormated.toString();
+  else p.text = "";
+
+  p = document.querySelector("#brightness-factor");
+  if (type == "Bulb") {   
+    p.text = "Brightness Factor = " + b.toString();
+  }
+  else {
+    p.text = "";
+  }
+}
+ 
+void clearValues() {
+  //print("clear the values");
+  var p = document.querySelector("#comp-type");
+  //p.text = "Tap on a component to see its measures";
+  p.text = "";
+  
+  p = document.querySelector("#description");
+  p.text = "Tap on a component above to learn more about it!";
+  
+  p = document.querySelector("#current-value");
+  p.text = "";
+
+  p = document.querySelector("#resistance-value");
+  p.text = "";
+
+  p = document.querySelector("#voltage-value");
+  p.text = "";
+
+  p = document.querySelector("#brightness-factor");
+  p.text = "";
+ 
 }

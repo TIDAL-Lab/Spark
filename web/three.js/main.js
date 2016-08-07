@@ -14,7 +14,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 // Static flags
 var ArFlag = false;
-var twoScreen = true;
+var twoScreen = false;
 var twoD = true; //electron movement is either 2D (z=0) or 3D
 
 // Dynamic FLAGS
@@ -102,7 +102,7 @@ function init() {
 	else {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
 		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
-		camera.position.z = 900;	
+		camera.position.z = 700;	
 	}
 
 	raycaster = new THREE.Raycaster();
@@ -241,6 +241,10 @@ function updateElectrons() {
 		);
 		var line = new THREE.Line( trackGeometry, trackMaterial );
 		lines.add( line );
+		if (lines.children.length > 10) {
+			var first = lines.children[0];
+			lines.remove(first);
+		}
 		// var geometry = new THREE.CircleGeometry( 5, 32 );
 		// var material = new THREE.MeshBasicMaterial( { color: orange } );
 		// var circle = new THREE.Mesh( geometry, material );

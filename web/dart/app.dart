@@ -28,7 +28,7 @@ part of SparkProject;
  * 3 --> webgl nonAR: circuit model on the same screen
  * 4 --> webgl AR
  */
-int CONDITION = 4;
+int CONDITION = 3;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
@@ -105,6 +105,11 @@ class App extends TouchManager {
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);    
      new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage); 
+     
+     if (condition==3 || condition==4) {
+       var helpButtons = document.querySelector("#main-page");
+       helpButtons.style.display = "none";
+     }
    }
    
    void receiveMessage(evt) { // receives message from the iframe
@@ -136,8 +141,8 @@ class App extends TouchManager {
        }
        else { //evt.data.length is 2 --> pan data
          //print(evt.data.runtimeType.toString());
-         frameCenterX += evt.data[0]*0.5; 
-         frameCenterY -= evt.data[1]*0.5;
+         frameCenterX += evt.data[0]*0.55; 
+         frameCenterY -= evt.data[1]*0.55;
          repaint();
        }
 
@@ -166,7 +171,7 @@ class App extends TouchManager {
          USE_SERVER = false;
          break;
        case 3:
-         help.helpSrc ="images/helps/";
+         help.helpSrc ="images/helps-components/";
          model = new webglModel();
          (model as webglModel).launchModel(); 
          SHOW_LENS = false;
@@ -176,10 +181,10 @@ class App extends TouchManager {
          HELP_RATIO = 0.4;
          break;
        case 4:
-         help.helpSrc ="images/helps/";
+         help.helpSrc ="images/helps-components/";
          model = new Model();  // not really using this
          SHOW_LENS = false;
-         SHOW_MARKER = false;
+         SHOW_MARKER = true;
          USE_SERVER = true;
          CANVAS_RATIO = 0.75;
          HELP_RATIO = 0.3;
@@ -217,8 +222,12 @@ class App extends TouchManager {
      button.style.top = "${h2+50}px";
      
      var img = document.querySelector("#help-image");
-     img.style.width = div.style.width;
-     img.style.height = div.style.height;
+     img.style.width = "${w2*0.6}px";
+     img.style.height = "${h3}px";
+     
+     div = document.querySelector("#help-window");
+     div.style.width = "${w2*0.4}px";
+     div.style.height = "${h3}px";
      
      // set the working box
      //set the working box
@@ -231,8 +240,8 @@ class App extends TouchManager {
      // set the frame, only for non-AR condition
      frameCenterX = centerX;
      frameCenterY = centerY;
-     frameWidth = w2;
-     frameHeight = h2;     
+     frameWidth = w2*0.9;
+     frameHeight = h2*0.9;     
    }   
    
    /* Resize the window
@@ -288,14 +297,14 @@ class App extends TouchManager {
      ctx.fillRect(0, 0, workingBoxWidth, workingBoxHeight);
 
      // draw the frame
-     if (condition == 3) {
-       ctx.strokeStyle = 'transparent';
-       ctx.lineWidth = 2;
-       ctx.fillStyle = "rgba(255,255,255,0.2)";
-  
-       ctx.strokeRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
-       ctx.fillRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
-     }
+//     if (condition == 3) {
+//       ctx.strokeStyle = 'transparent';
+//       ctx.lineWidth = 2;
+//       ctx.fillStyle = "rgba(255,255,255,0.2)";
+//  
+//       ctx.strokeRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
+//       ctx.fillRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
+//     }
      
      num boxW = deleteBoxImg.width / 6;
      num boxH = deleteBoxImg.height / 6;

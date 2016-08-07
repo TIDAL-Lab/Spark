@@ -39,7 +39,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
    	this.ammeter;
    	this.measureOn = false;
-   	this.text2;
+   	this.rotationAngle;
    	this.prevCount = 0;
 
    	// AR condition
@@ -99,14 +99,14 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 1, true);
 			containerMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
-			var plusText = makeTextSprite( "+", 
-				{ fontsize: 150, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
+/*			var plusText = makeTextSprite( "Y", 30,
+				{ fontsize: 32, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
 			plusText.position.set(-this.w*0.1, -this.l*0.1, 0);
-			var minusText = makeTextSprite( "-", 
-				{ fontsize: 150, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
-			minusText.position.set(-this.w*0.1, this.l*0.5, 0);
+			var minusText = makeTextSprite( "-", 30,
+				{ fontsize: 32, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
+			minusText.position.set(-this.w*0.01, this.l*0.6, 0);
 			this.container.add(plusText);
-			this.container.add(minusText);
+			this.container.add(minusText);*/
 		} 
 		else {   // it's a wire, resistor, or a bulb
 			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
@@ -161,7 +161,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		//transform the container
 		// first set its position
-		this.container.position.set(center.x-400, center.y, center.z);
+		this.container.position.set(center.x, center.y, center.z);
 		// then rotates it
 		// calculate the rotation angle of the component on the XY plane (-180 to 180 from +x axis)
 		var startToEnd = new THREE.Vector3().subVectors( this.endPoint, this.startPoint );
@@ -171,10 +171,11 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		vector.crossVectors(xAxis, startToEnd);
 		var sign = Math.sign(vector.z);		
 		var rotationAngle = angle*sign;
+
 		this.container.rotation.z = rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
 		// I need to manually update the matrix for electrons
 
-		
+		this.rotationAngle = rotationAngle - Math.PI/2;   // TEMP TESTING: for sprite text
 
 		this.container.updateMatrixWorld(); // because it is not in the render() loop yet 
 		
@@ -412,22 +413,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
        
         // Add text
         var randomColor = Math.floor( Math.random() * 255 );  // instead of r: 255
-		// var spriteText1 = makeTextSprite( " I = " + this.current.toFixed(3) + " ", 
-		// 	{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:155, g:128, b:0, a:0.8} } );
-		// spriteText1.position.set(-this.w, -standardLength/5, 0);
-
-		//this.text2 = " rate = " + this.ammeter.count.toFixed(2) + " ";
-		// var rate = this.ammeter.count;
-		// console.log(rate);
-
-		// this.text2 = Math.abs(rate.toFixed(2)) + " electrons per clock tick";
-		// //this.text2 = " 0 electrons per clock tick " ;
-		// var spriteText2 = makeTextSprite( this.text2, 
-		// 	{ fontsize: 52, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
-		// spriteText2.position.set(-this.w, standardLength/5, 0);
-		
-	    //this.ammeter.add( spriteText1 );
-	    //this.ammeter.add( spriteText2 );
 	}
 
 	this.updateAmmeter = function() {
@@ -437,32 +422,32 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 		//this.text2 = Math.abs(rate.toFixed(2)) + " electrons per clock tick ";
 		//this.text2 = "Speed = " + Math.abs(rate.toFixed(0));
+		var electronCount = 0;
 		if ( Math.round(Math.random()) == 1 ) {
-			this.text2 = Math.floor(this.current * 20) + " electrons";
+			electronCount = Math.floor(this.current * 20);
 		}
 		else {
-			this.text2 = Math.ceil(this.current * 20) + " electrons";
-		}
-		
+			electronCount = Math.ceil(this.current * 20);
+		} 
+		var ammeterText = "   " + electronCount + " electrons   ";
 		this.ammeter.remove(this.ammeter.children[0]);  // used to be children[1] when I had text 1
-		var spriteText2 = makeTextSprite( this.text2, 
-			{ fontsize: 54, fontface: "arial", borderColor: {r:153, g:76, b:0, a:1.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
-		spriteText2.position.set(this.w, 0, 0);
 		
-		this.ammeter.add( spriteText2 );
+		var spriteText = makeTextSprite( ammeterText, " per clock tick ", 20,
+			{ fontsize: 24, fontface: "kristen ITC", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
+		spriteText.position.set(this.w*1.2, this.l/2, 0);
+		
+		//spriteText.rotation.z = this.rotationAngle;
+		//spriteText.updateMatrixWorld(); // because it is not in the render() loop yet 
+		//spriteText.position.applyMatrix4( this.initialMatrix );
+
+
+		this.ammeter.add( spriteText );
+
 		this.ammeter.count = 0;
 		this.prevCount = rate;
 
 	}
 
-	this.clicked2 = function() {
-		if ( this.ammeter.visible == false ) {
-			this.ammeter.visible = true;
-		}
-		else {
-			this.ammeter.visible = false;
-		}
-	}
 
 	this.showAmmeter = function( flag ) {
 		if ( flag ) {
