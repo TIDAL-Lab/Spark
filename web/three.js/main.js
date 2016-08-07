@@ -25,7 +25,7 @@ var freezeFlag = false;
 var WIDTH_RATIO;
 
 // COLORS:
-var red = 0xD11919;
+var red = 0xDA4747;
 var darkRed = 0x990000;
 var green = 0x008F00;
 var lightGreen = 0xbfff80;
@@ -230,7 +230,7 @@ function updateElectrons() {
 			console.log("there is a bug here: " + pos1.x + " " + pos2.x); 
 		}									
 	}
-	if (watch) {
+	if (watch && electronObjects.length > 0) {
 		//var randomIndex = Math.floor(Math.random() * eVertices.length);
 		var electron = electronObjects[randomElectronIndex];
 		var trackMaterial = new THREE.LineBasicMaterial({ color: lightGreen });

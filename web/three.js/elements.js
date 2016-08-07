@@ -121,8 +121,8 @@ function back() {
     div.style.display = "block";
 }
 
+
 function showValues(type, v, i, r) {
-	console.log("showValues is called");
 
 	var brightness = i/0.3;
 	var iFormated = i.toPrecision(3);
@@ -179,33 +179,31 @@ var lines; // an object that holds the tracking lines as its children
 var randomElectronIndex;
 function watchElectron() {
 	if (!watch) {
-		// add an object to hold the tracking lines
-		lines = new THREE.Object3D();
-		var geometry = new THREE.CircleGeometry( 10, 16 );
-		var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
-		halo = new THREE.Mesh( geometry, material );
-		// halo.material.transparent = true;
-		// halo.material.opacity = 0.5;
-		halo.material.visible = true;
-
-		//scene.add(halo);
-		//scene.add(lines);
-		markerRoot.add(halo);
-		markerRoot.add(lines);
-
-		// pick a random number
-		randomElectronIndex = Math.floor(Math.random() * electronObjects.length);
-		//console.log(randomElectronIndex);
-
 		//change the style of watch-button to be active
 		button = document.querySelector("#watch-button");
 		button.style.background = "url('../../images/buttons/watch2-active.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
-		
+		if (electronObjects.length > 0) {
+			// add an object to hold the tracking lines
+			lines = new THREE.Object3D();
+			var geometry = new THREE.CircleGeometry( 10, 16 );
+			var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
+			halo = new THREE.Mesh( geometry, material );
+			halo.material.visible = true;
+
+			markerRoot.add(halo);
+			markerRoot.add(lines);
+
+			// pick a random number
+			randomElectronIndex = Math.floor(Math.random() * electronObjects.length);
+		}		
 	}
 	else {
-		markerRoot.remove(lines);
-		markerRoot.remove(halo);
+		if (electronObjects.length > 0) {
+			markerRoot.remove(lines);
+			markerRoot.remove(halo);
+		}
+
 
 		//change the style of watch-button to be normal
 		button = document.querySelector("#watch-button");

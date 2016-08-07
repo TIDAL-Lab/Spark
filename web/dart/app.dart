@@ -114,6 +114,8 @@ class App extends TouchManager {
    
    void receiveMessage(evt) { // receives message from the iframe
      //window.console.log('circuit received message');
+     
+     // message is the component ID
      if (evt.data is int) {         
        int index = evt.data;
        if (index == -1) {
@@ -127,22 +129,24 @@ class App extends TouchManager {
         //print("V: ${c.voltageDrop} I: ${c.current} R: ${c.resistance}");
        }
      }
+     
      else if (evt.data is String) {
        print(evt.data);
      }
+     // message is navigation controls for repositioning the frame
      else if (evt.data is List) {  // evt.data is a JSArray from touch controls
        if (evt.data.length == 1) { // zoom data
          var delta = evt.data[0];
-         frameWidth += delta;
-         frameHeight += delta*0.75;
+         frameWidth += delta * 0.75;  // before: 1
+         frameHeight += delta*0.55;   // before: 0.75
 //         frameWidth *= (1 + delta);
 //         frameHeight *= (1 + delta);
          repaint();
        }
        else { //evt.data.length is 2 --> pan data
          //print(evt.data.runtimeType.toString());
-         frameCenterX += evt.data[0]*0.55; 
-         frameCenterY -= evt.data[1]*0.55;
+         frameCenterX += evt.data[0]*0.38; // before: ??
+         frameCenterY -= evt.data[1]*0.38;  // before: ??
          repaint();
        }
 
@@ -177,7 +181,7 @@ class App extends TouchManager {
          SHOW_LENS = false;
          SHOW_MARKER = false;
          USE_SERVER = false;
-         CANVAS_RATIO = 0.55;
+         CANVAS_RATIO = 0.6;
          HELP_RATIO = 0.4;
          break;
        case 4:
@@ -240,8 +244,8 @@ class App extends TouchManager {
      // set the frame, only for non-AR condition
      frameCenterX = centerX;
      frameCenterY = centerY;
-     frameWidth = w2*0.9;
-     frameHeight = h2*0.9;     
+     frameWidth = w2;
+     frameHeight = h2;     
    }   
    
    /* Resize the window
@@ -261,7 +265,7 @@ class App extends TouchManager {
      circuit.updateComponents();
      document.querySelector("#model").style.display = "none";
      document.querySelector("#generic-slider").style.display = "none";
-     model.resetModel();
+     
      setScreen();
      if (SHOW_LENS) {
        lens.x = CANVAS_RATIO*canvas.width*3/4; // fix later
@@ -280,10 +284,14 @@ class App extends TouchManager {
      slider2.value = "1.0";
      querySelector("#resistor-value").text = "Resistance = 1";
      
+     model.resetModel();
+     
      /* create the first battery */
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
      new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
+     
+     
    }
 
    /* Draw */
@@ -298,7 +306,8 @@ class App extends TouchManager {
 
      //draw the frame
      if (condition == 3) {
-       ctx.strokeStyle = 'transparent';
+       //ctx.strokeStyle = 'transparent';
+       ctx.strokeStyle = "rgba(255,255,255,0.2)";
        ctx.lineWidth = 2;
        ctx.fillStyle = "rgba(255,255,255,0.2)";
   

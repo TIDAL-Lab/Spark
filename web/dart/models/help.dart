@@ -73,10 +73,11 @@ class Help {
   
   void show () {
     this.back();
+ 
     var div = document.querySelector("#help");
     div.style.display = "block";
     ButtonElement button = document.querySelector("#help-button");
-    button.style.display = "none";
+    button.style.display = "none";    
     if (theApp.model.component != null) {
       Component c = theApp.model.component;
       String type = c.type;
@@ -98,7 +99,7 @@ class Help {
     }
     
     else if (theApp.webglComponent != null) {
-
+      
       Component c = theApp.webglComponent;
       String type = c.type;
       var iFormated = c.current.toStringAsPrecision(3);

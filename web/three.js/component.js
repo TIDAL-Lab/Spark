@@ -69,7 +69,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
 	  	this.force.y = this.direction * this.current; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
-	  	if (this.compType == "Wire") { this.force.y *= 0.2; }
+	  	//if (this.compType == "Wire") { this.force.y *= 0.2; }
 	  	this.force.z = 0.0;
 
 
@@ -78,7 +78,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.force.transformDirection(this.container.matrixWorld); //normalized
 		this.force.multiplyScalar(length);
 
-		this.velocityMax = velocity + this.current * 20;
+		//this.velocityMax = velocity + this.current * 20;
 	}
 
 	this.createContainer = function() {
@@ -475,8 +475,15 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			return;
 		}
 		else { // if this is the first time this component is clicked
-    		var receiver = window.parent;
-			if (!twoScreen) receiver.postMessage(this.ID, 'http://localhost:8080');
+			
+			if (!twoScreen) {
+				var receiver = window.parent;
+				//receiver.postMessage(-1, 'http://localhost:8080');
+				receiver.postMessage(this.ID, 'http://localhost:8080');
+				//setTimeout(function(){test(this.ID);}, 0);						
+				//console.log("after calling time out");
+
+			}
 			else { // show the measures in the voltmeter image
 				showValues(this.compType, this.volt, this.current, this.R);
 			}
@@ -501,4 +508,11 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			}
 	}
 
+}
+
+function test(id) {
+	//id = this.ID;
+	console.log("before calling time out");
+	var receiver = window.parent;
+	receiver.postMessage(id, 'http://localhost:8080');
 }

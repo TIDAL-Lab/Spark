@@ -25,6 +25,9 @@ a {
   z-index: -1;
 }
 
+/* this removes the blue */
+button:focus {outline:0;}
+
 /*#voltmeter-image {
   background: url("../../images/buttons/voltmeter3.png") 0 0 no-repeat;
   background-size: 100%; 

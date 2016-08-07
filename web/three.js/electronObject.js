@@ -121,10 +121,10 @@ function Electron( component ) {
 		
 		var v = this.velocity.length();
 		var vMax = this.component.velocityMax;
-		if (this.velocity.length() > vMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
+/*		if (this.velocity.length() > vMax) {	// don't allow the speed to become more than 10, which is the distance for raycaster
 			this.velocity.setLength(vMax-0.01);
 		}
-		if (this.velocity.length() > vMax) console.log("error: velocity exceeds the max velocity");
+		if (this.velocity.length() > vMax) console.log("error: velocity exceeds the max velocity");*/
 
 		this.position.add( this.velocity );
 		this.status = "moved";
@@ -243,9 +243,10 @@ function Electron( component ) {
 		this.status = "bounced back";
 
 		if (this.reflectedTimes > 1) {  // check if the electron is stuck
-			this.velocity.setLength(velocity);
-			//this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
-			//console.log(this.reflectedTimes);
+			var l = this.velocity.length();
+			this.velocity.setLength(l/2);
+			this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
+			console.log(this.reflectedTimes);
 		}
 		this.reflectedTimes  += 1;
 
@@ -271,6 +272,7 @@ function Electron( component ) {
 			reflection.transformDirection(m);
 			this.velocity = reflection.multiplyScalar(length);
 		}
+		this.velocity.setLength(velocity);
 	}
 
 	this.collideAmmeter = function( obstacle, component ) {

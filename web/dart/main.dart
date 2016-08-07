@@ -28,7 +28,10 @@ import 'dart:core';
 //import 'package:intl/intl_browser.dart'; /* this was used for number format for the AR tags */
 import 'dart:web_audio';
 import 'dart:js';
+import 'dart:async';
+import 'dart:io';
 //import "package:json_object/json_object.dart";
+
 part 'app.dart';
 part 'touch.dart';
 part 'toolbar.dart';

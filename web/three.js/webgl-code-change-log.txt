@@ -620,6 +620,25 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 	before, I was adding/removing the tracking line/halo to the scene, but to have it working with AR condition
 	I had to change that to markerRoot. So it is working fine now.
 	
+*** notes on 8/6/2016
+1. I added a control panel for zooming and panning
+
+2. I fixed the issue with the annoying blue border from the button styles in the model:
+	For each of the buttons, I needed to add this to the css file:
+	button:focus {outline:0;}
+	link:
+	http://stackoverflow.com/questions/20340138/remove-blue-border-from-css-custom-styled-button-in-chrome
+3. I fixed the issue with textsprite, almost! 
+	I still don't completely understand the sprite object
+
+*** notes on 8/7/2016
+1. Working on a flashing effect to the meter to make the update more visible.
+	Not successful yet!
+
+2. Working on the electrons movement, velocity, force, etc. to make it more scientific
+
+
+4. XXX Added a texture for battery (so that it doesn't need to use text sprite)
 
 ISSUES TO FIX LATER:
 

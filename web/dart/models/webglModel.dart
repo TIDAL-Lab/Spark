@@ -31,9 +31,10 @@ class webglModel extends Model {
   void updateModel() {}
   
   void resetModel() {
-    //launchModel();    
+    //launchModel(); 
+    frame.src = "../three.js/Spark-webgl.html";
     document.querySelector("#model").style.display = "block";
-    theApp.help.show();
-    theApp.circuit.solve();
+//    theApp.help.show();
+//    theApp.circuit.solve();
   }
 }
