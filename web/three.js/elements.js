@@ -10,9 +10,27 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
- 	// set the voltmeter image
-    var image = document.querySelector("#legend-image");
-	image.src = "../images/legend-image.png";
+// set the voltmeter image
+var image = document.querySelector("#legend-image");
+image.src = "../images/legend-image.png";
+
+var button = document.querySelector("#plus-button");
+if (button != null) button.onclick = function() {zoom("in")};
+
+button = document.querySelector("#minus-button");
+if (button != null) button.onclick = function() {zoom("out")};
+
+button = document.querySelector("#up-button");
+if (button != null) button.onclick = function() {pan("up")};
+
+button = document.querySelector("#down-button");
+if (button != null) button.onclick = function() {pan("down")};
+
+button = document.querySelector("#left-button");
+if (button != null) button.onclick = function() {pan("left")};
+
+button = document.querySelector("#right-button");
+if (button != null) button.onclick = function() {pan("right")};
 
 if (twoScreen) {
 	var button = document.querySelector("#page0-button");
@@ -48,6 +66,39 @@ if (twoScreen) {
     // button = document.querySelector("#close-help-button");
     // if (button != null) button.onClick.listen((e) => close());
 
+function zoom( direction ) {
+	var delta;
+	if (direction == "in") {
+		delta = new THREE.Vector3(0.0, 0.0, -50);
+	}
+	else {
+		delta = new THREE.Vector3(0.0, 0.0, 50);
+	}
+	camera.position.add(delta);
+	var message = [delta.z];
+	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
+}
+
+function pan( direction ) {
+	var delta;
+	switch (direction) {
+		case "up":
+			delta = new THREE.Vector3(0.0, 10.0, 0.0);
+			break;
+		case "down":
+			delta = new THREE.Vector3(0.0, -10.0, 0.0);
+			break;
+		case "left":
+			delta = new THREE.Vector3(-10.0, 0.0, 0.0);
+			break;
+		case "right":
+			delta = new THREE.Vector3(10.0, 0.0, 0.0);
+			break;
+	}
+	camera.position.add(delta);
+ 	var message = [delta.x, delta.y];
+	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
+}
 
 function showPage(page) {
 	var image = document.querySelector("#help-image");

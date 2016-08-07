@@ -296,15 +296,15 @@ class App extends TouchManager {
      ctx.strokeRect(0, 0, workingBoxWidth, workingBoxHeight);
      ctx.fillRect(0, 0, workingBoxWidth, workingBoxHeight);
 
-     // draw the frame
-//     if (condition == 3) {
-//       ctx.strokeStyle = 'transparent';
-//       ctx.lineWidth = 2;
-//       ctx.fillStyle = "rgba(255,255,255,0.2)";
-//  
-//       ctx.strokeRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
-//       ctx.fillRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
-//     }
+     //draw the frame
+     if (condition == 3) {
+       ctx.strokeStyle = 'transparent';
+       ctx.lineWidth = 2;
+       ctx.fillStyle = "rgba(255,255,255,0.2)";
+  
+       ctx.strokeRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
+       ctx.fillRect(frameCenterX - frameWidth/2, frameCenterY - frameHeight/2, frameWidth, frameHeight);
+     }
      
      num boxW = deleteBoxImg.width / 6;
      num boxH = deleteBoxImg.height / 6;

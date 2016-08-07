@@ -281,3 +281,76 @@ a {
   z-index: 2;
 }
 
+#controls-panel {
+  position: absolute;
+  width: 200px;
+  height: 100px;
+  bottom: 0%;
+  left: 0%;
+  border-style: solid;
+  border-color: white;
+}
+.control-button {
+  -webkit-transform: rotate(360deg); /* Chrome & Safari */  
+  height: 40px;
+  width: 40px;
+  position: absolute;
+  margin: -40px -20px;
+  border: none;
+  padding: none;
+  display: block;
+}
+
+.control-button:active { 
+   background-position: 2px 2px; 
+   border: none;
+   padding: none;
+}
+
+#plus-button {
+  background: url("../../images/buttons/controls/plus.png") 0 0 no-repeat;
+  background-size: 100%; 
+  top: 60%;
+  left: 20%;
+
+  height: 50px;
+  width: 50px;
+  margin: -50px -25px;
+}
+
+#minus-button {
+  background: url("../../images/buttons/controls/minus.png") 0 0 no-repeat;
+  background-size: 100%; 
+  top: 90%;
+  left: 20%;
+}
+
+#up-button {
+  background: url("../../images/buttons/controls/up.png") 0 0 no-repeat;
+  background-size: 100%; 
+  top: 60%;
+  left: 70%;
+}
+
+#down-button {
+  background: url("../../images/buttons/controls/down.png") 0 0 no-repeat;
+  background-size: 100%; 
+  top: 100%;
+  left: 70%;
+}
+
+#left-button {
+  background: url("../../images/buttons/controls/left.png") 0 0 no-repeat;
+  background-size: 100%; 
+  top: 80%;
+  left: 50%;
+}
+
+#right-button {
+  background: url("../../images/buttons/controls/right.png") 0 0 no-repeat;
+  background-size: 100%; 
+  top: 80%;
+  left: 90%;
+}
+
+

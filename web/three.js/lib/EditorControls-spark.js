@@ -64,7 +64,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
 		object.position.add( delta );
-		center.add( delta );
+		//center.add( delta );  // what is center for?
 		var message = [delta.x, delta.y];
 		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
