@@ -240,11 +240,11 @@ function Electron( component ) {
 			//console.log(l);
 			//this.velocity.setLength(l/2);
 			//console.log(this.velocity.length());
-			this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/10); // rotate it by a small degree, for example 18
+			//this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/10); // rotate it by a small degree, for example 18
 			//console.log(this.reflectedTimes);
 			this.reflectedTimes -= 1;
 		}
-		if (this.reflectedTimes != 1) console.log(this.reflectedTimes);
+		//if (this.reflectedTimes != 1) console.log(this.reflectedTimes);
 		
 	 }
 
@@ -331,9 +331,8 @@ function Electron( component ) {
 			}
 
 			else {   // if the connected component is not a battery
-				//updateElectronComponent(electron);   // WRITE LATER
-				this.componentID = thisJunction.connectedComponentIDs[0];
-				this.component = components[this.componentID];
+				var nextcomponentID = thisJunction.connectedComponentIDs[0];
+				this.updateComponent(nextcomponentID);
 				var nextObstacle = this.collision( nextComponent.obstacles);
 				if (nextObstacle != null) {    // this is to avoid electrons stucking in overlap area
 					if ( nextObstacle.object == nextComponent.startJunction 
@@ -347,12 +346,17 @@ function Electron( component ) {
 
 	}
 
+	this.updateComponent = function(id) {
+		this.componentID = id;
+		this.component = components[this.componentID];
+		this.reflectedTimes = 0;
+	}
 
 	this.passFromBattery = function( firstJunction, secondJunction, battery ) {
 		var pushVector = new THREE.Vector3();
 		pushVector.subVectors(secondJunction.position, firstJunction.position);
 		var length = pushVector.length();  // TEST: 1.01
-			pushVector.transformDirection(battery.container.matrixWorld); //normalized 
+		pushVector.transformDirection(battery.container.matrixWorld); //normalized 
 		pushVector.multiplyScalar(length);
 
 		if (ArFlag) {  //AR condition
@@ -368,10 +372,22 @@ function Electron( component ) {
 			this.position.add(pushVector);
 		}
 
-		//this.velocity.multiplyScalar(2/this.velocity.length());   // after passing the battery set the velocity to 2 again	
+		this.velocity.multiplyScalar(velocity/this.velocity.length());   // after passing the battery set the velocity to 2 again	
 
-		this.componentID = secondJunction.connectedComponentIDs[0];	
-		this.component = components[this.componentID];
+		var nextComponent = components[secondJunction.connectedComponentIDs[0]];
+		if (nextComponent.compType == "Battery") {
+			if (nextComponent.startJunction.connectedComponentIDs[0] == battery.ID) {
+				this.passFromBattery(nextComponent.startJunction, nextComponent.endJunction , nextComponent);
+			}
+			else {
+				this.passFromBattery(nextComponent.endJunction, nextComponent.startJunction , nextComponent);
+			}
+		}
+		else {
+			var nextComponentID = secondJunction.connectedComponentIDs[0];
+			this.updateComponent(nextComponentID);
+		}
+
 	}
 
 

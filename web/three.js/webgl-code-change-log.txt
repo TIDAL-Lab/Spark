@@ -644,6 +644,7 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 		I assumed the same thermal energy for all around the circuit and therefore resetting the velocity to the initial velocity
 	So I don't use any maximum velocity any longer, but after each collision reset the value of velocity back to the initial value
 	and the increase in velocity at each tick is determined by the measure of current.
+	I also reset the velocity after passing the battery --> is this correct?!!
 	
 3. working on electrons getting stuck!
 	Update: it is working better now, 
@@ -654,7 +655,19 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 4. updated the tapping on components code:
 	added code so that if the user taps on the non-component area it also unselects the current clicked component.
 
-4. XXX Added a texture for battery (so that it doesn't need to use text sprite)
+5. Added a texture for battery (so that it doesn't need to use text sprite):
+	I also added a code to always render the batteries on top:
+	this.container.renderOrder = 1;
+	
+6. fixed the issue with more than one battery:
+	now it passes the electrons from as many batteries as are connected in series :)
+	
+7. added a flashing effect to the text
+	by adding a delay function when receiving the message on dart code.
+	// After a one-second delay, adds a task to the event queue.
+	new Future.delayed(const Duration(seconds:1), () {  // or milliseconds
+		// ...code goes here...
+	});
 
 ISSUES TO FIX LATER:
 

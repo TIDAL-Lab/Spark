@@ -96,8 +96,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var containerGeometry;
 		var containerMaterial;
 		if (this.compType == "Battery") { 
-			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 1, true);
-			containerMaterial = new THREE.MeshBasicMaterial( { color: darkGreen } );
+			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
+			containerMaterial = new THREE.MeshBasicMaterial( { map: batteryImg, color: darkGreen } );
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
 /*			var plusText = makeTextSprite( "Y", 30,
 				{ fontsize: 32, fontface: "arial", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:128, b:0, a:0.0} } );
@@ -107,16 +107,21 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			minusText.position.set(-this.w*0.01, this.l*0.6, 0);
 			this.container.add(plusText);
 			this.container.add(minusText);*/
+			this.container.renderOrder = 2;
 		} 
 		else {   // it's a wire, resistor, or a bulb
 			containerGeometry = new THREE.CylinderGeometry( this.w/2, this.w/2, this.l, 32, 32, true);
 			containerMaterial = new THREE.MeshBasicMaterial( { color: gray } );
-			if (this.compType == "Wire") { containerMaterial.color.set(lightGray); }
 			this.container = new THREE.Mesh( containerGeometry, containerMaterial );
+			this.container.renderOrder = 0;
+			if (this.compType == "Wire") { 
+				containerMaterial.color.set(lightGray);
+				this.container.renderOrder = 1; 
+			}
 		}
 
 		containerMaterial.transparent = true;
-		containerMaterial.opacity = 0.7;
+		containerMaterial.opacity = 0.8;
 		containerMaterial.depthTest = true;  // this seems to help with showing the electrons always on top
 		containerMaterial.depthWrite = false;
 
@@ -407,6 +412,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	    this.ammeter.visible = false;
 
+	    this.ammeter.renderOrder = this.container.renderOrder;
+
     	        //this.ammeter = object1;
         this.container.add(this.ammeter);
         this.obstacles.push(this.ammeter);
@@ -434,7 +441,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		
 		var spriteText = makeTextSprite( ammeterText, " per clock tick ", 20,
 			{ fontsize: 24, fontface: "kristen ITC", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
-		spriteText.position.set(this.w*1.2, this.l/2, 0);
+		spriteText.position.set(this.w*1.2, this.l/2, 20);
 		
 		//spriteText.rotation.z = this.rotationAngle;
 		//spriteText.updateMatrixWorld(); // because it is not in the render() loop yet 

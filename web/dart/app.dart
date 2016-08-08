@@ -123,9 +123,14 @@ class App extends TouchManager {
          theApp.help.show();
        }
        else {
-        Component c = components[index];
-        theApp.webglComponent = c;
-        theApp.help.show();
+         theApp.webglComponent = null;
+         theApp.help.show();
+        new Future.delayed(const Duration(milliseconds:50), () {
+          Component c = components[index];
+          theApp.webglComponent = c;
+          theApp.help.show();
+        });
+
         //print("V: ${c.voltageDrop} I: ${c.current} R: ${c.resistance}");
        }
      }

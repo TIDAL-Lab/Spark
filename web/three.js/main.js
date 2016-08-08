@@ -29,7 +29,8 @@ var red = 0xDA4747;
 var darkRed = 0x990000;
 var green = 0x008F00;
 var lightGreen = 0xbfff80;
-var darkGreen = 0x003300;
+//var darkGreen = 0x003300;
+var darkGreen = 0x2D5E17;
 var gray = 0x808080;
 var midnightBlue = 0x000099;
 var blue = 0x337586;
@@ -88,7 +89,7 @@ function doInit() {
 function init() {
 	//sphere = new THREE.TextureLoader().load( "textures/ball.png" ); // this works for three.js-r75 (latest revision) 
 	sphere = THREE.ImageUtils.loadTexture( "textures/ball.png" );
-	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery3t-twin.png" ); // later: study the difference b/w ImageLoader and TexutreLoader
+	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery-texture.png" ); // later: study the difference b/w ImageLoader and TexutreLoader
 	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );	
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );

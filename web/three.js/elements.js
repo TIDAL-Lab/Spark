@@ -292,6 +292,7 @@ function makeTextSprite( message, message2, scaleFactor, parameters )
 		{ map: texture } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
 	var sprite = new THREE.Sprite( spriteMaterial );
 	
+	
 	sprite.scale.set(scaleFactor*0.5 * fontsize, scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
 	//sprite.scale.set(100,50,1.0);
 	return sprite;	
