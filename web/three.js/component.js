@@ -68,7 +68,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	this.computeForce = function() {
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
-	  	this.force.y = this.direction * this.current; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
+	  	this.force.y = this.direction * this.current * 2; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
 	  	//if (this.compType == "Wire") { this.force.y *= 0.2; }
 	  	this.force.z = 0.0;
 
@@ -184,7 +184,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 
 		this.container.material.side = THREE.BackSide;  // for collision detection code
-  		this.obstacles.push(this.container); // for collision detection code
+  		//this.obstacles.push(this.container); // for collision detection code
   		this.obstacles.push(this.startJunction);
   		this.obstacles.push(this.endJunction);
 	}
@@ -270,8 +270,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	this.createIons = function() {		
 		var count = 0;
-		var d2 = 50;
-		var d = 0; // d is inverse of density of ions which is inversly proportional to resistance		
+		var d2 = 40;
+		var d = 1; // d is inverse of density of ions which is inversly proportional to resistance		
 		if (this.compType == "Resistor" || this.compType == "Bulb") {
 			var d2 = 20;
 			var d = this.R + 1;
@@ -279,8 +279,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var halfL = Math.round(this.l/2);
 		var halfW = Math.round(this.w/2);
 		
-		for ( i = - halfL; i <= halfL; i++) {
-			for ( j = - halfW; j <= halfW; j++) {
+		for ( i = - halfL; i < halfL; i++) {
+			for ( j = -halfW; j < halfW; j++) {
 				if (i % d2 == 0 & j % d2 == 0 & (i + j) % (20*(5-d)) == 0 ) {
 					pos = new THREE.Vector3();
 					pos.y = i; // I switched the order of x & y (from BoxGeometry)

@@ -636,7 +636,19 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 	Not successful yet!
 
 2. Working on the electrons movement, velocity, force, etc. to make it more scientific
-
+	Ok! I think it is working better now
+	According to Drude model:
+	a. electrons average velocity is proportional to E * average time between each collision
+	b. after each collision the reflected velocity is in a random direction and the magnitude depends on the 
+		thermal energy of the area.
+		I assumed the same thermal energy for all around the circuit and therefore resetting the velocity to the initial velocity
+	So I don't use any maximum velocity any longer, but after each collision reset the value of velocity back to the initial value
+	and the increase in velocity at each tick is determined by the measure of current.
+	
+3. working on electrons getting stuck!
+	Update: it is working better now, 
+	I am now using the electron.reflectedTimes counter to make sure there are not bounced off two obstacles more than twice
+	but still some times a couple of electrons get stuck, I observed at the junction with the battery.
 
 4. XXX Added a texture for battery (so that it doesn't need to use text sprite)
 

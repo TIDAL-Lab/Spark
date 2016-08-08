@@ -27,7 +27,7 @@ if (ArFlag) {
 
 window.addEventListener('message', function(event) {
 	if (event.origin !== 'http://localhost:8080') return;
-	console.log(event.data);  // this prints "hello model iframe"
+	//console.log(event.data);  // this prints "hello model iframe"
 	//event.source.postMessage("hello back", event.origin);
 }, false);
 

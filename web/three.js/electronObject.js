@@ -128,9 +128,10 @@ function Electron( component ) {
 
 		this.position.add( this.velocity );
 		this.status = "moved";
-		this.reflectedTimes = 0;
 
-		this.findElectronsOutside();
+		var isOutside = this.findElectronsOutside();
+		if (isOutside) this.reflectedTimes += 1; 
+		else this.reflectedTimes = 0;
 	}
 
 
@@ -138,9 +139,7 @@ function Electron( component ) {
 		this.testFlag = false;
 		// check if it is in the container box
 		var component = this.component;
-		//console.log("before: " + this.position.y);
 		var electronLocal = this.worldToLocal(this.position);
-		//console.log("after: " + electronLocal.y);
 		if (Math.abs(electronLocal.y) <= component.l/2) {
 			if (Math.abs(electronLocal.x) >= component.w/2) { // the electron is outside of the container cylinder
 				this.position.sub(this.velocity);
@@ -155,15 +154,14 @@ function Electron( component ) {
 				if (electronLocal.x > 0) normal.multiplyScalar(-1);
 				this.testFlag = true;
 				this.bounceBack(normal, component);
-				//console.log("bounced off a wall");
-
+				return true;
 			}
 		}
-		else {   // the electron is outside of the two junctions
+		else {   // check if the electron is outside of the two junctions
 			var x = electronLocal.x;
 			var y = Math.abs(electronLocal.y) - component.l/2
 			var distance = Math.sqrt(( x * x ) + ( y * y ));
-			if ( distance >= component.w/2 ) {
+			if ( distance >= component.w/2 ) {  // the electron is outside of the two junctions
 				this.position.sub(this.velocity);
 				// Make sure it's not out of the box anymore
 				var local2 = this.worldToLocal(this.position);
@@ -175,13 +173,12 @@ function Electron( component ) {
 				var normal = new THREE.Vector3(-x , -y, 0);
 				if (electronLocal.y < 0) normal.y = y;
 				this.bounceBack(normal, component);
-				//console.log("bounced off a junction");
-
+				return true;
 			}
-		} 
+		}
+		return false;  // no electron out of container 
 	}
 
-	//var arrowHelper = new THREE.ArrowHelper( new THREE.Vector3(1,0,0), new THREE.Vector3(1,0,0), 10, darkGreen );
 	this.collision = function( obstacles ) {
 		var length = this.velocity.length();
 		if (ArFlag) {
@@ -197,10 +194,6 @@ function Electron( component ) {
 			var direction = new THREE.Vector3().copy(this.velocity).normalize();	
 			var origin = new THREE.Vector3().copy(this.position); 
 		}
-
-		//scene.remove(arrowHelper);
-		//arrowHelper = new THREE.ArrowHelper( dir, origin, length+electronSize/2, darkGreen );
-		//scene.add(arrowHelper);
 
 		raycaster.set(origin, direction);
 
@@ -241,15 +234,18 @@ function Electron( component ) {
 
 		//if ( component.volt > 0 ) electron.velocity.multiplyScalar(lossFactor); // due to collision, lose energy
 		this.status = "bounced back";
-
+		this.reflectedTimes  += 1;
 		if (this.reflectedTimes > 1) {  // check if the electron is stuck
 			var l = this.velocity.length();
-			this.velocity.setLength(l/2);
-			this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
-			console.log(this.reflectedTimes);
+			//console.log(l);
+			//this.velocity.setLength(l/2);
+			//console.log(this.velocity.length());
+			this.velocity.applyAxisAngle(new THREE.Vector3(0,0,1), Math.PI/10); // rotate it by a small degree, for example 18
+			//console.log(this.reflectedTimes);
+			this.reflectedTimes -= 1;
 		}
-		this.reflectedTimes  += 1;
-
+		if (this.reflectedTimes != 1) console.log(this.reflectedTimes);
+		
 	 }
 
 
