@@ -461,17 +461,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 	this.clicked = function() {
 		if (this == clickedComponent) { // if this is the same component as clicked last time, unclick it
-			clickedComponent = null;
-			var receiver = window.parent;
-			if (!twoScreen) receiver.postMessage(-1, 'http://localhost:8080');
-			else { // clear the measures in the voltmeter image
-				clearValues();
-			}
-
-			if (this.compType == "Battery") { this.container.material.color.set(darkGreen); }
-			else if (this.compType == "Wire") { this.container.material.color.set(lightGray); }
-			else { this.container.material.color.set(gray); }
-			this.showAmmeter(false);
+			unSelectComponent();
 			return;
 		}
 		else { // if this is the first time this component is clicked
@@ -515,4 +505,19 @@ function test(id) {
 	console.log("before calling time out");
 	var receiver = window.parent;
 	receiver.postMessage(id, 'http://localhost:8080');
+}
+
+function unSelectComponent() {
+	if (clickedComponent != null) {
+		if (clickedComponent.compType == "Battery") { clickedComponent.container.material.color.set(darkGreen); }
+		else if (clickedComponent.compType == "Wire") { clickedComponent.container.material.color.set(lightGray); }
+		else { clickedComponent.container.material.color.set(gray); }
+		clickedComponent.showAmmeter(false);
+	}
+	clickedComponent = null;
+	var receiver = window.parent;
+	if (!twoScreen) receiver.postMessage(-1, 'http://localhost:8080');
+	else { // clear the measures in the voltmeter image
+		clearValues();
+	}
 }

@@ -166,8 +166,9 @@ THREE.EditorControls = function ( object, domElement ) {
 
 			thisComponent.clicked();
 		}
-
-		//}
+		else { // no component is clicked
+			unSelectComponent();   // function in the component class
+		}
 		
 	}
 

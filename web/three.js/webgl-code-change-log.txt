@@ -648,7 +648,11 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 3. working on electrons getting stuck!
 	Update: it is working better now, 
 	I am now using the electron.reflectedTimes counter to make sure there are not bounced off two obstacles more than twice
-	but still some times a couple of electrons get stuck, I observed at the junction with the battery.
+	if they are, rotate them by a small degree (for example 18 degrees)
+	ISSUE: but still some times a couple of electrons get stuck, I observed at the junction with the battery.
+	
+4. updated the tapping on components code:
+	added code so that if the user taps on the non-component area it also unselects the current clicked component.
 
 4. XXX Added a texture for battery (so that it doesn't need to use text sprite)
 
