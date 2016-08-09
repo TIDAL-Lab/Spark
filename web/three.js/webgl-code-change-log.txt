@@ -668,6 +668,26 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 	new Future.delayed(const Duration(seconds:1), () {  // or milliseconds
 		// ...code goes here...
 	});
+	
+*** notes on 8/8/2016
+1. revisited the collide with connected junctions code.
+
+2. solved the issue with connection with more than one components!! Yaaay!
+	the issue was very tricky!
+	in my component.formJunctionCurrents code, where I calculate the list of probabilities,
+	before, when I divided the probabilities with a norm, it could have resulted in a non-integer value,
+	that caused issue with rolling the dice, because the dice rolling code only works if the probabilities are integers
+	so I simply modified this line:
+			var norm = Math.min.apply( Math, junction.outCurrents );
+			junction.probabilities = junction.outCurrents.map(function(a) {
+	    							return (a/norm);
+								});
+	To:
+			var norm = Math.min.apply( Math, junction.outCurrents );
+			junction.probabilities = junction.outCurrents.map(function(a) {
+	    							return (Math.round(a/norm));
+								});
+	
 
 ISSUES TO FIX LATER:
 
