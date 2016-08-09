@@ -123,9 +123,10 @@ class App extends TouchManager {
          theApp.help.show();
        }
        else {
-         theApp.webglComponent = null;
-         theApp.help.show();
-        new Future.delayed(const Duration(milliseconds:50), () {
+         //theApp.webglComponent = null;
+         //theApp.help.show();
+         flashValues();
+        new Future.delayed(const Duration(milliseconds:100), () {
           Component c = components[index];
           theApp.webglComponent = c;
           theApp.help.show();
@@ -142,16 +143,16 @@ class App extends TouchManager {
      else if (evt.data is List) {  // evt.data is a JSArray from touch controls
        if (evt.data.length == 1) { // zoom data
          var delta = evt.data[0];
-         frameWidth += delta * 0.75;  // before: 1
-         frameHeight += delta*0.55;   // before: 0.75
+         frameWidth += delta * 0.7;  // before: 1
+         frameHeight += delta*0.7;   // before: 0.75
 //         frameWidth *= (1 + delta);
 //         frameHeight *= (1 + delta);
          repaint();
        }
        else { //evt.data.length is 2 --> pan data
          //print(evt.data.runtimeType.toString());
-         frameCenterX += evt.data[0]*0.38; // before: ??
-         frameCenterY -= evt.data[1]*0.38;  // before: ??
+         frameCenterX += evt.data[0]*0.35; // before: ??
+         frameCenterY -= evt.data[1]*0.42;  // before: ??
          repaint();
        }
 

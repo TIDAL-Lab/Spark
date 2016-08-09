@@ -30,7 +30,7 @@ class Help {
   
   Help () {
     img = document.querySelector("#help-image");
-    setImage("images/helps/bg.png");   
+    setImage("images/helps-components/bg.png");   
     
     p = new ParagraphElement();
     p = document.querySelector("#type");
@@ -238,6 +238,29 @@ void clearValues() {
   
   p = document.querySelector("#description");
   p.text = "Tap on a component above to learn more about it!";
+  
+  p = document.querySelector("#current-value");
+  p.text = "";
+
+  p = document.querySelector("#resistance-value");
+  p.text = "";
+
+  p = document.querySelector("#voltage-value");
+  p.text = "";
+
+  p = document.querySelector("#brightness-factor");
+  p.text = "";
+ 
+}
+
+void flashValues() {
+  //print("clear the values");
+  var p = document.querySelector("#comp-type");
+  //p.text = "Tap on a component to see its measures";
+  p.text = "";
+  
+//  p = document.querySelector("#description");
+//  p.text = "Tap on a component above to learn more about it!";
   
   p = document.querySelector("#current-value");
   p.text = "";

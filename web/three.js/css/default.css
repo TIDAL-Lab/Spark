@@ -25,7 +25,7 @@ a {
   z-index: -1;
 }
 
-/* this removes the blue */
+/* this removes the blue border */
 button:focus {outline:0;}
 
 /*#voltmeter-image {
@@ -61,10 +61,10 @@ button:focus {outline:0;}
 }
 
 #legend-image {
-  width: 100px;
+  width: 120px;
   position: absolute;
-  top: 10px;
-  left: 0px;
+  top: 5px;
+  left: 5px;
 }
 
 #watch-button {
@@ -286,19 +286,19 @@ button:focus {outline:0;}
 
 #controls-panel {
   position: absolute;
-  width: 200px;
-  height: 100px;
-  bottom: 0%;
-  left: 0%;
-  border-style: solid;
-  border-color: white;
+  width: 120px;
+  height: 60px;
+  bottom: 2%;
+  left: 2%;
+/*  border-style: solid;
+  border-color: white;*/
 }
 .control-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */  
-  height: 40px;
-  width: 40px;
+  height: 30px;
+  width: 30px;
   position: absolute;
-  margin: -40px -20px;
+  margin: -30px -15px;
   border: none;
   padding: none;
   display: block;
@@ -316,43 +316,43 @@ button:focus {outline:0;}
   top: 60%;
   left: 20%;
 
-  height: 50px;
-  width: 50px;
-  margin: -50px -25px;
+  height: 36px;
+  width: 36px;
+  margin: -36px -18px;
 }
 
 #minus-button {
   background: url("../../images/buttons/controls/minus.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 90%;
+  top: 100%;
   left: 20%;
 }
 
 #up-button {
   background: url("../../images/buttons/controls/up.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 60%;
+  top: 65%;
   left: 70%;
 }
 
 #down-button {
   background: url("../../images/buttons/controls/down.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 100%;
+  top: 110%;
   left: 70%;
 }
 
 #left-button {
   background: url("../../images/buttons/controls/left.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 80%;
+  top: 90%;
   left: 50%;
 }
 
 #right-button {
   background: url("../../images/buttons/controls/right.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 80%;
+  top: 90%;
   left: 90%;
 }
 

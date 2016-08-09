@@ -10,7 +10,7 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var ionGeometry = new THREE.SphereGeometry( 4, 16, 16 );
+var ionGeometry = new THREE.SphereGeometry( 5, 16, 16 );
 var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 var offsetZ = 0.00;
@@ -440,8 +440,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		this.ammeter.remove(this.ammeter.children[0]);  // used to be children[1] when I had text 1
 		
 		var spriteText = makeTextSprite( ammeterText, " per clock tick ", 20,
-			{ fontsize: 24, fontface: "kristen ITC", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
-		spriteText.position.set(this.w*1.2, this.l/2, 20);
+			{ fontsize: 26, fontface: "Comic Sans MS", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
+		spriteText.position.set(this.w*1.2, this.l/2, 30);
 		
 		//spriteText.rotation.z = this.rotationAngle;
 		//spriteText.updateMatrixWorld(); // because it is not in the render() loop yet 
