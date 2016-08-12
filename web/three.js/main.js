@@ -13,8 +13,8 @@
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 // Static flags
-var ArFlag = false;
-var twoScreen = false;
+var ArFlag = true;
+var twoScreen = true;
 var twoD = true; //electron movement is either 2D (z=0) or 3D
 
 // Dynamic FLAGS

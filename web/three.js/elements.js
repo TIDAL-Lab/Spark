@@ -35,6 +35,38 @@ if (button != null) button.onclick = function() {pan("right")};
 if (twoScreen) {
 	var button = document.querySelector("#page0-button");
     //button.addEventListener("click", showPage(0));
+    if (button != null) button.style.display = "none";
+
+   	button = document.querySelector("#page1-button");
+    if (button != null) button.style.display = "none";
+
+    button = document.querySelector("#page2-button");
+    if (button != null) button.style.display = "none";
+
+    button = document.querySelector("#page3-button");
+    if (button != null) button.style.display = "none";
+
+    button = document.querySelector("#back-button");
+    if (button != null) button.style.display = "none";
+
+    // set the help image
+    var image = document.querySelector("#help-image");
+	image.src = "../images/helps-components/bg.png";
+
+	// set the voltmeter image
+    var image = document.querySelector("#voltmeter-image");
+	image.src = "../images/buttons/voltmeter3.png";
+
+
+
+	var p = document.querySelector("#description");
+	p.innerHTML = "Tap on a component to see its measures";
+
+}        
+
+/*if (twoScreen) {
+	var button = document.querySelector("#page0-button");
+    //button.addEventListener("click", showPage(0));
     if (button != null) button.onclick = function() {showPage(0)};
 
    	button = document.querySelector("#page1-button");
@@ -51,7 +83,7 @@ if (twoScreen) {
 
     // set the help image
     var image = document.querySelector("#help-image");
-	image.src = "../images/helps/bg.png";
+	image.src = "../images/helps-components/bg.png";
 
 	// set the voltmeter image
     var image = document.querySelector("#voltmeter-image");
@@ -62,13 +94,13 @@ if (twoScreen) {
 	var p = document.querySelector("#comp-type");
 	p.innerHTML = "Tap on a component to see its measures";
 
-}        
+}        */
     // button = document.querySelector("#close-help-button");
     // if (button != null) button.onClick.listen((e) => close());
 
 function zoom( direction ) {
 	var delta;
-	if (direction == "in") {
+	if ((direction == "in" && !ArFlag) || (direction == "out" && ArFlag))  {
 		delta = new THREE.Vector3(0.0, 0.0, -50);
 	}
 	else {
@@ -100,7 +132,7 @@ function pan( direction ) {
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
 }
 
-function showPage(page) {
+function showPageOld(page) {
 	var image = document.querySelector("#help-image");
 	image.src = "../images/helps/help" + page.toString() + ".png";
     var div = document.querySelector("#main-page");
@@ -110,9 +142,19 @@ function showPage(page) {
     button.style.display = "inline";
 }
 
+function showPage(page) {
+	var image = document.querySelector("#help-image");
+	image.src = "../images/helps-components/help" + page.toString() + ".png";
+    var div = document.querySelector("#main-page");
+    div.style.display = "none";
+    
+    // var button = document.querySelector("#back-button");
+    // button.style.display = "inline";
+}
+
 function back() {
 	var image = document.querySelector("#help-image");
-	image.src = "../images/helps/bg.png";
+	image.src = "../images/helps-components/bg.png";
 
     var button = document.querySelector("#back-button");
     button.style.display = "none";
@@ -151,13 +193,34 @@ function showValues(type, v, i, r) {
 	else {
 		p.innerHTML = "";
  	}
+
+ 	if (twoScreen) {
+ 		switch (type) {
+	        case "Wire":
+	          showPage(0);
+	          break;
+	        case "Battery":
+	          showPage(1);
+	          break;
+	        case "Resistor":
+	          showPage(2);
+	          break;
+	        case "Bulb":
+	          showPage(3);
+	          break;
+     	}
+ 	}
+
+ 	var p = document.querySelector("#description");
+	p.innerHTML = "";
 }
  
 
 function clearValues() {
 
 	var p = document.querySelector("#comp-type");
-	p.innerHTML = "Tap on a component to see its measures";
+	//p.innerHTML = "Tap on a component to see its measures";
+	p.innerHTML = "";
 
 	p = document.querySelector("#current-value");
 	p.innerHTML = "";
@@ -170,6 +233,10 @@ function clearValues() {
 
 	p = document.querySelector("#brightness-factor");
 	p.innerHTML = "";
+
+	back();
+	var p = document.querySelector("#description");
+	p.innerHTML = "Tap on a component above to learn more about it!";
  
 }
 

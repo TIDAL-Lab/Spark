@@ -357,3 +357,21 @@ button:focus {outline:0;}
 }
 
 
+
+.secondText {
+   outline: none;
+   color: black;
+   position: absolute;
+   text-align: center;
+   border: none;
+   width: 270px;
+   height: 10px;
+   top: 70px;
+   right: 10px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: kristen ITC, Helvetica, sans-serif;
+   font-size:20px;
+   display: inline-block;
+}
