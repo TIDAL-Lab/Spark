@@ -687,7 +687,10 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 			junction.probabilities = junction.outCurrents.map(function(a) {
 	    							return (Math.round(a/norm));
 								});
-	
+
+*** notes on 8/14/2016
+
+								
 
 ISSUES TO FIX LATER:
 

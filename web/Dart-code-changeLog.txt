@@ -69,4 +69,5 @@ THINGS TO FIX LATER:
 	ok, I sort of fixed some of the issues, but still the pubnub publish/subscribe works strangely
 2. working on condition 4, trying to make the AR working.
 
-*** notes on 8/3/2016
+*** notes on 8/14/2016
+1. working on the parseDelete function and the issue with not correctly updating objects on parseDelete

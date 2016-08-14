@@ -94,8 +94,8 @@ function doParse(message){
     var tCircuit;
 	// create a new subclass of Parse.Object named Circuit
     var parseCircuit = Parse.Object.extend("Circuit");
-    var query = new Parse.Query(parseCircuit);
-    //query.exists("type");// This determines if the field "type" is set for the instances and retrieves all 
+    var query = new Parse.Query(parseCircuit);  // using Parse.Query to retrieve the circuit object
+    query.exists("type");// This determines if the field "type" is set for the instances and retrieves all 
   	//objects that have the "type" field set
   	query.find().then(function(results){
     	var promise = Parse.Promise.as();

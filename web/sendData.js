@@ -38,7 +38,7 @@ var deleteParse = function(myObj){
   this.doDeleteParse = function(){
     var parseCircuit = Parse.Object.extend("Circuit");
     var a_Circuit = new Parse.Query(parseCircuit);
-    //a_Circuit.exists("type");   // EB: commented to test the error with not deleting objects.
+    a_Circuit.exists("type");   // EB: commented to test the error with not deleting objects.
 
     
       a_Circuit.find().then(function(Circuits){
