@@ -28,7 +28,7 @@ part of SparkProject;
  * 3 --> webgl nonAR: circuit model on the same screen
  * 4 --> webgl AR
  */
-int CONDITION = 4;
+int CONDITION = 3;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
