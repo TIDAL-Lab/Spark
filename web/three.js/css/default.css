@@ -61,22 +61,22 @@ button:focus {outline:0;}
 }
 
 #legend-image {
-  width: 120px;
+  width: 150px;
   position: absolute;
-  top: 5px;
-  left: 5px;
+  top: 10px;
+  left: 720px;
 }
 
 #watch-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
   background: url("../../images/buttons/watch2.png") 0 0 no-repeat;
   background-size: 100%; 
-  height: 40px;
-  width: 200px;
+  height: 60px;
+  width: 240px;
   position: absolute;
-  margin: -40px -100px;
+  margin: -60px -120px;
   top: 12%;
-  left: 50%;
+  left: 35%;
   border: none;
   padding: none;
   display: block;
@@ -311,10 +311,10 @@ button:focus {outline:0;}
 }
 .control-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */  
-  height: 30px;
-  width: 30px;
+  height: 60px;
+  width: 60px;
   position: absolute;
-  margin: -30px -15px;
+  margin: -60px -30px;
   border: none;
   padding: none;
   display: block;
@@ -329,12 +329,12 @@ button:focus {outline:0;}
 #plus-button {
   background: url("../../images/buttons/controls/plus.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 60%;
+  top: 30%;
   left: 20%;
 
-  height: 36px;
-  width: 36px;
-  margin: -36px -18px;
+  height: 70px;
+  width: 70px;
+  margin: -70px -35px;
 }
 
 #minus-button {
@@ -347,29 +347,29 @@ button:focus {outline:0;}
 #up-button {
   background: url("../../images/buttons/controls/up.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 65%;
-  left: 70%;
+  top: 35%;
+  left: 110%;
 }
 
 #down-button {
   background: url("../../images/buttons/controls/down.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 110%;
-  left: 70%;
+  top: 120%;
+  left: 110%;
 }
 
 #left-button {
   background: url("../../images/buttons/controls/left.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 90%;
-  left: 50%;
+  top: 85%;
+  left: 70%;
 }
 
 #right-button {
   background: url("../../images/buttons/controls/right.png") 0 0 no-repeat;
   background-size: 100%; 
-  top: 90%;
-  left: 90%;
+  top: 85%;
+  left: 150%;
 }
 
 
@@ -380,14 +380,14 @@ button:focus {outline:0;}
    position: absolute;
    text-align: center;
    border: none;
-   width: 270px;
-   height: 10px;
-   top: 70px;
-   right: 10px;
+   width: 450px;
+   height: 20px;
+   top: 500px;
+   left: 10px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
    font-family: kristen ITC, Helvetica, sans-serif;
-   font-size:20px;
+   font-size:30px;
    display: inline-block;
 }

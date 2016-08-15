@@ -110,10 +110,10 @@ if (twoScreen) {
 function zoom( direction ) {
 	var delta;
 	if ((direction == "in" && !ArFlag) || (direction == "out" && ArFlag))  {
-		delta = new THREE.Vector3(0.0, 0.0, -50);
+		delta = new THREE.Vector3(0.0, 0.0, -100);
 	}
 	else {
-		delta = new THREE.Vector3(0.0, 0.0, 50);
+		delta = new THREE.Vector3(0.0, 0.0, 100);
 	}
 	camera.position.add(delta);
 	var message = [delta.z];
@@ -126,16 +126,16 @@ function pan( direction ) {
 	if (ArFlag) sign = -1;
 	switch (direction) {
 		case "up":
-			delta = new THREE.Vector3(0.0, 10.0*sign, 0.0);
+			delta = new THREE.Vector3(0.0, 20.0*sign, 0.0);
 			break;
 		case "down":
-			delta = new THREE.Vector3(0.0, -10.0*sign, 0.0);
+			delta = new THREE.Vector3(0.0, -20.0*sign, 0.0);
 			break;
 		case "left":
-			delta = new THREE.Vector3(-10.0*sign, 0.0, 0.0);
+			delta = new THREE.Vector3(-20.0*sign, 0.0, 0.0);
 			break;
 		case "right":
-			delta = new THREE.Vector3(10.0*sign, 0.0, 0.0);
+			delta = new THREE.Vector3(20.0*sign, 0.0, 0.0);
 			break;
 	}
 	camera.position.add(delta);

@@ -93,26 +93,30 @@ function JsArInit() {
     // but it's mostly just requestAnimationFrame wrapped up with a
     // polyfill)
     jsFrames.registerAnimation(function () {
-        markerDetectedFlag = false;
-        // Capture the current frame from the inputStream
-        inputCapture.getContext('2d').drawImage(input, 0, 0, width*WIDTH_RATIO, height);
+        if (!freezeFlag) {
+            markerDetectedFlag = false;
+            // Capture the current frame from the inputStream
+            inputCapture.getContext('2d').drawImage(input, 0, 0, width*WIDTH_RATIO, height);
 
-        // then we need to tell the image reader and the input scene that the input has changed
-        inputCapture.changed = true;
-        inputTexture.needsUpdate = true;
+            // then we need to tell the image reader and the input scene that the input has changed
+            inputCapture.changed = true;
+            inputTexture.needsUpdate = true;
 
-        // Use the imageReader to detect the markers
-        // (The 2nd parameter is a threshold)
-        if (detector.detectMarkerLite(imageReader, threshold) > 0 && !freezeFlag) {
-            markerDetectedFlag = true;
-            // If any markers were detected, get the transform matrix of the first one
-            detector.getTransformMatrix(0, resultMatrix);
+            // Use the imageReader to detect the markers
+            // (The 2nd parameter is a threshold)
+            if (detector.detectMarkerLite(imageReader, threshold) > 0) {
+                markerDetectedFlag = true;
+                // If any markers were detected, get the transform matrix of the first one
+                detector.getTransformMatrix(0, resultMatrix);
 
-            // and use it to transform our three.js object
-            markerRoot.setJsArMatrix(resultMatrix);
-            markerRoot.matrixWorldNeedsUpdate = true;
+                // and use it to transform our three.js object
+                markerRoot.setJsArMatrix(resultMatrix);
+                markerRoot.matrixWorldNeedsUpdate = true;
+
+            }
 
         }
+
 
         render(); 
     });
