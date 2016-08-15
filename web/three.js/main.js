@@ -94,17 +94,20 @@ function init() {
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
-	if (ArFlag) { 
+	camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
+	camera.position.z = 700;
+
+/*	if (ArFlag) { 
 		//camera = new THREE.Camera(); 
 		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
-		camera.position.z = 900;
+		camera.position.z = 700;
 	}
 	else {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
 		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
 		camera.position.z = 700;	
-	}
+	}*/
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
@@ -323,13 +326,13 @@ function createCSGComponent( c ) {
 
 function onWindowResize() {
 
-	windowHalfX = window.innerWidth / 2;
-	windowHalfY = window.innerHeight / 2;
+	// windowHalfX = window.innerWidth / 2;
+	// windowHalfY = window.innerHeight / 2;
 
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
+	// camera.aspect = window.innerWidth / window.innerHeight;
+	// camera.updateProjectionMatrix();
 
-	renderer.setSize( window.innerWidth, window.innerHeight );
+	// renderer.setSize( window.innerWidth, window.innerHeight );
 
 }
 

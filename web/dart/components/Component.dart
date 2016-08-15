@@ -263,8 +263,7 @@ class Component implements Touchable {
     theApp.components.remove(this);
     theApp.controlPoints.remove(this.start);
     theApp.controlPoints.remove(this.end);
-    theApp.circuit.removeBranch(this); // removing the branch from the circuit should be 
-                                      // the last thing to do, as it calls the sendDataToServer function
+    theApp.circuit.removeBranch(this); // removes the branch, sendData() is NOT called.
     
     if (this == theApp.model.component) { // if the model is being shown for this component
 //      document.querySelector("#model").style.display = "none";
@@ -384,6 +383,7 @@ class Component implements Touchable {
         theApp.circuit.collapseNode(start, start.connections.first);
         this.moveConnectedComponents(deltaX, deltaY);
         connecting = true;
+        
       }
     }
     if (!end.isConnected) {
@@ -395,10 +395,11 @@ class Component implements Touchable {
         
         theApp.circuit.collapseNode(end, end.connections.first);
         this.moveConnectedComponents(deltaX, deltaY);
+        connecting = true;
       }
     }
     App.repaint();
-    theApp.circuit.sendData();    
+    if (!connecting) theApp.circuit.sendData();    
   }
 
   void touchDrag(Contact event) {

@@ -17,12 +17,6 @@ if (twoScreen) {
 	}
 else {
 	doReceive("init"); 
-	}
-
-if (ArFlag) {
-    //display the freeze button
-    button = document.querySelector("#freeze-button");
-    button.style.display = "block";
 }
 
 window.addEventListener('message', function(event) {

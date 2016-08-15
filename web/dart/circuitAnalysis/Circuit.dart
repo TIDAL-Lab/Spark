@@ -134,11 +134,12 @@ class Circuit {
    * 1. called by circuit.solve method, when a change in graph
    * 2. called by circuit.addNewBranch method, when a new component is added
    * 3. called by component.touchUp method, when componets are dragged OR components are deleted
-   * 4. called by controlpoint.touchup method, when components are dragged
+   * 4. called by controlpoint.touchup method, when components are dragged or wire is extended
+   * 5. called by marker.touchup method
    */
   void sendData() {
    
-  
+    print("send data");
     //var myObj = new JsArray();
     var myObj = [];
     //findConnectedComponents();
@@ -196,10 +197,13 @@ class Circuit {
     
     
     if (USE_SERVER) {  // send data to parse
-      print("sending data to parse");
+      //print("sending data to parse");
+      //print(JSON.encode(myObj));
       // call the "doDeleteParse method on myObj (the code is in sendData.js)
-      var deleteParse = new JsObject(context['deleteParse'],[myObj]); // instantiate a JS "deleteParse" object
-      deleteParse.callMethod('doDeleteParse'); // call its method "doDeleteParse"
+      var sendParse = new JsObject(context['sendParse'],[myObj]); // instantiate a JS "deleteParse" object
+      sendParse.callMethod('doUpdateParse'); // call its method "doUpdateParse"
+      //sendParse.callMethod('doUpdateParse');
+      
     }
     else { 
       theApp.webglComponent = null;

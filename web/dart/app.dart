@@ -35,6 +35,8 @@ bool USE_SERVER = false;
 num CANVAS_RATIO = 0.0;
 num HELP_RATIO = 0.0;
 
+
+
 class App extends TouchManager {
 
    CanvasRenderingContext2D ctx;

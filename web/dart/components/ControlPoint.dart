@@ -144,6 +144,10 @@ class ControlPoint implements Touchable {
     }
     else if (isConnected) { /* a cp is disconnected and then connected back in a single drag event */
       Sounds.playSound("ping");
+      theApp.circuit.sendData();
+    }
+    else {
+      theApp.circuit.sendData();
     }
   }
   /* TODO */
@@ -191,7 +195,7 @@ class ControlPoint implements Touchable {
     makeConnection();
     updateCircuit();    
     App.repaint();
-    theApp.circuit.sendData();
+    //theApp.circuit.sendData();
   }
 
   void touchDrag(Contact event) {

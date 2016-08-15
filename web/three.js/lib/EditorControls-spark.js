@@ -64,7 +64,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
 		object.position.add( delta );
-		//center.add( delta );  // what is center for?
+		center.add( delta );  // what is center for?
 		var message = [delta.x, delta.y];
 		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
@@ -84,7 +84,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
 		object.position.add(delta); 
-		//console.log(delta);
+		//console.log(object.position);
 		var message = [delta.z];
 		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
@@ -99,8 +99,51 @@ THREE.EditorControls = function ( object, domElement ) {
 	*/
 
 
-	this.rotate = function ( delta ) {
+	this.rotateTest = function ( delta ) {
+		// EB AR test
+		//vector.copy( object.position ).sub( center );
+		vector.copy( object.position );
+		console.log(vector);
+		var theta = Math.atan2( vector.x, vector.z );
+		var phi = Math.atan2( Math.sqrt( vector.x * vector.x + vector.z * vector.z ), vector.y );
 
+		//console.log(delta);
+		theta += delta.x;
+		phi += delta.y;
+
+		var EPS = 0.000001;
+
+		phi = Math.max( EPS, Math.min( Math.PI - EPS, phi ) );
+
+		// EB modification
+
+		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta);
+		if (phi >= Math.PI/2) {
+			phi = Math.min( phi, Math.PI*3/4);
+		}
+		else {
+			phi = Math.max( phi, Math.PI/4);
+		}
+
+		// END EB modifications
+		var radius = vector.length();   // EB: distance from camera to scene
+		//console.log(theta*180/Math.PI);
+		vector.x = radius * Math.sin( phi ) * Math.sin( theta );
+		vector.y = radius * Math.cos( phi );
+		vector.z = radius * Math.sin( phi ) * Math.cos( theta );
+		//console.log(vector);
+
+		//object.position.copy( center ).add( vector );
+		object.position.copy( vector );
+		//object.lookAt( center );
+
+		scope.dispatchEvent( changeEvent );
+
+
+
+	};
+
+	this.rotate = function ( delta ) {
 		vector.copy( object.position ).sub( center );
 
 		var theta = Math.atan2( vector.x, vector.z );
@@ -132,7 +175,6 @@ THREE.EditorControls = function ( object, domElement ) {
 		//console.log(vector);
 
 		object.position.copy( center ).add( vector );
-
 		object.lookAt( center );
 
 		scope.dispatchEvent( changeEvent );
@@ -265,7 +307,7 @@ THREE.EditorControls = function ( object, domElement ) {
 	function onMouseClick( event ) {
 		//console.log("double clicked");
 		pointer.set( event.clientX, event.clientY );
-		scope.show();
+		if (freezeFlag || !ArFlag) scope.show();
 	}
 
 
@@ -346,7 +388,8 @@ THREE.EditorControls = function ( object, domElement ) {
 				offset0.x = -offset0.x;
 				offset1.x = -offset1.x;
 
-				scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
+				if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
+
 				break;
 
 			case 2: // two-fingered touch: zoom
@@ -354,7 +397,7 @@ THREE.EditorControls = function ( object, domElement ) {
 				touches[ 1 ].set( event.touches[ 1 ].pageX, event.touches[ 1 ].pageY, 0 );
 				//scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
 				distance = touches[ 0 ].distanceTo( touches[ 1 ] );
-				scope.zoom( new THREE.Vector3( 0, 0, prevDistance - distance ) );
+				if (freezeFlag || !ArFlag) scope.zoom( new THREE.Vector3( 0, 0, prevDistance - distance ) );
 				prevDistance = distance;
 
 

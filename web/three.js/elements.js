@@ -32,6 +32,15 @@ if (button != null) button.onclick = function() {pan("left")};
 button = document.querySelector("#right-button");
 if (button != null) button.onclick = function() {pan("right")};
 
+if (ArFlag) {
+    //display the freeze button
+    var button = document.querySelector("#freeze-button");
+    button.style.display = "block";
+
+    // button = document.querySelector("#reload-button");
+    // button.style.visibility = "visible";
+}
+
 if (twoScreen) {
 	var button = document.querySelector("#page0-button");
     //button.addEventListener("click", showPage(0));
@@ -113,18 +122,20 @@ function zoom( direction ) {
 
 function pan( direction ) {
 	var delta;
+	var sign = 1;
+	if (ArFlag) sign = -1;
 	switch (direction) {
 		case "up":
-			delta = new THREE.Vector3(0.0, 10.0, 0.0);
+			delta = new THREE.Vector3(0.0, 10.0*sign, 0.0);
 			break;
 		case "down":
-			delta = new THREE.Vector3(0.0, -10.0, 0.0);
+			delta = new THREE.Vector3(0.0, -10.0*sign, 0.0);
 			break;
 		case "left":
-			delta = new THREE.Vector3(-10.0, 0.0, 0.0);
+			delta = new THREE.Vector3(-10.0*sign, 0.0, 0.0);
 			break;
 		case "right":
-			delta = new THREE.Vector3(10.0, 0.0, 0.0);
+			delta = new THREE.Vector3(10.0*sign, 0.0, 0.0);
 			break;
 	}
 	camera.position.add(delta);
@@ -288,6 +299,7 @@ function freezeAR() {
 		//change the style of freeze-button to be active		
 		button.style.background = "url('../../images/buttons/capture.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
+		
 	}
 
 	else {   //unfreeze the scene
@@ -295,6 +307,10 @@ function freezeAR() {
 		//change the style of freeze-button to be active
 		button.style.background = "url('../../images/buttons/freeze.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
+		camera.position.x = 0;
+		camera.position.y = 0;
+		camera.position.z = 700;
+
 
 	}
 
@@ -399,5 +415,10 @@ var stop = false;
 
 function keepMoving() {
 	stop = !stop;   // the stop flag is used in the rendering function as a condition for running updateElectrons()
+}
+
+function reloadPage() {
+	console.log("reload the page");
+	if (ArFlag) window.location.reload();
 }
 

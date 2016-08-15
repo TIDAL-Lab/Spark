@@ -689,7 +689,15 @@ LATER: instead of using three.min.js use three.js file and then comment the part
 								});
 
 *** notes on 8/14/2016
+working on AR condition!
+1. working on adding rotation to the touch interaction,
+	but for some reason, the touch interaction are different when using AR 
+2. fixed the issue with window resizing, but commenting out everything in the windowResize function!
 
+3. working on adding a hidden button for reloading the page,
+	issue: when the button is hidden it does not fire the onclick function
+	
+4. disabled touch interaction when it is not freezed
 								
 
 ISSUES TO FIX LATER:
