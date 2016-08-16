@@ -708,6 +708,8 @@ working on AR condition!
 *** notes on 8/16/2016
 1. working on rotate for AR
 
+test test
+
 ISSUES TO FIX LATER:
 
 TODO001 (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
