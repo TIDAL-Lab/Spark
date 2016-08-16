@@ -100,6 +100,60 @@ THREE.EditorControls = function ( object, domElement ) {
 	*/
 
 
+	this.rotateWIP = function ( delta ) {
+		// EB AR test
+		//vector.copy( object.position ).sub( center );
+		vector.copy( object.position );
+		//console.log(vector);
+		//var theta = Math.atan2( vector.x, vector.z );
+		//var phi = Math.atan2( Math.sqrt( vector.x * vector.x + vector.z * vector.z ), vector.y );
+
+		var theta = Math.atan2( vector.y, vector.x );
+		var phi = Math.atan2( vector.z,  Math.sqrt( vector.x * vector.x + vector.y * vector.y ));
+
+
+		console.log("delta: ");
+		console.log(delta);
+		theta += delta.x;
+		phi += delta.y;
+
+		var EPS = 0.000001;
+
+		phi = Math.max( EPS, Math.min( Math.PI - EPS, phi ) );
+
+		// EB modification
+
+		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta); // don't let theta to exceed PI/4 or 45 degrees
+		if (phi >= Math.PI/2) {
+			phi = Math.min( phi, Math.PI*3/4);
+		}
+		else {
+			phi = Math.max( phi, Math.PI/4);
+		}
+
+		// END EB modifications
+		var radius = vector.length();   // EB: distance from camera to scene
+
+		//vector.x = radius * Math.sin( phi ) * Math.sin( theta );
+		//vector.y = radius * Math.cos( phi );
+		//vector.z = radius * Math.sin( phi ) * Math.cos( theta );
+
+		vector.x = radius * Math.cos( phi ) * Math.cos( theta );
+		vector.y = radius * Math.cos( phi ) * Math.sin( theta );
+		vector.z = radius * Math.sin( phi );
+
+
+		//object.position.copy( center ).add( vector );
+		//vector.negate();
+		object.position.copy( vector );
+		object.lookAt( center );
+
+		scope.dispatchEvent( changeEvent );
+
+
+
+	};
+
 	this.rotate = function ( delta ) {
 		// EB AR test
 		//vector.copy( object.position ).sub( center );
@@ -147,7 +201,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 	};
 
-	this.rotateOld = function ( delta ) {
+	this.rotateOriginal = function ( delta ) {
 		vector.copy( object.position ).sub( center );
 
 		var theta = Math.atan2( vector.x, vector.z );
