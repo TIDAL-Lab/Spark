@@ -324,9 +324,12 @@ function freezeAR() {
 		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
-		// camera.position.x = 0;
-		// camera.position.y = 0;
-		// camera.position.z = 500;
+		// camera.setJsArMatrix(parameters);
+		// var temp = new THREE.Matrix4();
+		// temp = camera.projectionMatrix;
+		// var z = camera.position.z;
+		// camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
+		// camera.projectionMatrix = temp;
 		
 	}
 
@@ -335,9 +338,9 @@ function freezeAR() {
 		//change the style of freeze-button to be active
 		button.style.background = "url('../../images/buttons/freeze.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
-		camera.position.x = 0;
-		camera.position.y = 0;
-		camera.position.z = 700;
+		// camera.position.x = 0;
+		// camera.position.y = 0;
+		// camera.position.z = 700;
 
 
 	}

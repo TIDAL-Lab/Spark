@@ -80,10 +80,10 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		if ( delta.length() > distance ) return;
 
-		if (!ArFlag) delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
-		if (ArFlag) delta.applyMatrix3( normalMatrix.getNormalMatrix( object.projectionMatrix ) );
+		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
+		//if (ArFlag) delta.applyMatrix3( normalMatrix.getNormalMatrix( object.projectionMatrix ) );
 
-		//if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
+		if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
 		object.position.add(delta); 
 		//console.log(object.position);
 		var message = [delta.z];
@@ -104,11 +104,13 @@ THREE.EditorControls = function ( object, domElement ) {
 		// EB AR test
 		//vector.copy( object.position ).sub( center );
 		vector.copy( object.position );
-		console.log(vector);
+		//console.log(vector);
 		var theta = Math.atan2( vector.x, vector.z );
 		var phi = Math.atan2( Math.sqrt( vector.x * vector.x + vector.z * vector.z ), vector.y );
 
-		//console.log(delta);
+
+		console.log("delta: ");
+		console.log(delta);
 		theta += delta.x;
 		phi += delta.y;
 
@@ -118,7 +120,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		// EB modification
 
-		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta);
+		theta = Math.min( Math.abs(theta), Math.PI/4)*Math.sign(theta); // don't let theta to exceed PI/4 or 45 degrees
 		if (phi >= Math.PI/2) {
 			phi = Math.min( phi, Math.PI*3/4);
 		}
@@ -224,8 +226,8 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		if ( event.button === 0 ) {
 
-			//state = STATE.ROTATE;
-			state = STATE.PAN;
+			state = STATE.ROTATE;
+			//state = STATE.PAN;
 
 		} else if ( event.button === 1 ) {
 
@@ -335,6 +337,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		switch ( event.touches.length ) {
 
 			case 1: 
+				console.log("touch start: " + camera.position);
 				// EB: The Touch.pageX read-only property returns the X coordinate of the touch point relative to the viewport, including any scroll offset.
 
 				touches[ 0 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
@@ -382,15 +385,15 @@ THREE.EditorControls = function ( object, domElement ) {
 				
 
 				// Rotate
-				//scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
+				if (freezeFlag || !ArFlag) scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
 
 				// Pan
-				var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
-				var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
-				offset0.x = -offset0.x;
-				offset1.x = -offset1.x;
+				// var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
+				// var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
+				// offset0.x = -offset0.x;
+				// offset1.x = -offset1.x;
 
-				if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
+				// if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
 
 				break;
 
@@ -403,12 +406,12 @@ THREE.EditorControls = function ( object, domElement ) {
 				prevDistance = distance;
 
 
-				// var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
-				// var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
-				// offset0.x = -offset0.x;
-				// offset1.x = -offset1.x;
+				var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
+				var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
+				offset0.x = -offset0.x;
+				offset1.x = -offset1.x;
 
-				// scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
+				if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
 
 				break;
 
@@ -418,9 +421,15 @@ THREE.EditorControls = function ( object, domElement ) {
 		prevTouches[ 1 ].copy( touches[ 1 ] );
 
 	}
+	// EB: testing
+	// function touchEnd( event ) {
+	// 	console.log("touch end: ");
+	// 	console.log(camera.position);
+	// }
 
 	domElement.addEventListener( 'touchstart', touchStart, false );
 	domElement.addEventListener( 'touchmove', touchMove, false );
+	//domElement.addEventListener( 'touchEnd', touchEnd, false );
 
 };
 

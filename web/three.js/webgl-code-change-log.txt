@@ -702,8 +702,11 @@ working on AR condition!
 *** notes on 8/15/2016
 1. added a hidden button for reloading the page
 	solution for onclick not firing for "hidden" button --> use a button with the background color!
-2. 
+2. added a flashing effect for the help text in the AR (twoscreen) condition
+	setTimeout(function(){ showValues(c.compType, c.volt, c.current, c.R); }, 100);
 								
+*** notes on 8/16/2016
+1. working on rotate for AR
 
 ISSUES TO FIX LATER:
 

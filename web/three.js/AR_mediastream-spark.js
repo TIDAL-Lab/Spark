@@ -48,7 +48,7 @@ function JsArInit() {
     // (We need to give it the same projection matrix as the detector
     // so the overlay will line up with what the detector is 'seeing')
     camera.setJsArMatrix(parameters);
-    console.log(camera.projectionMatrix.elements);
+    //console.log(camera.projectionMatrix.elements);
     
     // This is the canvas that we draw our input image on & pass
     // to the detector to analyse for markers...
@@ -114,6 +114,11 @@ function JsArInit() {
                 markerDetectedFlag = true;
                 // If any markers were detected, get the transform matrix of the first one
                 detector.getTransformMatrix(0, resultMatrix);
+
+                // NEW ADDITION
+                // Copy the marker matrix to the matrixArray matrix.
+                //copyMarkerMatrix(resultMatrix, matrixArray);
+                //console.log("copying matrix does not work!!");
 
                 // and use it to transform our three.js object
                 markerRoot.setJsArMatrix(resultMatrix);

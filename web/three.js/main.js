@@ -94,10 +94,10 @@ function init() {
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
-	camera = new THREE.PerspectiveCamera( 75, width / height, 10, 10000 );
-	camera.position.z = 700;
+	// camera = new THREE.PerspectiveCamera( 75, width / height, 10, 10000 );
+	// camera.position.z = 700;
 
-/*	if (ArFlag) { 
+	if (ArFlag) { 
 		//camera = new THREE.Camera(); 
 		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
@@ -107,7 +107,7 @@ function init() {
 		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
 		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
 		camera.position.z = 700;	
-	}*/
+	}
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
@@ -120,9 +120,10 @@ function init() {
 	renderer.setClearColor ( backgroundBlue ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth , window.innerHeight );
+	//if (twoScreen) renderer.setSize( width, height );
 
 	//if (twoScreen) renderer.setViewport ( 0, 0, window.innerWidth*0.6, window.innerHeight );
-	//renderer.setSize( width * 2 , height * 2 );
+	
 	
 	document.body.appendChild( renderer.domElement );
 
