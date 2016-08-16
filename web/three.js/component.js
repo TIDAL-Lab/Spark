@@ -426,7 +426,11 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 			}
 			else { // show the measures in the voltmeter image
-				showValues(this.compType, this.volt, this.current, this.R);
+				// add a delay for showing the values --> flashing text
+				flashValues();
+				var c = this;
+				setTimeout(function(){ showValues(c.compType, c.volt, c.current, c.R); }, 100);
+				
 			}
 
 			if (clickedComponent != null) {
@@ -451,12 +455,6 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 
 }
 
-function test(id) {
-	//id = this.ID;
-	console.log("before calling time out");
-	var receiver = window.parent;
-	receiver.postMessage(id, 'http://localhost:8080');
-}
 
 function unSelectComponent() {
 	if (clickedComponent != null) {

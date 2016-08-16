@@ -80,9 +80,10 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		if ( delta.length() > distance ) return;
 
-		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
+		if (!ArFlag) delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
+		if (ArFlag) delta.applyMatrix3( normalMatrix.getNormalMatrix( object.projectionMatrix ) );
 
-		if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
+		//if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
 		object.position.add(delta); 
 		//console.log(object.position);
 		var message = [delta.z];

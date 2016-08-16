@@ -698,6 +698,11 @@ working on AR condition!
 	issue: when the button is hidden it does not fire the onclick function
 	
 4. disabled touch interaction when it is not freezed
+
+*** notes on 8/15/2016
+1. added a hidden button for reloading the page
+	solution for onclick not firing for "hidden" button --> use a button with the background color!
+2. 
 								
 
 ISSUES TO FIX LATER:

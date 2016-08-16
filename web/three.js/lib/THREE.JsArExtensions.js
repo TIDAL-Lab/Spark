@@ -2,8 +2,9 @@
 
 THREE.Camera.prototype.setJsArMatrix = function (jsArParameters) {
     var matrixArray = new Float32Array(16);
+    console.log(matrixArray);
     jsArParameters.copyCameraMatrix(matrixArray, 10, 10000);
-
+    console.log(matrixArray);
     return this.projectionMatrix.set(
         matrixArray[0], matrixArray[4], matrixArray[8],  matrixArray[12],
         matrixArray[1], matrixArray[5], matrixArray[9],  matrixArray[13],

@@ -39,10 +39,16 @@ function JsArInit() {
     parameters = new FLARParam( width, height );
     detector = new FLARMultiIdMarkerDetector(parameters, markerWidth);
 
+    // For tracking video set continue mode to true. In continue mode, the detector
+    // tracks markers across multiple frames.
+    detector.setContinueMode(true);
+
+
     // The three.js camera for rendering the overlay on the input images
     // (We need to give it the same projection matrix as the detector
     // so the overlay will line up with what the detector is 'seeing')
     camera.setJsArMatrix(parameters);
+    console.log(camera.projectionMatrix.elements);
     
     // This is the canvas that we draw our input image on & pass
     // to the detector to analyse for markers...

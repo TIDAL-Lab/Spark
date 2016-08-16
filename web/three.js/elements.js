@@ -251,6 +251,30 @@ function clearValues() {
  
 }
 
+function flashValues() {
+
+	var p = document.querySelector("#comp-type");
+	//p.innerHTML = "Tap on a component to see its measures";
+	p.innerHTML = "";
+
+	p = document.querySelector("#current-value");
+	p.innerHTML = "";
+
+	p = document.querySelector("#resistance-value");
+	p.innerHTML = "";
+
+	p = document.querySelector("#voltage-value");
+	p.innerHTML = "";
+
+	p = document.querySelector("#brightness-factor");
+	p.innerHTML = "";
+
+	back();
+	var p = document.querySelector("#description");
+	p.innerHTML = "";
+ 
+}
+
 var watch = false;
 var halo;
 var lines; // an object that holds the tracking lines as its children
@@ -299,6 +323,10 @@ function freezeAR() {
 		//change the style of freeze-button to be active		
 		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
+
+		// camera.position.x = 0;
+		// camera.position.y = 0;
+		// camera.position.z = 500;
 		
 	}
 

@@ -94,7 +94,7 @@ function init() {
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
 
-	camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
+	camera = new THREE.PerspectiveCamera( 75, width / height, 10, 10000 );
 	camera.position.z = 700;
 
 /*	if (ArFlag) { 
