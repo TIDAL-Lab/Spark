@@ -99,7 +99,7 @@ THREE.EditorControls = function ( object, domElement ) {
 	*/
 
 
-	this.rotateTest = function ( delta ) {
+	this.rotate = function ( delta ) {
 		// EB AR test
 		//vector.copy( object.position ).sub( center );
 		vector.copy( object.position );
@@ -134,8 +134,9 @@ THREE.EditorControls = function ( object, domElement ) {
 		//console.log(vector);
 
 		//object.position.copy( center ).add( vector );
+		//vector.negate();
 		object.position.copy( vector );
-		//object.lookAt( center );
+		object.lookAt( center );
 
 		scope.dispatchEvent( changeEvent );
 
@@ -143,7 +144,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 	};
 
-	this.rotate = function ( delta ) {
+	this.rotateOld = function ( delta ) {
 		vector.copy( object.position ).sub( center );
 
 		var theta = Math.atan2( vector.x, vector.z );

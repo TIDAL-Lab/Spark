@@ -259,7 +259,7 @@ function watchElectron() {
 	if (!watch) {
 		//change the style of watch-button to be active
 		button = document.querySelector("#watch-button");
-		button.style.background = "url('../../images/buttons/watch2-active.png') 0 0 no-repeat"; 
+		button.style.background = "url('../../images/buttons/watch2-active2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 		if (electronObjects.length > 0) {
 			// add an object to hold the tracking lines
@@ -297,7 +297,7 @@ function freezeAR() {
 	if (!freezeFlag) {  // freeze the scene
 
 		//change the style of freeze-button to be active		
-		button.style.background = "url('../../images/buttons/capture.png') 0 0 no-repeat"; 
+		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 		
 	}

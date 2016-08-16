@@ -165,6 +165,7 @@ function initComponents() {
 	//markerRoot.add(compositeMesh);
 	markerRoot.add(electronVertices);	
 	if (ArFlag) markerRoot.matrixAutoUpdate = false;
+	//if (ArFlag) camera.matrixAutoUpdate = false;
 	scene.add( markerRoot );
 }
 

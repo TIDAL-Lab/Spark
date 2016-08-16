@@ -14,8 +14,8 @@
 var parameters, detector;
 var imageReader, resultMatrix;
 var input;
-var width = 320;
-var height = 240;
+var width = 480;
+var height = 480;
 var inputCapture, inputTexture, inputPlane;
 
 function JsArInit() {
@@ -113,6 +113,12 @@ function JsArInit() {
                 markerRoot.setJsArMatrix(resultMatrix);
                 markerRoot.matrixWorldNeedsUpdate = true;
 
+/*                // OR use it to transform the camera object
+                var m = new THREE.Matrix4();
+                m = m.getInverse(resultMatrix);
+                camera.setJsArMatrix(m);
+                camera.matrixWorldNeedsUpdate = true;
+*/
             }
 
         }

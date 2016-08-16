@@ -10,7 +10,7 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 
-var electronSize = 40;
+var electronSize = 20;
 var velocity = 4;
 //var velocityMax = 20;
 var lossFactor = 0.9;

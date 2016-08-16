@@ -385,7 +385,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var spriteText = makeTextSprite( ammeterText, " per clock tick ", 20,
 			{ fontsize: 26, fontface: "Comic Sans MS", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
 		if (!ArFlag) spriteText.position.set(this.w*1.2, this.l/2, 30);
-		else spriteText.position.set(this.w*1.2, this.l/2, -100);
+		else spriteText.position.set(this.w*1.2, this.l/2, -50);
 		
 		//spriteText.rotation.z = this.rotationAngle;
 		//spriteText.updateMatrixWorld(); // because it is not in the render() loop yet 
