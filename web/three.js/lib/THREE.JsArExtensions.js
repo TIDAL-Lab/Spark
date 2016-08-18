@@ -19,6 +19,17 @@ THREE.Object3D.prototype.setJsArMatrix = function (jsArMatrix) {
     );
 };
 
+THREE.Object3D.prototype.setJsArMatrix2 = function (jsArMatrix) {
+    return this.matrix.set(
+         jsArMatrix.m00,  jsArMatrix.m01, -jsArMatrix.m02,  jsArMatrix.m03,
+        -jsArMatrix.m10, -jsArMatrix.m11,  jsArMatrix.m12, -jsArMatrix.m13,
+         jsArMatrix.m20*2,  jsArMatrix.m21, -jsArMatrix.m22,  jsArMatrix.m23,
+                      0,               0,               0,               1
+    );
+};
+
+// temp: added to test AR matrix transformations
+
 function copyMarkerMatrix(arMat, glMat) {
   glMat[0] = arMat.m00;
   glMat[1] = -arMat.m10;

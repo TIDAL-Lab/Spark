@@ -18,6 +18,8 @@ var width = 480;
 var height = 480;
 var inputCapture, inputTexture, inputPlane;
 
+var resultArray = [];
+
 function JsArInit() {
 /*    $('#loading').hide();
     $('#nowebgl').hide(); // temporarily; later see what you should do with these two messages!*/
@@ -37,6 +39,8 @@ function JsArInit() {
     // the right size relative to your markers)
     var markerWidth = 180;
     parameters = new FLARParam( width, height );
+    console.log("parameters projection:");
+    console.log(parameters._projection_matrix);
     detector = new FLARMultiIdMarkerDetector(parameters, markerWidth);
 
     // For tracking video set continue mode to true. In continue mode, the detector
@@ -48,7 +52,8 @@ function JsArInit() {
     // (We need to give it the same projection matrix as the detector
     // so the overlay will line up with what the detector is 'seeing')
     camera.setJsArMatrix(parameters);
-    //console.log(camera.projectionMatrix.elements);
+    console.log(camera.projectionMatrix.elements);
+    console.log(camera.up);
     
     // This is the canvas that we draw our input image on & pass
     // to the detector to analyse for markers...
@@ -111,6 +116,9 @@ function JsArInit() {
             // Use the imageReader to detect the markers
             // (The 2nd parameter is a threshold)
             if (detector.detectMarkerLite(imageReader, threshold) > 0) {
+                //if (resultArray.length)
+                //resultArray.push(resultMatrix);
+
                 markerDetectedFlag = true;
                 // If any markers were detected, get the transform matrix of the first one
                 detector.getTransformMatrix(0, resultMatrix);
@@ -123,6 +131,7 @@ function JsArInit() {
                 // and use it to transform our three.js object
                 markerRoot.setJsArMatrix(resultMatrix);
                 markerRoot.matrixWorldNeedsUpdate = true;
+                
 
 /*                // OR use it to transform the camera object
                 var m = new THREE.Matrix4();

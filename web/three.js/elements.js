@@ -324,12 +324,38 @@ function freezeAR() {
 		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
-		// camera.setJsArMatrix(parameters);
-		// var temp = new THREE.Matrix4();
-		// temp = camera.projectionMatrix;
-		// var z = camera.position.z;
-		// camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
-		// camera.projectionMatrix = temp;
+
+
+		var xRotation = markerRoot.getWorldRotation().x;
+		var yRotation = markerRoot.getWorldRotation().y;
+
+		console.log(xRotation);
+		console.log(yRotation);
+		console.log(markerRoot.matrixWorld);
+		console.log(resultMatrix);
+
+		//markerRoot.matrixWorld.makeRotationX(2*xRotation);
+
+		//markerRoot.matrixWorld.makeRotationFromEuler(euler);
+		//markerRoot.matrixAutoUpdate = true;
+		markerRoot.rotation.x = Math.PI/2;
+		markerRoot.position.set(0,0,0);
+		//markerRoot.updateMatrixWorld(); 
+		//markerRoot.rotateY(2*yRotation);
+		//resultMatrix.m20 *= 2;
+		//markerRoot.setJsArMatrix2(resultMatrix);
+
+		//var matrix3 = new THREE.Matrix3()
+		//markerRoot.matrixWorldNeedsUpdate = true;
+
+		//var target = markerRoot.localToWorld(markerRoot.position);
+		//console.log(target);
+
+		//camera.lookAt(target);
+		//camera.rotation.x = xRotation;
+		//camera.rotation.y = -1 * yRotation;
+		//camera.matrixWorldNeedsUpdate = true;
+		
 		
 	}
 

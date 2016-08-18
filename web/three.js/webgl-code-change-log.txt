@@ -708,6 +708,11 @@ working on AR condition!
 *** notes on 8/16/2016
 1. working on rotate for AR
 
+	
+*** notes on 8/18/2016
+1. trying to add a smoothing algorithm for jitters 
+	also I don't understand the 
+
 test test
 
 ISSUES TO FIX LATER:
