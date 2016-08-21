@@ -29,6 +29,7 @@ a {
     position: absolute;
     left: 0px;
     top: 0px;
+    z-index : -1;
 }
 
 /* this removes the blue border */
@@ -50,7 +51,7 @@ button:focus {outline:0;}
   width: 400px;
   position: absolute;
   top: 20px;
-  right: 50px;
+  right: 20px;
 }
 
 #help-image {
@@ -386,7 +387,7 @@ button:focus {outline:0;}
    border: none;
    width: 450px;
    height: 20px;
-   top: 500px;
+   top: 600px;
    left: 10px;
    border-radius: none;
    margin-left: 1px;
