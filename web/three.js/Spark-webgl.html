@@ -111,5 +111,12 @@
 		<script src="electronObject.js"></script>
 		<script src="elements.js"></script>
 		<script src="launch.js"></script>
+		<script type="text/javascript">
+      		window.oncontextmenu = function(event) {
+         		event.preventDefault();
+         		event.stopPropagation();
+         		return false;
+      		};
+ 		</script>
 	</body>
 </html>

@@ -50,8 +50,8 @@ class Marker implements Touchable {
     
 //    num centerX = theApp.workingBoxWidth / 2;
 //    num centerY = theApp.workingBoxHeight / 2;
-    iw = img.width / 4;
-    ih = img.height / 4;
+    iw = img.width / 8;
+    ih = img.height / 8;
 //    ctx.drawImageScaled(img, centerX-markerW/2, centerY-markerH/2, markerW, markerH);
     ctx.drawImageScaled(img, 0, 0, iw, ih);
     ctx.restore();

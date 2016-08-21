@@ -346,6 +346,10 @@ class App extends TouchManager {
        theApp.removeTouchable(theApp.lens);
        theApp.addTouchable(theApp.lens);
      }
+     if (SHOW_MARKER) {
+            theApp.removeTouchable(theApp.marker);
+            theApp.addTouchable(theApp.marker);
+     }
      
      /* redraw the components of app*/
      theApp.draw();
