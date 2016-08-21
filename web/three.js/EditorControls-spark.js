@@ -61,6 +61,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		var distance = object.position.distanceTo( center );
 		//console.log(distance);
 		if (!ArFlag) delta.multiplyScalar( distance * 0.001 );
+		else delta.multiplyScalar( distance * 0.1 );
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
 		object.position.add( delta );
@@ -89,7 +90,11 @@ THREE.EditorControls = function ( object, domElement ) {
 		var message = [delta.z];
 		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
+		console.log("camera: ", camera.position);
+
 		scope.dispatchEvent( changeEvent );
+
+
 
 	};
 
@@ -252,8 +257,13 @@ THREE.EditorControls = function ( object, domElement ) {
 		//renderer.setClearColor ( 0x330086 );
 		var raycaster = new THREE.Raycaster();
 		var mouse = new THREE.Vector2();
-		mouse.x = ( pointer.x / window.innerWidth ) * 2 - 1;
-		mouse.y = - ( pointer.y / window.innerHeight ) * 2 + 1;	
+
+		console.log(markerRoot.scale.x);
+		// mouse.x = ( pointer.x / window.innerWidth ) * 2 - 1;
+		// mouse.y = - ( pointer.y / window.innerHeight ) * 2 + 1;
+
+		mouse.x = ( pointer.x / modelWidth ) * 2 - 1;
+		mouse.y = - ( pointer.y / modelHeight ) * 2 + 1;
 
 		// update the picking ray with the camera and mouse position	
 		raycaster.setFromCamera( mouse, object );
@@ -264,7 +274,9 @@ THREE.EditorControls = function ( object, domElement ) {
 		}
 		var intersects = raycaster.intersectObjects( objects );
 		//for ( var i = 0; i < intersects.length; i++ ) {
+
 		if (intersects.length != 0) {
+			console.log("raycaster works");
 			var thisObject = intersects[ 0 ].object; 
 			var index = objects.indexOf(thisObject);
 			//thisObject.material.color.set( 0xFF9900 );
@@ -286,8 +298,8 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		if ( event.button === 0 ) {
 
-			state = STATE.ROTATE;
-			//state = STATE.PAN;
+			//state = STATE.ROTATE;
+			state = STATE.PAN;
 
 		} else if ( event.button === 1 ) {
 
@@ -369,9 +381,23 @@ THREE.EditorControls = function ( object, domElement ) {
 	}
 
 	function onMouseClick( event ) {
-		//console.log("double clicked");
+		if (ArFlag) {
+			markerRoot.scale.set(1/arScale, 1/arScale, 1/arScale);
+			electronVertices.material.size /= arScale;
+			markerRoot.updateMatrixWorld();
+			markerRoot.matrixWorldNeedsUpdate = true;
+		}
+
 		pointer.set( event.clientX, event.clientY );
 		if (freezeFlag || !ArFlag) scope.show();
+
+		if (ArFlag) {
+			markerRoot.scale.set(1, 1, 1);
+			electronVertices.material.size *= arScale;
+			markerRoot.updateMatrixWorld();
+			markerRoot.matrixWorldNeedsUpdate = true;
+		}
+
 	}
 
 
@@ -445,15 +471,15 @@ THREE.EditorControls = function ( object, domElement ) {
 				
 
 				// Rotate
-				if (freezeFlag || !ArFlag) scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
+				//if (freezeFlag || !ArFlag) scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
 
 				// Pan
-				// var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
-				// var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
-				// offset0.x = -offset0.x;
-				// offset1.x = -offset1.x;
+				var offset0 = touches[ 0 ].clone().sub( getClosest( touches[ 0 ], prevTouches ) );
+				var offset1 = touches[ 1 ].clone().sub( getClosest( touches[ 1 ], prevTouches ) );
+				offset0.x = -offset0.x;
+				offset1.x = -offset1.x;
 
-				// if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
+				if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
 
 				break;
 

@@ -12,6 +12,12 @@
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
+var modelWidth;
+var modelHeight;
+
+// var width = 640;
+// var height = 480;
+
 // Static flags
 var ArFlag = true;
 var twoScreen = true;
@@ -21,8 +27,6 @@ var twoD = true; //electron movement is either 2D (z=0) or 3D
 var updateFlag = false;  //(launch): when updating the circuit, updateFlag = true => pause the rendering while the circuit object is being parsed
 var markerDetectedFlag = false;  //not being used now
 var freezeFlag = false;
-
-var WIDTH_RATIO;
 
 // COLORS:
 var red = 0xDA4747;
@@ -41,13 +45,13 @@ var lightGray = 0xB2B2B2;
 
 var container;
 var camera, scene, renderer, controls;
-var inputScene, inputCamera;
+// var inputScene, inputCamera;
 var pointLight;
 var mouseX = 0, mouseY = 0;
 var sphere; //image element for particles
 var batteryImg, resistorImg;
 var components = []; // an array of components
-var electronVertices, electronGeometry, electronMaterial;
+var electronVertices, electronGeometry, electronMaterial, electronSize;
 var electronObjects = [];
 var raycaster;
 //var compositeMesh;
@@ -62,84 +66,69 @@ var windowHalfY = window.innerHeight / 2;
 
 var clickedComponent = null;   // the component that is tapped on to show information
 
-function doInit() {	
-	if (twoScreen) {
-		WIDTH_RATIO = 0.65;	
-		var width = window.innerWidth;
-		var height = window.innerHeight;
-		var h = height;
-		var w = width*(1-WIDTH_RATIO);
-
+function doInit() {
+	
+	// set the size of screen divs	
+	if (twoScreen) {  //set the size of renderer based on a 4/3 standard video size and the rest of width of screen for the help div
+		modelHeight = window.innerHeight;
+		modelWidth = modelHeight*4/3;
+		var helpWidth = window.innerWidth - modelWidth;
 		var helpDiv = document.querySelector("#help-window");
-		helpDiv.style.width = w.toString() + "px";
-		helpDiv.style.height = h.toString() + "px";
-
+		helpDiv.style.width = helpWidth.toString() + "px";
+		helpDiv.style.height = modelHeight.toString() + "px";
 	}
-	else {
-		WIDTH_RATIO = 1;
+	else {  // make the help div invisible
 		var helpDiv = document.querySelector("#help-window");
 		helpDiv.style.display = "none";
+		modelWidth = window.innerWidth;
+		modelHeight = window.innerHeight;
 	}
 
-	init();
-	if (ArFlag) JsArInit();
-	if (!ArFlag) animate(); //for non-AR condition; for AR condition the jsFrames.registerAnimation() function is used 
-}
-
-function init() {
+	// lodad textures
 	//sphere = new THREE.TextureLoader().load( "textures/ball.png" ); // this works for three.js-r75 (latest revision) 
 	sphere = THREE.ImageUtils.loadTexture( "textures/ball.png" );
 	batteryImg = THREE.ImageUtils.loadTexture( "textures/battery-texture.png" ); // later: study the difference b/w ImageLoader and TexutreLoader
-	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );	
+	resistorImg = THREE.ImageUtils.loadTexture( "textures/resistor2t.png" );
 	//container = document.createElement( 'div' );
 	//document.body.appendChild( container );
+	THREE.ImageUtils.crossOrigin = 'anonymous';  	// enables using images from the image folder
+	window.addEventListener( 'resize', onWindowResize, false );
 
-	// camera = new THREE.PerspectiveCamera( 75, width / height, 10, 10000 );
-	// camera.position.z = 700;
+	if (ArFlag) JsArInit(); //for AR condition the jsFrames.registerAnimation() function is used
+	else init(); //for non-AR condition;  
+}
 
-	if (ArFlag) { 
-		//camera = new THREE.Camera(); 
+function init() {
 		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
-		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
-		camera.position.z = 700;
-		console.log(camera.projectionMatrix.elements);
-		//console.log(camera.up);
-	}
-	else {
-		camera = new THREE.PerspectiveCamera( 75, width / height, 0.1, 10000 );
-		//camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
-		camera.position.z = 700;	
-		
-	}
+	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
+	camera.position.z = 700;	
+
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
-	
-	THREE.ImageUtils.crossOrigin = 'anonymous';  	// enables using images from the image folder
-
+	markerRoot = new THREE.Mesh();
 	initComponents();
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setClearColor ( backgroundBlue ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setSize( window.innerWidth , window.innerHeight );
+	renderer.setSize( modelWidth , modelHeight );
 	//if (twoScreen) renderer.setSize( width, height );
-
-	//if (twoScreen) renderer.setViewport ( 0, 0, window.innerWidth*0.6, window.innerHeight );
-	
-	
-	document.body.appendChild( renderer.domElement );
+	//if (twoScreen) renderer.setViewport ( 0, 0, window.innerWidth*0.6, window.innerHeight );	
+	//document.body.appendChild( renderer.domElement );
+	var container = document.querySelector("#container");
+	container.appendChild(renderer.domElement);
 
 	// Be aware that a light source is required for MeshPhongMaterial to work:
     pointLight = new THREE.PointLight(0xFFFFFF); 	// Set the color of the light source (white).
     pointLight.position.set(100, 100, 250); 		// Position the light source at (x, y, z).
     camera.add(pointLight); 							// Add the light source to the scene.
 
-	window.addEventListener( 'resize', onWindowResize, false );
-
 	// CONTROLS
 	//controls = new THREE.OrbitControls( camera, renderer.domElement );
 	controls = new THREE.EditorControls( camera, renderer.domElement );
+
+	animate();	
 	
 }
 
@@ -156,24 +145,24 @@ function initComponents() {
 	for (k=0; k < components.length; k++) {
 		components[k].updateJunctions();
 	}
-	
 	if (!ArFlag) electronSize = 8;
+	else electronSize = 15;
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: blue , transparent: true } );
 	electronVertices = new THREE.PointCloud ( electronGeometry, electronMaterial );
-
-	markerRoot = new THREE.Mesh();
+	// TEST:
+	var box = createBox();
+	//markerRoot.add(box.box);
 	for (k=0; k < components.length; k++) {
 		markerRoot.add(components[k].container); // add all the components to the parent object
 	}
-	//createConnectedMeshes();
-	//markerRoot.add(compositeMesh);
-	markerRoot.add(electronVertices);	
-	if (ArFlag) markerRoot.matrixAutoUpdate = false;
-	//if (ArFlag) camera.matrixAutoUpdate = false;
+
+	markerRoot.add(electronVertices);
+	//markerRoot.rotation.z = Math.PI;	
+	//if (ArFlag) markerRoot.matrixAutoUpdate = false;  // not needed any longer with jsartoolkit5 library;
 	scene.add( markerRoot );
 }
 
-function doUpdate() {	
+function doUpdate() {
 	update();
 	//render();
 }
@@ -182,15 +171,16 @@ function update() {
 	//change the style of watch-button to be normal
 	button = document.querySelector("#watch-button");
 	button.style.background = "url('../../images/buttons/watch2.png') 0 0 no-repeat / 100%"; // 100% is the size
-
+	
 	// remove all children of scene
-	for (c = scene.children.length-1; c >= 0; c--) { 
-		var obj = scene.children[c];
-		scene.remove(obj);
+	for (c = markerRoot.children.length-1; c >= 0; c--) { 
+		var obj = markerRoot.children[c];
+		markerRoot.remove(obj);
 	}
 	electronObjects = [];
-	initComponents();
-
+	
+	if (!ArFlag) initComponents();
+	else updateAR(); // in ar-spark.js file
 }
 
 function animate() {
@@ -201,7 +191,7 @@ function animate() {
 
 function render() {
 	if (!updateFlag && !stop) {
-        updateElectrons();
+        updateElectrons();     
     }
  	renderer.autoClear = false;
 	renderer.clear();
@@ -216,6 +206,7 @@ function render() {
 
 
 function updateElectrons() {
+	//console.log("updating electrons");
 	ticks++;
 	if ( ticks % 10 == 0) {
 		for (i = 0; i < components.length; i++) {

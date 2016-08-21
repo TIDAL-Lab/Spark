@@ -5,65 +5,77 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		
-<!--
-		<script src="lib/webgl-utils.js"></script>
-    	<script src="lib/webgl-debug.js"></script>
-    	<script src="lib/cuon-utils.js"></script>
-    	<script src="lib/cuon-matrix-quat.js"></script> 
-    -->
   		<script src="lib/jquery.min.js"></script>
   		<script src="lib/parse-1.2.19.min.js"></script>
-  	<!--	<script src="lib/pubnub-3.7.14.min.js"></script>  -->
   		<script src="https://cdn.pubnub.com/pubnub-3.15.2.js"></script>
   		<script src="lib/underscore.js"></script>
 
-  		<!-- the following scripts are the three.js scripts -->
-		<script src="lib/three.js/build/three.min.js"></script>
-		<script src="lib/three.js/examples/js/Detector.js"></script>
-		<script src="lib/three.js/examples/js/libs/stats.min.js"></script>
-		<script src="EditorControls-spark.js"></script>
-<!--	<script src="lib/three.js/examples/js/controls/OrbitControls.js"></script>	
-		<script src="lib/three.js/examples/js/controls/DeviceOrientationControls.js"></script>  -->
-		<!--  -->
-		<!-- <script src="lib/three.js/examples/js/controls/EditorControls.js"></script> -->
-		
-		<!-- the following scripts are the JsArToolkit scripts -->
-		<script src="lib/THREE.JsArExtensions.js"></script>
-	    <script src="lib/jsFrames.min.js"></script>
-	    <script src="lib/JSARToolKit-master/JSARToolKit.min.js"></script>
+  		<!-- scripts copied from barcode_threejs.html example in jsartoolkit -->
+  		<!-- <script src="lib/jsartoolkit5-master/build/artoolkit.debug.js"></script> -->
+		<!-- <script src="lib/jsartoolkit5-master/js/artoolkit.api.js"></script> -->
+		<script src="lib/jsartoolkit5-master/examples/js/third_party/three.js/three.min.js"></script>
+		<script src="lib/jsartoolkit5-master/build/artoolkit.min.js"></script>
+		<!-- <script src="lib/jsartoolkit5-master/js/artoolkit.three.js"></script> -->
+		<script src="artoolkit.three-spark.js"></script>
 
-	    <script src="lib/ThreeCSG.js"></script>
+		<!-- added by EB -->
+		<!-- <script src="lib/jsartoolkit5-master/examples/js/third_party/three.js/OrbitControls.js"></script> -->
+		<script src="lib/jsartoolkit5-master/examples/js/third_party/three.js/Detector.js"></script>
+
+		<!-- the following scripts are the three.js scripts -->
+		<!-- <script src="lib/three.js/build/three.min.js"></script> -->
+		<!-- <script src="lib/three.js/examples/js/Detector.js"></script> -->
+		<script src="EditorControls-spark.js"></script>
+		<!-- <script src="lib/three.js/examples/js/controls/EditorControls.js"></script> -->
 
 	    <link rel="stylesheet" href="css/default.css" />
-		<link href="lib/winjs/css/ui-light.css" rel="stylesheet" />
-		<script src="lib/winjs/js/base.js"></script>
-		<script src="lib/winjs/js/ui.js"></script>
+
+		<!-- style copied from barcode_threejs.html example -->
+<!-- 		<style>
+			html,body {
+				margin: 0;
+				padding: 0;
+				width: 100%;
+				text-align: center;
+				overflow-x: hidden;
+			}
+			.portrait canvas {
+				transform-origin: 0 0;
+				transform: rotate(-90deg) translateX(-100%);
+			}
+			.desktop canvas {
+			 	transform: scale(-1, 1);
+			}
+		</style> -->
 
 	</head>
 	<body>
 
-	    <video id="inputStream" width="480" height="480" autoplay="autoplay" style="display: none"></video>
+
+
+<!-- 	    <video id="inputStream" width="480" height="480" autoplay="autoplay" style="display: none"></video>
 	    <img id="inputImage" width="480" height="480" src="tests/static.png" style="display: none"/>
 	    <canvas id="inputCapture" width="480" height="480" style="display: none"></canvas>
 	    <canvas id="debugCanvas" width="480" height="480" style="display: none"></canvas>
-
+ -->
     	
 <!-- 	    <button onclick="keepMoving()"> move electrons</button>
 	    <button onclick="updateElectrons()"> next move</button>
 	    <button onclick="displayGrid()"> grid on</button>  -->
-	    
-	    <button id="watch-button" onclick="watchElectron()"></button>
-	    <button id="freeze-button" onclick="freezeAR()" style="display: none"></button>
-	    <div id = "legend-box">
-			<img id="legend-image"></img>
-	    </div>
-	    <div id = "controls-panel">
-	    	<button id = "plus-button" class = "control-button"></button>
-	    	<button id = "minus-button" class = "control-button"></button>
-	    	<button id = "up-button" class = "control-button"></button>
-	    	<button id = "down-button" class = "control-button"></button>
-	    	<button id = "right-button" class = "control-button"></button>
-	    	<button id = "left-button" class = "control-button"></button>
+	    <div id = "container">
+		    <button id="watch-button" onclick="watchElectron()"></button>
+		    <button id="freeze-button" onclick="freezeAR()" style="display: none"></button>
+		    <div id = "legend-box">
+				<img id="legend-image"></img>
+		    </div>
+		    <div id = "controls-panel">
+		    	<button id = "plus-button" class = "control-button"></button>
+		    	<button id = "minus-button" class = "control-button"></button>
+		    	<button id = "up-button" class = "control-button"></button>
+		    	<button id = "down-button" class = "control-button"></button>
+		    	<button id = "right-button" class = "control-button"></button>
+		    	<button id = "left-button" class = "control-button"></button>
+		    </div>
 	    </div>
 	    <div id="help-window">
 	    	<img id="voltmeter-image"></img>
@@ -76,7 +88,7 @@
 		   	</div>
    			<img id = "help-image">
    			<p id="description" class="secondText"></p>
-<!--       		<button id = "close-help-button"></button> -->
+      		<button id = "close-help-button"></button>
       		<div id = "main-page">
 		        <p id="type" class="bigText"></p>
 		        <p id="description" class="secondText"></p>
@@ -90,16 +102,14 @@
 
 	    </div>
 
-	    <script src="AR_mediastream-spark.js"></script>
+	    <script src="ar-spark.js"></script>
 	 	<script src="main.js"></script>	 	
+	 	
 		<!-- the following scripts are various classes in the code -->
 		<script src="component.js"></script>
 		<!-- the following scripts are the functional scripts for Spark -->	
 		<script src="electronObject.js"></script>
 		<script src="elements.js"></script>
 		<script src="launch.js"></script>
-		<script type="text/javascript">
-		// moved to launch.js
-		</script>
 	</body>
 </html>

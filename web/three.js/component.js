@@ -11,7 +11,7 @@
  */
 
 var ionGeometry = new THREE.SphereGeometry( 5, 16, 16 );
-var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed , transparent: true} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
+var ionMaterial = new THREE.MeshBasicMaterial( {color: darkRed} ); // later: there was something wrong with MeshPhongMaterial that it did not change the color, so I changed it to basic material.
 var standardLength = 200; // it is 100 multiplies by the factor (here 2) that it is scaled by when passed from Parse
 var offsetZ = 0.00;
 
@@ -121,7 +121,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		}
 
 		containerMaterial.transparent = true;
-		containerMaterial.opacity = 0.5;
+		containerMaterial.opacity = 0.8;
 		containerMaterial.depthTest = true;  // this seems to help with showing the electrons always on top
 		containerMaterial.depthWrite = false;
 
@@ -385,7 +385,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		var spriteText = makeTextSprite( ammeterText, " per clock tick ", 20,
 			{ fontsize: 26, fontface: "Comic Sans MS", borderColor: {r:153, g:76, b:0, a:0.0}, backgroundColor: {r:255, g:153, b:0, a:0.8} } );
 		if (!ArFlag) spriteText.position.set(this.w*1.2, this.l/2, 30);
-		else spriteText.position.set(this.w*1.2, this.l/2, -50);
+		else spriteText.position.set(this.w*1.2, this.l/2, +50);
 		
 		//spriteText.rotation.z = this.rotationAngle;
 		//spriteText.updateMatrixWorld(); // because it is not in the render() loop yet 
@@ -442,6 +442,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			this.container.material.color.set(darkOrange);
 			clickedComponent = this;
 			if (this.compType != "Battery") this.showAmmeter(true);
+			if (this.compType == "Battery") this.showAmmeter(true);   // temp, for testing AR
 		}
 	}
 

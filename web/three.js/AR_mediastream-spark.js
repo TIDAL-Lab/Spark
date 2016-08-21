@@ -42,6 +42,7 @@ function JsArInit() {
     console.log("parameters projection:");
     console.log(parameters._projection_matrix);
     detector = new FLARMultiIdMarkerDetector(parameters, markerWidth);
+    //detector = new FLARSingleIdMarkerDetector(parameters, markerWidth);
 
     // For tracking video set continue mode to true. In continue mode, the detector
     // tracks markers across multiple frames.

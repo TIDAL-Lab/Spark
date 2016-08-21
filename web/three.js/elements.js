@@ -109,13 +109,21 @@ if (twoScreen) {
 
 function zoom( direction ) {
 	var delta;
+	var scale = 20.0;
+	if (ArFlag) scale /= arScale;
 	if ((direction == "in" && !ArFlag) || (direction == "out" && ArFlag))  {
-		delta = new THREE.Vector3(0.0, 0.0, -100);
+		delta = new THREE.Vector3(0.0, 0.0, -scale);
 	}
 	else {
-		delta = new THREE.Vector3(0.0, 0.0, 100);
+		delta = new THREE.Vector3(0.0, 0.0, scale);
 	}
 	camera.position.add(delta);
+	console.log(camera.position);	
+	// markerRoot.position.add(delta);
+	// markerRoot.matrixWorldNeedsUpdate = true;
+	// var obj = markerRootParent.children[0];
+	// markerRootParent.remove(obj);
+	// markerRootParent.add(markerRoot);
 	var message = [delta.z];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
 }
@@ -123,19 +131,20 @@ function zoom( direction ) {
 function pan( direction ) {
 	var delta;
 	var sign = 1;
-	if (ArFlag) sign = -1;
+	var scale = 20.0;
+	if (ArFlag) { sign = -1; scale /= arScale; }
 	switch (direction) {
 		case "up":
-			delta = new THREE.Vector3(0.0, 20.0*sign, 0.0);
+			delta = new THREE.Vector3(0.0, scale*sign, 0.0);
 			break;
 		case "down":
-			delta = new THREE.Vector3(0.0, -20.0*sign, 0.0);
+			delta = new THREE.Vector3(0.0, -scale*sign, 0.0);
 			break;
 		case "left":
-			delta = new THREE.Vector3(-20.0*sign, 0.0, 0.0);
+			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
 			break;
 		case "right":
-			delta = new THREE.Vector3(20.0*sign, 0.0, 0.0);
+			delta = new THREE.Vector3(scale*sign, 0.0, 0.0);
 			break;
 	}
 	camera.position.add(delta);
@@ -326,20 +335,18 @@ function freezeAR() {
 
 
 
-		var xRotation = markerRoot.getWorldRotation().x;
-		var yRotation = markerRoot.getWorldRotation().y;
+		// var xRotation = markerRoot.getWorldRotation().x;
+		// var yRotation = markerRoot.getWorldRotation().y;
 
-		console.log(xRotation);
-		console.log(yRotation);
-		console.log(markerRoot.matrixWorld);
-		console.log(resultMatrix);
 
 		//markerRoot.matrixWorld.makeRotationX(2*xRotation);
 
 		//markerRoot.matrixWorld.makeRotationFromEuler(euler);
 		//markerRoot.matrixAutoUpdate = true;
-		markerRoot.rotation.x = Math.PI/2;
-		markerRoot.position.set(0,0,0);
+		
+		//markerRoot.rotation.x = Math.PI/2;
+		//markerRoot.position.set(0,0,0);
+		
 		//markerRoot.updateMatrixWorld(); 
 		//markerRoot.rotateY(2*yRotation);
 		//resultMatrix.m20 *= 2;
@@ -368,7 +375,7 @@ function freezeAR() {
 		// camera.position.y = 0;
 		// camera.position.z = 700;
 
-
+		camera.position.set(0, 0, 0);
 	}
 
 	freezeFlag = !freezeFlag;

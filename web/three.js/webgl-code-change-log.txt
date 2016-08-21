@@ -712,8 +712,80 @@ working on AR condition!
 *** notes on 8/18/2016
 1. trying to add a smoothing algorithm for jitters 
 	also I don't understand the 
+	
+	ok, I am going to try a new library. Until now, for JSARtoolkit, I used this repository:
+	https://github.com/kig/JSARToolKit
+	but now, I am goint to try this:
+	
+2. using new library, studying example: barcode_threejs.html
 
-test test
+*** notes on 8/19/2016
+1. reading the introduction document, trying to understand the new jsartoolkit5 library 
+	and artoolkit.three.js
+	
+issue with loading the js files, so I removed the "async" keyword when sourcing the js files in html file. 
+(the original intro_example.html file used "async")
+
+testing with the box example, it all works fine, no issue with rescaling the box
+also markerwidth works --> 1 is the default value, and for example if 2, the size of box is half of the marker. (different than before)
+
+2. trying to find an optimum way to use size of components and the markerwidth
+it seems that with the current setting, where the component size is in the scale of 100s does not work
+because when testing it with the box example, making the markerwidth large, makes the code jittery and iffy!!
+
+Solution: I added a code to the ar tick function, where I scale down for rendering and then again 
+rescale the markerRoot object back to normal size for calculations in updateElectron() function
+
+
+3. added the blurry effect to the video scene (to the plane in artoolkit.three-spark.js)
+
+4. Fixed the issue with continuously updating electrons:
+	made the markerdetectedflag work correctly, 
+	now, the updateElectrons() function is only fired if a marker is detected OR if it is freezed.
+	by adding this event handler:
+	arController.addEventListener('getMarker', function(ev) { ...}
+	
+	--> actually this function is already in the artoolkit.three-spark.js file, so i can modify it there, instead of 
+		adding a new function in ar-spark.js
+	
+5. update the model when the circuit is updated --> done
+	just needed to modify the update() function
+6. to make the click work: this.show --> transform from pointer to mouse: instead of using window.inner dimensions
+	use the modelwidth and modelHeight
+	
+*** notes on 8/20/2016
+1. issue with click event and showing ammeter values, i figured if I remove the markerRootParent object and directily 
+add components and electrons to the markerroot it solves the problem
+BUT this way I cannot rescale the markerroot any longer to play with smaller markerWidth values. 
+For now, I keep it with the new setup...
+
+2. ISSUE: circuit disppears at longer distances & the spriteTExt box is upside down!!
+
+3. reset the camera position to 0 when capturing again:
+  in freezeAR() function: camera.position.set(0, 0, 0);
+  
+4. solve the problem with clicking:
+added matrix scaling to the onmouseclick even handler function:
+
+		markerRoot.scale.set(0.01, 0.01, 0.01);
+		electronVertices.material.size /= 100;
+		markerRoot.updateMatrixWorld();
+		markerRoot.matrixWorldNeedsUpdate = true;
+
+		pointer.set( event.clientX, event.clientY );
+		if (freezeFlag || !ArFlag) scope.show();
+
+		markerRoot.scale.set(1, 1, 1);
+		electronVertices.material.size *= 100;
+		markerRoot.updateMatrixWorld();
+		markerRoot.matrixWorldNeedsUpdate = true;
+
+*** notes on 8/21/2016
+1. I tried modifying the code for updating the circuit.
+	I don't understand: if instead of removing components one by one, i remove markerRoot from scene, it doesn't remove it!
+	So I have to go with the one by one option :(
+	
+
 
 ISSUES TO FIX LATER:
 
