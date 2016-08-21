@@ -32,7 +32,8 @@ class Marker implements Touchable {
     this.y = y;
    
     img = new ImageElement();
-    setImage("images/marker2.png");
+    //setImage("images/markers/marker2.png");
+    setImage("images/markers/56-modified.png");
     
     theApp.addTouchable(this);
   }

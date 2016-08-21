@@ -1,6 +1,7 @@
 var markerRootParent;
 var arController;
 var arScale;
+var markerID;
 //window.ARThreeOnLoad = function() {
 function JsArInit() {
 	ARController.getUserMediaThreeScene({maxARVideoSize: 800, cameraParam: 'lib/jsartoolkit5-master/examples/Data/camera_para.dat', 
@@ -21,13 +22,26 @@ function JsArInit() {
 
 		// set the scale based on the markerwidth = 1 
 		arScale = 100;
-
-		// See /doc/patterns/Matrix code 3x3 (72dpi)/20.png
-		markerRootParent = arController.createThreeBarcodeMarker(20, 1);
+		markerID = 56;
+		// Testing Barcode marker: See artoolkit5/doc/patterns/Matrix code 3x3 (72dpi)/20.png
+		markerRootParent = arController.createThreeBarcodeMarker(markerID, 1);
 		markerRoot = new THREE.Mesh();
 		initComponents();
 		markerRootParent.add(markerRoot);
 		scene.add(markerRootParent);
+
+		arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
+
+		// markerRoot = new THREE.Mesh();
+		// var markerLoaded = false;
+		// // Testing Pattern marker:
+		// arController.loadMarker('lib/jsartoolkit5-master/examples/Data/patt.hiro', function(markerId) {
+		// 	markerLoaded = true;
+		// 	markerRootParent = arController.createThreeMarker(markerId);			
+		// 	initComponents();
+		// 	markerRootParent.add(markerRoot);
+		// 	scene.add(markerRootParent);
+		// });
 
 		//EB: set width and height of renderer
 		arController.videoWidth = modelWidth;
@@ -35,7 +49,7 @@ function JsArInit() {
 
 		document.body.className = arController.orientation;
 
-		arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
+		
 
 		var renderer = new THREE.WebGLRenderer({antialias: true});
 		renderer.setClearColor ( backgroundBlue ); 			//bluish background color
@@ -65,7 +79,7 @@ function JsArInit() {
 
 		// if a marker is detected, enable updatingElectrons() to fire.
 		arController.addEventListener('getMarker', function(ev) {
-			if (ev.data.marker.id == 20) {
+			if (ev.data.marker.id == markerID) {   
 				markerDetectedFlag = true;
 				//console.log("camera: ", camera.position);
 				//console.log("controller getcameramatrix: ", arController.getCameraMatrix());
@@ -76,20 +90,22 @@ function JsArInit() {
 		});
 
 		var tick = function() {
-			markerRoot.scale.set(1/arScale, 1/arScale, 1/arScale);
-			electronVertices.material.size /= arScale;
-			markerRoot.updateMatrixWorld();
-			//markerRoot.matrixWorldNeedsUpdate = true;
-			markerDetectedFlag = false;
-			if (!freezeFlag) arScene.process();
-			arScene.renderOn(renderer);
-			if (!updateFlag && !stop) {
-				markerRoot.scale.set(1, 1, 1);
-				electronVertices.material.size *= arScale;
+			//if (markerLoaded) {   // the flag is for using pattern markers
+				markerRoot.scale.set(1/arScale, 1/arScale, 1/arScale);
+				electronVertices.material.size /= arScale;
 				markerRoot.updateMatrixWorld();
 				//markerRoot.matrixWorldNeedsUpdate = true;
-        		if (freezeFlag || markerDetectedFlag) updateElectrons(); // update electrons only when a marker is detected or if it is freezed
-    		}
+				markerDetectedFlag = false;
+				if (!freezeFlag) arScene.process();
+				arScene.renderOn(renderer);
+				if (!updateFlag && !stop) {
+					markerRoot.scale.set(1, 1, 1);
+					electronVertices.material.size *= arScale;
+					markerRoot.updateMatrixWorld();
+					//markerRoot.matrixWorldNeedsUpdate = true;
+	        		if (freezeFlag || markerDetectedFlag) updateElectrons(); // update electrons only when a marker is detected or if it is freezed
+	    		}
+	    	//}
 			requestAnimationFrame(tick);
 		};
 

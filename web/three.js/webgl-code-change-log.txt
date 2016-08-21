@@ -783,8 +783,13 @@ added matrix scaling to the onmouseclick even handler function:
 *** notes on 8/21/2016
 1. I tried modifying the code for updating the circuit.
 	I don't understand: if instead of removing components one by one, i remove markerRoot from scene, it doesn't remove it!
-	So I have to go with the one by one option :(
-	
+	So I have to go with the one by one option --> which works pretty fine!
+
+2. I figured how to change the near and far plane of the arcontroller ---> I modified the artoolkit.min js file :)
+
+3. Testing different types of markers in jsartoolkit5
+so far, it seems that the barcode markers are more reliable than pattern markers.
+
 
 
 ISSUES TO FIX LATER:
