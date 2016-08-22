@@ -7,7 +7,7 @@ var arRenderFlag = true;
 var barcodeMarker = true;
 //window.ARThreeOnLoad = function() {
 function JsArInit() {
-	ARController.getUserMediaThreeScene({maxARVideoSize: 800, cameraParam: 'lib/jsartoolkit5-master/examples/Data/camera_para.dat', 
+	ARController.getUserMediaThreeScene({maxARVideoSize: 1080, cameraParam: 'lib/jsartoolkit5-master/examples/Data/camera_para.dat', 
 	onSuccess: function(arScene, arController, arCamera) {
 		// temp
 		scene = arScene.scene;
