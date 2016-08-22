@@ -166,7 +166,7 @@
 					renderer.autoClear = false;
 					renderer.clear();
 					if (!freezeFlag) renderer.render(this.videoScene, this.videoCamera);
-					renderer.render(this.scene, this.camera);
+					if (arRenderFlag) renderer.render(this.scene, this.camera);
 					renderer.autoClear = ac;
 				}
 			};

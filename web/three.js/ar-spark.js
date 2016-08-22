@@ -2,6 +2,7 @@ var markerRootParent;
 var arController;
 var arScale;
 var markerID;
+var arRenderFlag = true;
 //window.ARThreeOnLoad = function() {
 function JsArInit() {
 	ARController.getUserMediaThreeScene({maxARVideoSize: 800, cameraParam: 'lib/jsartoolkit5-master/examples/Data/camera_para.dat', 
@@ -35,7 +36,7 @@ function JsArInit() {
 		markerRoot = new THREE.Mesh();
 		var markerLoaded = false;
 		// Testing Pattern marker:
-		arController.loadMarker('markers/plus16.pat', function(markerId) {
+		arController.loadMarker('markers/plus16v3.pat', function(markerId) {
 			markerLoaded = true;
 			console.log(markerId);
 			markerID = markerId;
@@ -77,6 +78,7 @@ function JsArInit() {
 		arController.addEventListener('getMarker', function(ev) {
 			if (ev.data.marker.id == markerID) {   
 				markerDetectedFlag = true;
+				arRenderFlag = true;
 			}
 		});
 
@@ -112,11 +114,11 @@ if (window.ARController && ARController.getUserMediaThreeScene) {
 }
 
 function updateAR() {
-	//markerRootParent = arController.createThreeBarcodeMarker(20, 1);
 	scene.remove(markerRootParent);
+	arRenderFlag = false;
 	initComponents();
 	markerRootParent.add(markerRoot);
-	scene.add(markerRootParent);
+	scene.add(markerRootParent);	
 }
 
 var createBox = function() {

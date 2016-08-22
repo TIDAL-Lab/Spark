@@ -339,6 +339,7 @@ function freezeAR() {
 		button.style.backgroundSize = "100%";
 
 		camera.position.set(0, 0, 0);
+		arRenderFlag = true;
 	}
 
 	freezeFlag = !freezeFlag;

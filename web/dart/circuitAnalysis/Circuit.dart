@@ -138,8 +138,6 @@ class Circuit {
    * 5. called by marker.touchup method
    */
   void sendData() {
-   
-    print("send data");
     //var myObj = new JsArray();
     var myObj = [];
     //findConnectedComponents();
@@ -210,6 +208,10 @@ class Circuit {
       if (theApp.model != null) theApp.help.show();
       var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
       data.callMethod('doSendData'); // call its method "doSendData"
+      new Future.delayed(const Duration(milliseconds:200), () {
+        data.callMethod('doSendData');
+      });
+
     }
   }
   

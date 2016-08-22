@@ -25,7 +25,7 @@ var twoD = true; //electron movement is either 2D (z=0) or 3D
 
 // Dynamic FLAGS
 var updateFlag = false;  //(launch): when updating the circuit, updateFlag = true => pause the rendering while the circuit object is being parsed
-var markerDetectedFlag = false;  //not being used now
+var markerDetectedFlag = false;  //to track if a marker is being detected at a time
 var freezeFlag = false;
 
 // COLORS:
