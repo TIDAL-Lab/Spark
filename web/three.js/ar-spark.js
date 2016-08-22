@@ -3,6 +3,8 @@ var arController;
 var arScale;
 var markerID;
 var arRenderFlag = true;
+
+var barcodeMarker = true;
 //window.ARThreeOnLoad = function() {
 function JsArInit() {
 	ARController.getUserMediaThreeScene({maxARVideoSize: 800, cameraParam: 'lib/jsartoolkit5-master/examples/Data/camera_para.dat', 
@@ -24,27 +26,31 @@ function JsArInit() {
 		// set the scale based on the markerwidth = 1 
 		arScale = 50;
 		markerID = 56;
+		markerRoot = new THREE.Mesh();
 		// Testing Barcode marker: See artoolkit5/doc/patterns/Matrix code 3x3 (72dpi)/20.png
-/*		markerRootParent = arController.createThreeBarcodeMarker(markerID, 1);
-		markerRoot = new THREE.Mesh();
-		initComponents();
-		markerRootParent.add(markerRoot);
-		scene.add(markerRootParent);
-
-		arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);*/
-
-		markerRoot = new THREE.Mesh();
-		var markerLoaded = false;
-		// Testing Pattern marker:
-		arController.loadMarker('markers/plus16v3.pat', function(markerId) {
-			markerLoaded = true;
-			console.log(markerId);
-			markerID = markerId;
-			markerRootParent = arController.createThreeMarker(markerId);			
+		if (barcodeMarker) {
+			markerRootParent = arController.createThreeBarcodeMarker(markerID, 1);	
+			markerLoaded = true;		
 			initComponents();
 			markerRootParent.add(markerRoot);
 			scene.add(markerRootParent);
-		});
+
+			arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
+		}
+
+		else {
+			var markerLoaded = false;
+			// Testing Pattern marker:
+			arController.loadMarker('markers/plus16v3.pat', function(markerId) {
+				markerLoaded = true;
+				console.log(markerId);
+				markerID = markerId;
+				markerRootParent = arController.createThreeMarker(markerId);			
+				initComponents();
+				markerRootParent.add(markerRoot);
+				scene.add(markerRootParent);
+			});
+		}
 
 		//EB: set width and height of renderer
 		arController.videoWidth = modelWidth;

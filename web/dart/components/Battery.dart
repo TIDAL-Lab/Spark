@@ -34,7 +34,7 @@ class Battery extends Component  {
 //        isFirstBattery = false;
 //      }
 //    }
-    if (theApp.batteryMarker)setImage("images/battery3t.png");
+    if (theApp.batteryMarker) setImage("images/battery3t.png");
     else {
       this.ownMarker = true;
       theApp.batteryMarker = true;      

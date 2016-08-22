@@ -33,8 +33,7 @@ class Marker implements Touchable {
    
     img = new ImageElement();
     //setImage("images/markers/marker2.png");
-    //setImage("images/markers/56-modified.png");
-    setImage("three.js/markers/plus2.png");
+    setImage("images/markers/56-modified.png");
     theApp.addTouchable(this);
   }
   void setImage(String src) {
