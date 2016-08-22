@@ -790,6 +790,14 @@ added matrix scaling to the onmouseclick even handler function:
 3. Testing different types of markers in jsartoolkit5
 so far, it seems that the barcode markers are more reliable than pattern markers.
 
+4. working on making the control panel buttons (zoom/pan) continuous by adding onmousedown, onmouseup, and ontouchend events
+
+also trying to remove the "press-and-hold" rectangle that appears when I hold the touch on the screen, it's very annoying
+
+SOLUTION: I changed the setting for touch interaction, using these instructions:
+http://support.intuilab.com/kb/how-to/properly-configure-windows-pc-touch-and-gesture-behaviors
+disabled right click for press-and-hold touch action :)
+why there is a delay for touch? mouse works fine! there is some issue with touchstart
 
 
 ISSUES TO FIX LATER:

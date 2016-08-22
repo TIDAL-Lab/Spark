@@ -9,28 +9,57 @@
  * Circuit-level and the level that shows interactions between electrons and ions as they move through circuit components.
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
-
+var zoomInterval;
 // set the voltmeter image
 var image = document.querySelector("#legend-image");
 image.src = "../images/legend-image.png";
 
 var button = document.querySelector("#plus-button");
-if (button != null) button.onclick = function() {zoom("in")};
-
+if (button != null) {
+	button.onclick = function() {zoom("in", "click")};
+	button.onmousedown = function() {zoom("in", "hold")};
+	button.onmouseup = function() {stopInterval()};
+	//button.ontouchstart = function() {zoom("in", "click")};
+	button.ontouchend = function() {stopInterval()};
+}
 button = document.querySelector("#minus-button");
-if (button != null) button.onclick = function() {zoom("out")};
-
+if (button != null) {
+	button.onclick = function() {zoom("out", "click")};
+	button.onmousedown = function() {zoom("out", "hold")};
+	button.onmouseup = function() {stopInterval()};
+	button.ontouchend = function() {stopInterval()};
+}
 button = document.querySelector("#up-button");
-if (button != null) button.onclick = function() {pan("up")};
+if (button != null) {
+	button.onclick = function() {pan("up", "click")};
+	button.onmousedown = function() {pan("up", "hold")};
+	button.onmouseup = function() {stopInterval()};
+	button.ontouchend = function() {stopInterval()};
+}
 
 button = document.querySelector("#down-button");
-if (button != null) button.onclick = function() {pan("down")};
+if (button != null) {
+	button.onclick = function() {pan("down", "click")};
+	button.onmousedown = function() {pan("down", "hold")};
+	button.onmouseup = function() {stopInterval()};
+	button.ontouchend = function() {stopInterval()};
+}
 
 button = document.querySelector("#left-button");
-if (button != null) button.onclick = function() {pan("left")};
+if (button != null) {
+	button.onclick = function() {pan("left", "click")};
+	button.onmousedown = function() {pan("left", "hold")};
+	button.onmouseup = function() {stopInterval()};
+	button.ontouchend = function() {stopInterval()};
+}
 
 button = document.querySelector("#right-button");
-if (button != null) button.onclick = function() {pan("right")};
+if (button != null) {
+	button.onclick = function() {pan("right", "click")};
+	button.onmousedown = function() {pan("right", "hold")};
+	button.onmouseup = function() {stopInterval()};
+	button.ontouchend = function() {stopInterval()};
+}
 
 if (ArFlag) {
     //display the freeze button
@@ -73,41 +102,7 @@ if (twoScreen) {
 
 }        
 
-/*if (twoScreen) {
-	var button = document.querySelector("#page0-button");
-    //button.addEventListener("click", showPage(0));
-    if (button != null) button.onclick = function() {showPage(0)};
-
-   	button = document.querySelector("#page1-button");
-    if (button != null) button.onclick = function() {showPage(1)};
-
-    button = document.querySelector("#page2-button");
-    if (button != null) button.onclick = function() {showPage(2)};
-
-    button = document.querySelector("#page3-button");
-    if (button != null) button.onclick = function() {showPage(3)};
-
-    button = document.querySelector("#back-button");
-    if (button != null) button.onclick = function() {back()};
-
-    // set the help image
-    var image = document.querySelector("#help-image");
-	image.src = "../images/helps-components/bg.png";
-
-	// set the voltmeter image
-    var image = document.querySelector("#voltmeter-image");
-	image.src = "../images/buttons/voltmeter3.png";
-
-
-
-	var p = document.querySelector("#comp-type");
-	p.innerHTML = "Tap on a component to see its measures";
-
-}        */
-    // button = document.querySelector("#close-help-button");
-    // if (button != null) button.onClick.listen((e) => close());
-
-function zoom( direction ) {
+function zoom( direction, state ) {
 	var delta;
 	var scale = 20.0;
 	if (ArFlag) scale /= arScale;
@@ -117,28 +112,28 @@ function zoom( direction ) {
 	else {
 		delta = new THREE.Vector3(0.0, 0.0, scale);
 	}
-	camera.position.add(delta);
-	console.log(camera.position);	
-	// markerRoot.position.add(delta);
-	// markerRoot.matrixWorldNeedsUpdate = true;
-	// var obj = markerRootParent.children[0];
-	// markerRootParent.remove(obj);
-	// markerRootParent.add(markerRoot);
+	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	else {camera.position.add(delta);}	
+
 	var message = [delta.z];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
 }
 
-function pan( direction ) {
+function stopInterval() {
+	clearInterval(interval);
+}
+
+function pan( direction, state ) {
 	var delta;
 	var sign = 1;
 	var scale = 20.0;
 	if (ArFlag) { sign = -1; scale /= arScale; }
 	switch (direction) {
 		case "up":
-			delta = new THREE.Vector3(0.0, scale*sign, 0.0);
+			delta = new THREE.Vector3(0.0, scale, 0.0);
 			break;
 		case "down":
-			delta = new THREE.Vector3(0.0, -scale*sign, 0.0);
+			delta = new THREE.Vector3(0.0, -scale, 0.0);
 			break;
 		case "left":
 			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
@@ -147,7 +142,9 @@ function pan( direction ) {
 			delta = new THREE.Vector3(scale*sign, 0.0, 0.0);
 			break;
 	}
-	camera.position.add(delta);
+	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	else {camera.position.add(delta);}
+
  	var message = [delta.x, delta.y];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
 }
@@ -333,37 +330,6 @@ function freezeAR() {
 		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
-
-
-		// var xRotation = markerRoot.getWorldRotation().x;
-		// var yRotation = markerRoot.getWorldRotation().y;
-
-
-		//markerRoot.matrixWorld.makeRotationX(2*xRotation);
-
-		//markerRoot.matrixWorld.makeRotationFromEuler(euler);
-		//markerRoot.matrixAutoUpdate = true;
-		
-		//markerRoot.rotation.x = Math.PI/2;
-		//markerRoot.position.set(0,0,0);
-		
-		//markerRoot.updateMatrixWorld(); 
-		//markerRoot.rotateY(2*yRotation);
-		//resultMatrix.m20 *= 2;
-		//markerRoot.setJsArMatrix2(resultMatrix);
-
-		//var matrix3 = new THREE.Matrix3()
-		//markerRoot.matrixWorldNeedsUpdate = true;
-
-		//var target = markerRoot.localToWorld(markerRoot.position);
-		//console.log(target);
-
-		//camera.lookAt(target);
-		//camera.rotation.x = xRotation;
-		//camera.rotation.y = -1 * yRotation;
-		//camera.matrixWorldNeedsUpdate = true;
-		
-		
 	}
 
 	else {   //unfreeze the scene
@@ -371,9 +337,6 @@ function freezeAR() {
 		//change the style of freeze-button to be active
 		button.style.background = "url('../../images/buttons/freeze.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
-		// camera.position.x = 0;
-		// camera.position.y = 0;
-		// camera.position.z = 700;
 
 		camera.position.set(0, 0, 0);
 	}
@@ -381,7 +344,6 @@ function freezeAR() {
 	freezeFlag = !freezeFlag;
 
 }
-
 
 
 function makeTextSprite( message, message2, scaleFactor, parameters )

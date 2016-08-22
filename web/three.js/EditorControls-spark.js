@@ -60,8 +60,11 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		var distance = object.position.distanceTo( center );
 		//console.log(distance);
-		if (!ArFlag) delta.multiplyScalar( distance * 0.001 );
-		else delta.multiplyScalar( distance * 0.1 );
+		if (ArFlag) {
+			delta.multiplyScalar( distance * 0.01 );
+			delta.y *= -1;
+		}
+		else delta.multiplyScalar( distance * 0.001 );
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 
 		object.position.add( delta );
@@ -90,7 +93,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		var message = [delta.z];
 		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
-		console.log("camera: ", camera.position);
+		// console.log("camera: ", camera.position);
 
 		scope.dispatchEvent( changeEvent );
 
@@ -257,8 +260,6 @@ THREE.EditorControls = function ( object, domElement ) {
 		//renderer.setClearColor ( 0x330086 );
 		var raycaster = new THREE.Raycaster();
 		var mouse = new THREE.Vector2();
-
-		console.log(markerRoot.scale.x);
 		// mouse.x = ( pointer.x / window.innerWidth ) * 2 - 1;
 		// mouse.y = - ( pointer.y / window.innerHeight ) * 2 + 1;
 
@@ -276,7 +277,6 @@ THREE.EditorControls = function ( object, domElement ) {
 		//for ( var i = 0; i < intersects.length; i++ ) {
 
 		if (intersects.length != 0) {
-			console.log("raycaster works");
 			var thisObject = intersects[ 0 ].object; 
 			var index = objects.indexOf(thisObject);
 			//thisObject.material.color.set( 0xFF9900 );
@@ -423,7 +423,6 @@ THREE.EditorControls = function ( object, domElement ) {
 		switch ( event.touches.length ) {
 
 			case 1: 
-				console.log("touch start: " + camera.position);
 				// EB: The Touch.pageX read-only property returns the X coordinate of the touch point relative to the viewport, including any scroll offset.
 
 				touches[ 0 ].set( event.touches[ 0 ].pageX, event.touches[ 0 ].pageY, 0 );
