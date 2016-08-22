@@ -27,7 +27,15 @@ class Battery extends Component  {
   ImageElement warning = new ImageElement();
   
   Battery(num x0, num y0, num x1, num y1, num v) : super("Battery",x0, y0, x1, y1) {
-    setImage("images/battery3t.png");
+    bool isFirstBattery = true;
+    for (Component c in theApp.components) {
+      if (c.type == "Battery") {
+        isFirstBattery = false;
+      }
+    }
+    if (isFirstBattery) setImage("images/batteryMarker.png");
+    else setImage("images/battery3t.png");
+    
     warning.src = "images/burnt-sign.png";
     current = 0.0;
     resistance = 0.0;
