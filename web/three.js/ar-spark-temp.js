@@ -2,14 +2,11 @@ var markerRootParent;
 var arController;
 var arScale;
 var markerID;
-var arRenderFlag = true;
-
-var barcodeMarker = false;  // either barcode marker or pattern marker
 //window.ARThreeOnLoad = function() {
 function JsArInit() {
 	ARController.getUserMediaThreeScene({maxARVideoSize: 800, cameraParam: 'lib/jsartoolkit5-master/examples/Data/camera_para.dat', 
 	onSuccess: function(arScene, arController, arCamera) {
-		
+		// temp
 		scene = arScene.scene;
 		camera = arScene.camera;
 		arController = arController;
@@ -26,31 +23,26 @@ function JsArInit() {
 		// set the scale based on the markerwidth = 1 
 		arScale = 100;
 		markerID = 56;
-		markerRoot = new THREE.Mesh();
 		// Testing Barcode marker: See artoolkit5/doc/patterns/Matrix code 3x3 (72dpi)/20.png
-		if (barcodeMarker) {
-			markerRootParent = arController.createThreeBarcodeMarker(markerID, 1);	
-			markerLoaded = true;		
+/*		markerRootParent = arController.createThreeBarcodeMarker(markerID, 1);
+		markerRoot = new THREE.Mesh();
+		initComponents();
+		markerRootParent.add(markerRoot);
+		scene.add(markerRootParent);
+		arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);*/
+
+		markerRoot = new THREE.Mesh();
+		var markerLoaded = false;
+		// Testing Pattern marker:
+		arController.loadMarker('markers/plus16v3.pat', function(markerId) {
+			markerLoaded = true;
+			console.log(markerId);
+			markerID = markerId;
+			markerRootParent = arController.createThreeMarker(markerId);			
 			initComponents();
 			markerRootParent.add(markerRoot);
 			scene.add(markerRootParent);
-
-			arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
-		}
-
-		else {
-			var markerLoaded = false;
-			// Testing Pattern marker:
-			arController.loadMarker('markers/plus16v3.pat', function(markerId) {
-				markerLoaded = true;
-				console.log(markerId);
-				markerID = markerId;
-				markerRootParent = arController.createThreeMarker(markerId);			
-				initComponents();
-				markerRootParent.add(markerRoot);
-				scene.add(markerRootParent);
-			});
-		}
+		});
 
 		//EB: set width and height of renderer
 		arController.videoWidth = modelWidth;
@@ -72,14 +64,18 @@ function JsArInit() {
 		//document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
 		//CONTROLS
+		//controls = new THREE.OrbitControls( camera, renderer.domElement );
 		controls = new THREE.EditorControls( camera, renderer.domElement );
 
+		// arController.setProjectionNearPlane(1);
+		// arController.setProjectionFarPlane(10000);
+		// console.log("near", arController.getProjectionNearPlane());
+		// console.log("far", arController.getProjectionFarPlane());
 
 		// if a marker is detected, enable updatingElectrons() to fire.
 		arController.addEventListener('getMarker', function(ev) {
 			if (ev.data.marker.id == markerID) {   
 				markerDetectedFlag = true;
-				arRenderFlag = true;
 			}
 		});
 
@@ -115,11 +111,11 @@ if (window.ARController && ARController.getUserMediaThreeScene) {
 }
 
 function updateAR() {
+	//markerRootParent = arController.createThreeBarcodeMarker(20, 1);
 	scene.remove(markerRootParent);
-	arRenderFlag = false;
 	initComponents();
 	markerRootParent.add(markerRoot);
-	scene.add(markerRootParent);	
+	scene.add(markerRootParent);
 }
 
 var createBox = function() {
