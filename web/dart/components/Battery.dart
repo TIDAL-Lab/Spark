@@ -34,12 +34,16 @@ class Battery extends Component  {
 //        isFirstBattery = false;
 //      }
 //    }
-    if (theApp.batteryMarker) setImage("images/battery3t.png");
-    else {
+    if (!theApp.batteryMarker && USE_PATTERN) {
       this.ownMarker = true;
       theApp.batteryMarker = true;      
       setImage("images/batteryMarker.png");
+      
     }
+    else {
+      setImage("images/battery3t.png");
+    }
+    
     warning.src = "images/burnt-sign.png";
     current = 0.0;
     resistance = 0.0;
@@ -55,7 +59,7 @@ class Battery extends Component  {
   }
     
     CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {
-      if (!theApp.batteryMarker) {
+      if (!theApp.batteryMarker && USE_PATTERN) {
         this.ownMarker = true;
         theApp.batteryMarker = true;      
         setImage("images/batteryMarker.png");

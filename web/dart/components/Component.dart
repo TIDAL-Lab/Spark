@@ -256,7 +256,7 @@ class Component implements Touchable {
   
   void removeComponent() {
     
-    if (this.type == "Battery" && (this as Battery).ownMarker) {
+    if (USE_PATTERN && this.type == "Battery" && (this as Battery).ownMarker) {
       theApp.batteryMarker = false;
     }
     theApp.removeTouchable(this);

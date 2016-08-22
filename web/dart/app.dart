@@ -35,6 +35,8 @@ bool USE_SERVER = false;
 num CANVAS_RATIO = 0.0;
 num HELP_RATIO = 0.0;
 
+bool USE_PATTERN = false;
+
 
 class App extends TouchManager {
 
@@ -195,7 +197,8 @@ class App extends TouchManager {
          help.helpSrc ="images/helps-components/";
          model = new Model();  // not really using this
          SHOW_LENS = false;
-         SHOW_MARKER = false;
+         USE_PATTERN = false;
+         if (!USE_PATTERN) SHOW_MARKER = true; // only one of SHOW_MARKER or USE_PATTERN should be true in this condition.            
          USE_SERVER = true;
          CANVAS_RATIO = 0.75;
          HELP_RATIO = 0.3;
