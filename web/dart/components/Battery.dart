@@ -25,17 +25,21 @@ class Battery extends Component  {
   bool isBurnt = false;
   num maxCurrent = 10.0;
   ImageElement warning = new ImageElement();
+  bool ownMarker = false;
   
   Battery(num x0, num y0, num x1, num y1, num v) : super("Battery",x0, y0, x1, y1) {
-    bool isFirstBattery = true;
-    for (Component c in theApp.components) {
-      if (c.type == "Battery") {
-        isFirstBattery = false;
-      }
+//    bool isFirstBattery = true;
+//    for (Component c in theApp.components) {
+//      if (c.type == "Battery") {
+//        isFirstBattery = false;
+//      }
+//    }
+    if (theApp.batteryMarker)setImage("images/battery3t.png");
+    else {
+      this.ownMarker = true;
+      theApp.batteryMarker = true;      
+      setImage("images/batteryMarker.png");
     }
-    if (isFirstBattery) setImage("images/batteryMarker.png");
-    else setImage("images/battery3t.png");
-    
     warning.src = "images/burnt-sign.png";
     current = 0.0;
     resistance = 0.0;
@@ -51,6 +55,11 @@ class Battery extends Component  {
   }
     
     CanvasRenderingContext2D drawComponent(CanvasRenderingContext2D ctx) {
+      if (!theApp.batteryMarker) {
+        this.ownMarker = true;
+        theApp.batteryMarker = true;      
+        setImage("images/batteryMarker.png");
+      }
       iw = img.width / 3.5;
       ih = img.height / 3.5;
       ctx.drawImageScaled(img, -iw/2, -ih/2, iw, ih);

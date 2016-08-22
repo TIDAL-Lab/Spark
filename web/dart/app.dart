@@ -36,7 +36,6 @@ num CANVAS_RATIO = 0.0;
 num HELP_RATIO = 0.0;
 
 
-
 class App extends TouchManager {
 
    CanvasRenderingContext2D ctx;
@@ -66,7 +65,7 @@ class App extends TouchManager {
    num frameCenterX, frameCenterY, frameWidth, frameHeight; // the frame that maps the connection to the electron model (condition 3)
    
    int condition = CONDITION;
-   
+   bool batteryMarker = false; // a falg to check if there is a battery with marker in the work station
       
    App() {
      theApp = this;
