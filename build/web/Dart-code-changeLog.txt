@@ -1,0 +1,73 @@
+THINGS TO FIX LATER:
+1. FIX THE PROBLEM WITH PUB SERVE
+2. FIX THE PROBLEM WITH SINGLEWHERE ERROR FOR GETTING AN EDGE
+3. FIX THE CODE FOR RESIGING THE WINDOW
+4. MAKE THE SLIDERS WORK BETTER; MAKE SURE THEY WORK CORRECTLY WITH MOUSE EVENTS
+6. FIX THE DELETE CODE: DELETE THE CONNECTED COMPONENTS WHEN THE DRAGGED COMPONENT IS NOT ON THE DELETEBOX, BUT THE CONNECTED CIRCUIT IS 
+
+*** notes on 02/19/2015
+1. merging the two conditions into one code
+	main.dart: added a condition switch
+	copied probe.html, probe.dart, and css/probeToolbar.css
+	copied a 2nd version of dart/model.dart --> now they are two files: agentModel.dart & lumpModel.dart
+	track where the model is called:
+	--> main.dart: if condition --> model
+	--> help.dart
+	style issues: fixed default.css --> #model1
+
+*** notes 02/27/2015
+
+1.Changing the brightness of light bulb
+	I changed the bulb-on and bulb-off colors
+	A drop shadow is added (it first draws bulb-off, then the shadow (with radius proportional with current)
+	and then bulb-on image.
+2. Adding a battery info page for condition = 0
+
+
+*** notes on 10/14/2015
+1. DART OLD ISSUE: fix the issue with mixing the touch event and mouse event.
+   For example, creating two components. (Update: Mike: this is windows 8 issue, cannot get fixed, just switch between the modes)
+2. DART OLD ISSUE: fix the issue with changing the circuit configuration 
+	when clicking/holding the click on a component or a control point!!
+	SOLVED(?): I don't know why but it seems that running pub serve interferes with running the code.
+	I unchecked the pub serve in manage launches and the weird things are all gone!!
+3. DART OLD ISSUE: slider change not updating the value
+	UPDATE: it workes with touch events, but I should later test it with the mouse events
+
+*** notes on 6/25/2016
+1. cleaned up the code, created an app.dart file and moved the App class from main.dart
+2. organized the settings for conditions
+3. working on the css styles
+
+*** notes on 6/27/2016
+1. setting the screen with CANVAS_RATIO and HELP_RATIO
+2. I don't remember what those were for: probe.html, probe.dart, and probeToolbar.css
+	investigation: they are for condition 1 and battery for condition 2 which show the V, I, R values
+3. I first set the canvas to be the same size as the workspace, but then realized that I can draw the help text
+	so I changed the canvas size to be the whole screen.
+	Now I have issues with drawing control points outside of the workingbox
+
+*** notes on 7/1/2016
+1. remove sliders in the toolbar (just leaving the generic slider)	
+
+*** notes on 7/18/2016
+1. modifying the way that the circuit is connected to different models for different conditions	
+	it is currently a big mess
+	
+*** notes on 7/31/2016
+1. before the working box was a rectangle object, which made updating the width and height of it difficult and messy
+	now I changed it, there is no object anymore, and just drawing a rectangle in the draw() function based on
+	updated width and height after reseting or resizing the window (similar to the frame rectangle)
+2. I now use the USE_SERVER flag inside the sendData() function (inside circuit object) 
+	if it is condition 3 (non-AR) it does not send data to server, but using pubnub it sends it directly to the iframe
+	but if it is condition 4 (AR) it sends data to server
+	both functions for sending data (both conditions 3 & 4) are written in sendData.js file.
+	
+*** notes on 8/1/2016
+1. trying to fix the issue with initiating the electron model when the app starts
+	(right now, it does not show the battery on the electron model before the first interaction)
+	ok, I sort of fixed some of the issues, but still the pubnub publish/subscribe works strangely
+2. working on condition 4, trying to make the AR working.
+
+*** notes on 8/14/2016
+1. working on the parseDelete function and the issue with not correctly updating objects on parseDelete

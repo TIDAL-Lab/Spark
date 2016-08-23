@@ -1,0 +1,52 @@
+// TODO
+// CIRCUIT/CONTENT BUGS
+* burnt battery bug: when a burnt battery is in series with a working battery, the bulb lights up, which shouldn't
+
+* URGENT: issue with parallel circuit with battery v=4 and 3 resistors r=1 --> battery burns!
+
+* burnt battery: disable the slider
+
+* fix the light bulb shade
+
+* add light rays to the bulbs!
+
+* add "resistor" to the resistor
+
+* bug: when creating a new component, sometimes it creates 2!
+
+* add units for V, I, and R
+
+
+// CSS BUGS
+* [WIP] fix the style of the model frame and probe
+
+* [WIP] fix position of elements for different screens
+
+
+// INTERACTION/REPRESENTATION BUGS
+* [DONE] merge the two conditions into one code
+
+* drag components from the toolbar in order to create a new one, instead of tapping on it
+
+* sliders bug: mouse interaction doesn't work. 
+
+* make the information button more visible
+
+* fix the content of help texts for control condition (it is 3 texts but should be 4)
+
+* highlight the magnifying glass
+
+* the trash has no sound!
+
+* improve the interaction with the sliders, it is not smooth enough 	
+
+* when reset --> the sliders need to be reset to 1
+
+* change the appearance of resistors for different resistances
+
+* check why the info button disappears some times!
+
+* enable switching between touch and mouse interactions 
+
+* don't let the components to get out of the box when the controlpoints are dragged. I added a conditional to 
+	touchDrag function of controlpoints, but did not work
