@@ -12,8 +12,8 @@
 
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-// var modelWidth;
-// var modelHeight;
+var modelWidth;
+var modelHeight;
 
 // var width = 640;
 // var height = 480;
@@ -107,13 +107,12 @@ function init() {
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
-	console.log("init comp.l: ", components.length);
+	markerRoot = new THREE.Mesh();
 	initComponents();
 
 	renderer = new THREE.WebGLRenderer();
 	renderer.setClearColor ( backgroundBlue ); 			//bluish background color
 	renderer.setPixelRatio( window.devicePixelRatio );
-	//renderer.setSize( modelWidth , modelHeight );
 	renderer.setSize( modelWidth , modelHeight );
 	//if (twoScreen) renderer.setSize( width, height );
 	//if (twoScreen) renderer.setViewport ( 0, 0, window.innerWidth*0.6, window.innerHeight );	
@@ -128,7 +127,9 @@ function init() {
 
 	// CONTROLS
 	//controls = new THREE.OrbitControls( camera, renderer.domElement );
-	controls = new THREE.EditorControls( camera, renderer.domElement );	
+	controls = new THREE.EditorControls( camera, renderer.domElement );
+
+	animate();	
 	
 }
 
@@ -150,8 +151,7 @@ function initComponents() {
 	electronMaterial = new THREE.PointCloudMaterial( { size: electronSize, map: sphere, sizeAttenuation: true, color: blue , transparent: true } );
 	electronVertices = new THREE.PointCloud ( electronGeometry, electronMaterial );
 	// TEST:
-	markerRoot = new THREE.Mesh();
-	//var box = createBox();
+	var box = createBox();
 	//markerRoot.add(box.box);
 	for (k=0; k < components.length; k++) {
 		markerRoot.add(components[k].container); // add all the components to the parent object
@@ -161,7 +161,6 @@ function initComponents() {
 	//markerRoot.rotation.z = Math.PI;	
 	//if (ArFlag) markerRoot.matrixAutoUpdate = false;  // not needed any longer with jsartoolkit5 library;
 	scene.add( markerRoot );
-	console.log(scene.children.length);
 }
 
 function doUpdate() {
@@ -175,12 +174,11 @@ function update() {
 	button.style.background = "url('../../images/buttons/watch2.png') 0 0 no-repeat / 100%"; // 100% is the size
 	
 	// remove all children of scene
-	for (c = scene.children.length-1; c >= 0; c--) { 
-		var obj = scene.children[c];
-		scene.remove(obj);
+	for (c = markerRoot.children.length-1; c >= 0; c--) { 
+		var obj = markerRoot.children[c];
+		markerRoot.remove(obj);
 	}
 	electronObjects = [];
-	console.log("after update", components.length);
 	
 	if (!ArFlag) initComponents();
 	else updateAR(); // in ar-spark.js file

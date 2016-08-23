@@ -799,15 +799,6 @@ http://support.intuilab.com/kb/how-to/properly-configure-windows-pc-touch-and-ge
 disabled right click for press-and-hold touch action :)
 why there is a delay for touch? mouse works fine! there is some issue with touchstart
 
-*** notes on 8/23/2016
-1. I was getting crazy with a sudden issue with the code since yesterday!!! Suddenly the electrons got stuck at the 
-junctions! I worked for hours to figure out what caused it! 
-Finally, I figured there was this line, which I changed a few weeks ago, and working fine (!), was the source of issue!
-it was related to the parse code in launch.js: a while ago, I uncommented this line: query.exists("type");
-but apparently this causes some weird malreading of objects from parse! So, I commented it again and the code works!!
-IT was really driving me crazy! :)
-
-2. 
 
 ISSUES TO FIX LATER:
 

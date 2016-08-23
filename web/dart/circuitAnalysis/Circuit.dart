@@ -201,11 +201,8 @@ class Circuit {
       //print(JSON.encode(myObj));
       // call the "doDeleteParse method on myObj (the code is in sendData.js)
       var sendParse = new JsObject(context['sendParse'],[myObj]); // instantiate a JS "deleteParse" object
-      //sendParse.callMethod('doUpdateParse'); // call its method "doUpdateParse"
+      sendParse.callMethod('doUpdateParse'); // call its method "doUpdateParse"
       //sendParse.callMethod('doUpdateParse');
-      new Future.delayed(const Duration(milliseconds:200), () {
-        sendParse.callMethod('doUpdateParse');
-      });
       
     }
     else { 
@@ -213,6 +210,10 @@ class Circuit {
       if (theApp.model != null) theApp.help.show();
       var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
       data.callMethod('doSendData'); // call its method "doSendData"
+//      new Future.delayed(const Duration(milliseconds:100), () {
+//        data.callMethod('doSendData');
+//      });
+
     }
   }
   

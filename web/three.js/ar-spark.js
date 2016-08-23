@@ -116,7 +116,6 @@ if (window.ARController && ARController.getUserMediaThreeScene) {
 
 function updateAR() {
 	scene.remove(markerRootParent);
-	markerRootParent.remove(markerRoot);
 	arRenderFlag = false;
 	initComponents();
 	markerRootParent.add(markerRoot);

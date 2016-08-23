@@ -83,45 +83,46 @@ function doReceive(message){
 function doParse(message){
 	// if updating the circuit, set a boolean to pause the rendering while the circuit object is being parsed
 	if (message != 'init') updateFlag = true; 
-  var numComps;
-  components = []; // this var is created in main.js 
-  var tCircuit;
+   	var numComps;
+    components = []; // this var is created in main.js 
+    var tCircuit;
 	// create a new subclass of Parse.Object named Circuit
-  var parseCircuit = Parse.Object.extend("Circuit");
-  var query = new Parse.Query(parseCircuit);  // using Parse.Query to retrieve the circuit object
-  //query.exists("type");// This determines if the field "type" is set for the instances and retrieves all 
-	//objects that have the "type" field set
-	query.find().then(function(results){
-  	var promise = Parse.Promise.as();
-  	_.each(results, function(result){
-    	promise = promise.then(function(){
-            compType = result.get("type");
-            compVolt = result.get("voltageDrop");
-            current = result.get("current");
-            compRes = result.get("resistance");
-            startx = 2 * result.get("startX");
-            starty = 2 * result.get("startY");
-            endx = 2 * result.get("endX");
-            endy = 2 * result.get("endY");
-            direction = result.get("direction");
-            graphLabel = result.get("graphLabel");
-            //direction = 1;
-            connections = result.get("connection");
-            tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy, direction, connections, graphLabel);
-            components.push(tCircuit);        
-    		});
+    var parseCircuit = Parse.Object.extend("Circuit");
+    var query = new Parse.Query(parseCircuit);  // using Parse.Query to retrieve the circuit object
+    query.exists("type");// This determines if the field "type" is set for the instances and retrieves all 
+  	//objects that have the "type" field set
+  	query.find().then(function(results){
+    	var promise = Parse.Promise.as();
+    	_.each(results, function(result){
+      	promise = promise.then(function(){
+              compType = result.get("type");
+              compVolt = result.get("voltageDrop");
+              current = result.get("current");
+              compRes = result.get("resistance");
+              startx = 2 * result.get("startX");
+              starty = 2 * result.get("startY");
+              endx = 2 * result.get("endX");
+              endy = 2 * result.get("endY");
+              direction = result.get("direction");
+              graphLabel = result.get("graphLabel");
+              //direction = 1;
+              connections = result.get("connection");
+              tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy, direction, connections, graphLabel);
+              components.push(tCircuit);        
+      		});
 
-  	});
-      return promise;
-  }).then(function(){
-  	if (message == 'init') {
-  		doInit();
-  	}
-  	else { // message is update
-  		updateFlag = false; //sets the boolean to resume rendering the scene
-  		doUpdate();
-  	}
-  	
+    	});
+        return promise;
+    }).then(function(){
+    	if (message == 'init') {
+    		doInit();
+    	}
+    	else { // message is update
+    		updateFlag = false; //sets the boolean to resume rendering the scene
+    		doUpdate();
+    	}
+    	
 
- });  
+  
+    });  
 }
