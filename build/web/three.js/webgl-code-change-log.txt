@@ -1,0 +1,829 @@
+THINGS TO FIX LATER:
+1. [3/31/2016] why when the obstacles are disabled, the electrons only move to up, and not down?! fix this later
+2. [3/31/2016] I cannot use the camer on chrome, ask Mike to help you with this so that I can migrate back from firefox to chrome
+3. [3/31/2016] fix this error: TypeError: components[electron.componentID] is undefined
+			   everytime that the circuit is updated it gives this error before the components are updated, the code performs correctly
+			   but this error needs to be fixed later
+4. [3/31/2016] 			   
+
+
+*** notes on 9/14/2015
+1. I am studying how to run collision detection on particle systems. So far it seems that there is nothing good!
+2. I am studying raycasters in three.js
+3. I am changing the createContainer() function to createBox() function, the main change is that I am creating a 3D box instead of a 2D rectangle.
+	And instead of actually drawing the box, I am creating a MESH using BoxGeometry(). 
+	I also need to set the position and rotate the box so that it matches the coordinates of the input json object
+4. I also am changing the start and end point objects to a bunch of Vector3() objects, I think this make thins easier later.
+5. I made the component box transparent by adding:
+	boxMaterial.transparent = true;
+	boxMaterial.opacity = 0.5;
+	But it did not work and it did not show the particles inside the box. I searched and added this line, which solved the problem:
+	boxMaterial.depthWrite = false;
+	
+*** notes on 9/15/2015
+1. Now it's time to work on collision detection!
+2. Can I use boundingBox? 
+	boundingBox = new THREE.Box3().setFromObject(boxMesh);
+3. No! boundingBox is not the answer, because the box is parallel to the XYZ axes. 
+4. I should define walls and use collision detection to the walls.
+
+*** notes on 9/16/2015
+1. Trying to rotate a geometry around a point that is external to the geometry --> to rotate the walls of component
+	the solution is to append the walls to the component as its children and then rotate all of them at once
+	component.add(walls[i]);
+2. Now dealing with the raycaster and collision	
+	For each electron I need to build a raycaster with electron's position and direction of moving, which is basically it's velocity vector.
+3. For now, the electrons move randomly inside the box.
+4. I made all the electrons moving with the same initial velocity, by changing random velocity.y to a value that results in a constant velocity 
+	( velocity.y = sqrt(velocity-velocity.x^2) )
+5. Now it's time to import the components from parse json object.
+
+ADD LATER: change the bouncing off the walls
+ADD LATER: add bumping into the ions!
+
+*** notes on 9/16/2015
+1. I added the code from old code that passes the json object of components to the webgl. I needed to make some little modifications in the code,
+	including moving the js code from html file to the top of my main code. 
+2. There are issues with when the parse code is called, which I'll fix later.
+3. I fixed the problem with the coordinates, changing the code in "Circuit.dart" file, where it sends the json object.
+	Before it was scaled to match the webgl format, but now I want the real position according to the center of working box.
+4. ISSUE: not generating ions (SOLVED).
+5. ISSUE: the component is rotated 90 degree on the XY plane (SOLVED).
+6. ISSUE: the code stops when I change the circuit, any change (SOLVED).
+
+*** notes on 9/17/2015
+1. working on parsing code. Things to fix:
+	* XY coordinates are not correct
+	* run parse first, before making a change in the circuit.
+	* there are no ions in the system now 
+	* the code stops after making one change
+2. I don't know what this is for: SyntaxError: unreachable code after return statement
+
+*** notes on 9/21/2015
+1. Today, I am trying to figure out how data streaming works in pubnub and parse.
+2. I updated the JS Parse source, but then the execution gives error that Parse is not defined! I changed it back to the old one for now, to fix it later!
+	For now, don't use the latest source!
+3. I studies all the details about data streaming.
+4. I created my own pubnub channel, and my own Parse app with my own account! All understood from Mmachi's code!
+5. The components were not rotated by 90 degrees, the XY coordinates were set wrongly, which I fixed. Right now, the input coordinates in webgl are scaled up by x2
+6. Warning Message: THREE.PlaneGeometry: Consider using THREE.PlaneBufferGeometry for lower memory footprint.
+	---> NOT an issue for now, IGNORE it.
+7. The issue with ions is solved. The issue was not with not generating ions, but with some scaling issue in the code that resulted in no ion to generate.
+
+*** notes on 9/22/2015
+1. Today, I am working on the issue that code stops rendering after I update the circuit. I am reading about requestAnimationFrame() method and how renderer works in WebGL.
+2. I think at each update, I only need to remove objects from the scene, and add new objects to the scene.
+3. YESSSSS! IT WORKED:
+	I just needed to write an update() function, which only removes scene children and adds the updated objects to the scene.
+4. ISSUE: with each update, electrons speed up! (SOLVED)
+5. ISSUE: it is still not rendering correctly, some objects don't update correctly, some particles remain on canvas after the update, etc. 
+	(SOLVED)
+	Explanation: it was not corretcly removing the scene children, I used a wrong for loop.
+	stackoverflow link that helped: http://stackoverflow.com/questions/29417374/threejs-remove-all-together-object-from-scene
+
+6. I am working on camera, Z coordinate, and zooming in and zooming out
+	I found a code online and added to my code, and now by mouse wheel, it zooms in/out.
+	I used this link: http://stackoverflow.com/questions/10354574/webgl-zooming-camera-in-threejs-without-trackball-controls-or-other-camera-con
+ISSUE: when it zooms in as much that the objects are out of scene, it cannot zoom out anymore!
+
+*** notes on 9/23/2015
+1. Solved the problem with electrons speeding up:
+	Apparently, at each time that it was calling requestAnimationFrame( animate ), it was changing the time interval or something, 
+	and as a result it was moving the particles faster (i.e., each update resulted in a shorter time step, and hence a faster particle)
+	Solution was to only call render() function at each update, and not the whole animate() function.
+2. I added a mouse drag functionality, by adding mouse up, mouse move, and mouse down functions. It now rotates the camera
+	I originally wanted the mouse drag to drag the scene but it need more work later.
+3. Working on collision with ions.
+4. It seems that I have to change ions from being a particle system to an array of regular objects. It seems impossible to add the collision function if ions are particles.
+	i.e., the raycaster only works with object3 structures, and the individual particles are not objects!
+5. I changed the ion structure to become an array of ions as children of each component, so they are not pointcloud structure anymore.
+
+*** notes on 9/24/2015
+1. I studies how I can draw spheres for electrons, instead of using a ball texture. I haven't changed the code yet, but this link seems to show some good tricks, check it later:
+http://stackoverflow.com/questions/12372834/rendering-spheres-or-points-in-a-particle-system
+2. I added collision with ions
+3. I added a tiny randomness in the bouncing back direction, but it still needs more work
+4. I added a battery image texture to the battery and wrote a separate function for initializing the battery.
+	
+*** notes on 9/29/2015
+1. Mike suggested that I don't use slice() method to select the electrons for each component (for the updateElectrons function).
+	He thinks each time slice() is called, maybe it copies a whole array which can significantly slows down the execution. 
+	Instead, I can pass the whole electrons array with start and end index to the updateElectron function.
+	I did that, but I am not sure if I seen any obvious change in the speed of electrons moving.
+2. I changed the structue of code, in a way that instead of assigning arrays of electrons to components in order, I create an ID field for each electron,
+	which says which component it belongs to. This will make moving from one component to another easier later on.
+	
+*** notes on 9/30/2015	
+1. Next project: Add junctions!
+2. To avoid electrons flying off the component at reset: 
+	I added a constant 5 to the calculated init coordination of electrons to avoid creating electrons right on the edge.
+3. I also made the ion layout look a bit better!
+
+*** notes on 10/6/2015
+1. Since last week the code started crashing! Mike helped me run the code on Chrome using local server 127.0.0.1:3030
+	But still the code crashes.
+2. I am now trying to debug the issue. First, the crash was due to initing the code with two components initiated in the code
+	and then when I update the circuit with Parse and data streaming, for some reason it crashes the code. 
+	So for now, I commented the testing components and it directly initiates the circuit that is streamed from Parse.
+3. Still the problem with updating speed is not solved. I submitted the code to gitub and am trying to compare it to the last commint to detect the source of issue.
+4. I went through the code step by step and found out that the part that creates ions slows down the execution!!!
+	*** the problem was that at each run of for loop for creating ions, the ionGeometry and ionMaterial were initialized too. 
+		I movet it out of the loop, and the problem was solved :)
+5. I fixed bouncing back code, using the face and normal property of the raycaster. The code is fixed for the ions, but still does not work for bouncing off the walls
+	
+*** notes on 10/7/2015
+1. For some reason, bouncing back from the ions dramatically slows down the electrons. I need to troubleshoot it and find why! 	
+	It also seems that the slowed down electron does not bounce off the ions anymore! (actually it is not always the case)
+	Answer: the reflection is not working right. after bouncing back the z component of the velocity vector is not zero anymore, this explains both above observations!
+2. ISSUE: the new bouncing back code still does not work for the walls, for some reason it detects a wrong face with a normal in z direction.
+3. Now I am working on constructing a json object to send the information about connected components.
+jsify():
+https://api.dartlang.org/1.12.1/dart-js/JsObject/JsObject.jsify.html
+create JSON by JS for loop:
+http://stackoverflow.com/questions/920930/how-to-create-json-by-javascript-for-loop
+4. I finished making the matrix in the dart code. the matrix encodes information about what components are connected and how (from s to e, from s to s, etc.)
+
+*** notes on 10/8/2015
+1. I need to flatten the connections array sent from Parse to the JS code.
+Link to how to flatten a nested array: http://www.christopherbiscardi.com/2014/01/06/flattening-nested-arrays-in-javascript/
+2. ISSUE: fix the bug with removing connected components!
+3. ISSUE: fix the bug with reset button in Dart: not showing the battery when it is reset.
+4. ISSUE: bouncing off the walls not working!
+
+
+*** notes on 10/14/2015
+Working on the Dart code to fix old issues (check dart code change log file)
+
+*** notes on 10/15/2015
+1. I tried to fix the issue with bouncing off the walls, apparently rotation the walls initially made the normal vectors working not as wanted
+	(I still don't understand what is going on!!)
+	But there is still issue with bouncing off the walls when the component is angled.
+2. I modified bouncing off the ions, so that it considers the cases where the angle between electron velocity and normal vector is 180 or 90 degrees
+	But still there are a rare cases where the electron stops moving when collide with an ion
+	--> needs to be fixed!
+	
+*** notes on 10/19/2015
+1. I have been working on the bounce back function which was not working correctly.
+	The problem was with the local space and world space. For example, the electron velocity was in world space,
+	but the face normals where in local space. The solution was to rotate the electron velocity with the reverse angle of component rotationAngle
+	which makes the electron velocity in the component space, and then calculating the bounce back angle.
+	
+2. I commented the type check in the parse code, because it sorted the components base on types and then rendered them
+	which messed up with reading the connected components!
+
+*** notes on 10/22/2015
+1. Working on making the junctions!
+2. I wanted to have the electrons bounce off the box from inside. I searched and found this link helpful:
+http://stackoverflow.com/questions/28664904/three-js-raycaster-collision-inside-of-cylinder
+	The problem is solved by chanding the side of box to be rendered from front to back.
+	
+*** notes on 10/28/2015
+1. I am working on the CSG code, and how to create a union geometry for the whole circuit.
+(Note: I tried the three.js merge() function, but it seems that the merging function does not do what I am looking for,
+and the edges that each indivudal box has still exists after merging)
+2. I also tried to add an orbitcontrols.js library, mimicking a CSG example, but it does not function, I will fix it after I finish the CSG code!
+3. I fixed the controls; I just needed to use the source code (OrbitControls.js) from examples library, instead of copying it from the online example resource. 
+4. The CSG code is now partially working; I added a union shape, but when the ions are added to the obstacles array it becomes very slow.
+	Also, electrons get trapped on some of the union geometry walls, I need to understand why!
+	
+*** notes on 11/6/2015
+1. I am modifying the CSG code, the current main issues are:
+	a. when I have a combined mesh with a rotated wire, something wrong goes on with the face normal calculations and it causes some electrons to stop!
+	b. I need to add a code that electrons know to which component they belong at each tick, 
+	right now they always belong to the component they initiated from 	
+	c. the code does not distinguish that the components are actually "connected"! It simply creates a combined mesh no matter what! [FIXED]
+	
+	
+*** notes on 1/1/2016
+1. Working on sending the connected graph information to parse and webgl code:
+	in circuit.dart code, each graph node knows which connected graph it belongs to. That should be all I need!
+	update: for now, I decided to only send the graphLabel information. I figured that sending the connected components information might not be 
+	necessary.
+2. I changed the CSG code to consider the connected graphs. Now, there is one CSG composite mesh for each of the connected graphs
+	And instead of having one big obstacle for all the electrons, now only the composite mesh that the electron belongs to is the obstacle
+3. ISSUE: why when two components with no angles are connected, there is a tiny partial wall between them that the electrons bounce off!? 	
+	(I should add a sphere junction anyways)
+4. ISSUE: angled connected components --> some electrons stop moving at the edges. Is it because they pass the boundary of mesh?	
+
+*** notes on 1/2/2016
+1. I am adding sphere junctions to the components.
+	It seems that I need to merge the box mesh with the two sphere juctions (instead of adding the two as the children of boxMesh)
+I tried the CSG union function to unite [mesh, start juction, end juction], but there are two problems:
+	first, the code initially renders very slowly. I need to figure out why!
+	--> I tested different parts of code, and it seems the part that it adds the junctions (especially the end junction) makes it very slow
+		I don't understand how this is different from adding another box mesh!!
+		SOLVED: it seems that the rendering issue was because I set the sphere width and height segments to 60, 
+		I reduced it to 30 and it got much faster!
+	second, the junctions' positions are not updates based on the component, and they stay at the origin.
+
+*** notes on 1/3/2016
+1. ISSUE: the position of junctions for the CSG code:
+	I am trying to use the clone() function to solve the problem, but based on what I read online:
+	Mesh.clone() does not clone the Geometry and Material properties.
+	http://stackoverflow.com/questions/22360936/will-three-js-object3d-clone-create-a-deep-copy-of-the-geometry
+	I am lost! I don't understand why the cloned object cannot update it's matrix world to be the correct one :(
+	I tried many tricks, but still not successful!
+	PROBLEM SOLVED:
+	These are my findings, even though I am not 100% sure if I understood all this weird transformation issues!:
+	A. I had to clone the component.
+	B. The flag for recursive clone is true (default value is set to true), by component.clone() it also clones the junctions (children)
+		BUT, it does not copy the world matrix!
+	C. So I need to manually update the world matrix for the junctions, therefore I have to clone() the junctions too,
+		to avoid messing up with the possition of the original junctions.
+	D. To update the world matrix for the junctions, I used this line of code:
+		clonedChild.applyMatrix(components[k].boxMesh.matrixWorld);
+	
+*** notes on 2/2/2016
+1. Have been working on device motion
+	for now testing rotation component, trying to make it work for the rotation along the z axis
+	I started by reading articles on accelerometer data from JS and different events that handle this in JS
+2. I am testing a DeviceOrientationControls JS file I found in the library of three.js, trying to modify that code
+	I need to rotate the camera
+	
+
+*** notes on 3/9/2016
+From the testings, it seemed that using the accelerometer data for detecting the motion is not a good option.
+So, we decided to go back to JSARoolkit.
+I am currently working on the AR, so far I could add a 3D shape on over a tag.
+1. now the goal is to add a particle system to the 3D object
+	I added the particle system to the box and it now works
+	
+*** notes on 3/14/2016
+I am working on merging the AR code with my three.js code
+Issue: there are issues with updating matrices for components and their junctions, now that I am adding the AR code which needs to 
+control the updating matrix process, and therefore it messes with the code and things don't work the way that they should.
+These are the steps that I am taking to mitigate this problem:
+1. I created an allComponents mesh, which contains all the components as its children, so that helps with the updating issue
+Before adding the CSG code, I need to figure out how the camera works, because until now, it seems that I don't understand how to
+create a camera object that works properly!
+Issue solved: the parameter that I need to play with is the "markerWidth" parameter in the AR code.
+Issue: the overlay object (i.e., the circuit) is not a stable image, and it moves a lot even when the marker is held still. 
+I need to find a way to remove this visual effect.
+
+2. I am trying to add moving electrons to the code. I updated the three.js library, changed pointcould to points.
+there is a problem with the size of electrons, I am playing with the sizeAttenuation property of pointsmaterial...
+3. Another issue is with the collision code, which seems not working when the AR works!
+
+*** notes on 4/6/2016
+1. I worked around the matrix update happenings in the code. It seems that I need to have one object3D (either allComponentsMesh or scene itself)
+	that contains all the objects in the scene, and then disable the matrix auto update for that parent object (e.g. scene.matrixAutoUpdate = false)
+	and then I just need to be worried about updating transforming the parent object using the JsAr result matrix. This means that I need to add the 
+	electrons to the parent object.
+2. Now that the problem is solved, I still need to solve the issue of electrons bouncing off the walls 
+ISSUE 1: the bounce back procedure does not work correctly (even with no AR)
+		SOLUTION: I fixed it for no AR condition
+		for AR condition: the problem is within the collision procedure where I used to update the localVelocity vector by this code:
+		localVelocity.applyAxisAngle(new THREE.Vector3(0, 0, -1), this.rotationAngle);
+		Now that the matrix is updated by scene matrix update (manually), the rotationAngle would not work any longer!
+		Issue: I detected that the problem is not with bouncing back, but one step earlier, the problem is that with AR added, there is no 
+		collision reported by the raycaster.
+		*** I think I need to play with the updateElectrons procedure, because I realized that everytime the scene matrix is updated by the JsAr
+		computations, the electron velocity is still untouched.
+	
+ISSUE 2: all the electrons move towards positive y coordinate, I need to fix this!	
+		SOLVED: adding this line: if ( Math.round(Math.random()) == 1 ) vY *= -1;
+
+3. I added the ions as obstacles, and it is working all fine (a while ago I significantly decreased the width & height segements of the
+	spheregeometry)		
+	
+*** notes on 4/11/2016
+1. Today, I am trying to fix the problem with running the code on chrome. Chrome browser worked fine before I added the AR code
+but after adding the JsAr code, it gave errors and I had to switch to firefox
+
+NOTE: when using chrome browser I have to use localhost (as a secure origin) 
+b/c chrome does not allow testing a feature on a server that does not have a valid certificate, according to this website:
+https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
+
+ISSUE 1: I get hundreds of this error on chrome: [.CommandBufferContext]RENDER WARNING: Render count or primcount is 0.
+	I googled and one person suggested that it is caused due to having meshes with no vertices or faces, and suggested using a checkMesh code
+	I used the checkMesh code but could not figure out what the problem is
+	NOT SOLVED YET :(
+	
+ISSUE 2: each time that I update the circuit and the update code runs in three.js, there are a few errors:
+	"Uncaught TypeError: Cannot read property 'updateElectron' of undefined"
+	I need to modify my update() procedure to mitigate this issue!
+	I tried adding a flag that when it is updating it does not render (and so update electrons) but it does not seem to work!
+	SOLVED: I figured that the issue is happening when executing the doParse code, where it parses the circuit object after each update from parse
+			so the solution is to setup a boolean (updateFlag) that becomes true when parsing (for update condition) starts, and ends when doUpdate()
+			is called. This way, I don't get the error any longer :)
+ISSUE 3: with accessing camera!
+	SOLVED: the issue was simply with chrome deprecating features on insecure origins; so I had to use the localhost
+	
+	topcode opencv library
+	websocket json
+	camera angled from top: perspective correction
+	magnetic helps with circuit configuration
+	
+*** notes on 4/12/2016
+
+ISSUE 1: electrons not bouncing off the walls
+
+ISSUE 2: size attenuation does not work for electrons
+
+FINDING: I figured out that using revision r75 of three.js was not a good idea, and I have to switch it back to the older version:
+		issues solved: 
+		1. no more "the object cannot be linked to the inspector without the toolbox error"
+		2. no more issue with electrons size attenuation
+		3.
+The changes that I needed to make in the code to go back to the older version:
+	1. changed the address to the library: lib/three.js-r75/ --> lib/three.js/
+	2. changed the particlesystem: points --> pointcloud
+	3. changed loading the images function: THREE.TextureLoader().load( "textures/ball.png" ) --> THREE.ImageUtils.loadTexture( "textures/ball.png" );
+	
+*** notes on 4/15/2016	
+
+ISSUE 1: why when I add an object without applying the jsar transformation matrices, it does not render it on the screen?
+
+		It seems it is because of the camera, because the camera is not a perspective camera!!!
+		
+FINDING: I found out what caused this repeated error that I used to get when rendering: 
+		THREE.WebGLRenderer: Texture is not power of two. Texture.minFilter should be set to THREE.NearestFilter or THREE.LinearFilter. (  )
+		
+		Apparently this was due to rendering the inputScene, when I commented out renderer.render(inputScene, inputCamera) ,
+		the error went away.
+
+*** notes on 4/17/2016
+
+FINALLY: I figured out how to run the collision detection with AR condition!!!!!!!!!!!!!
+		
+		in a nutshell: I needed to add this line of code to the collision function:
+		origin.applyMatrix4(electrons.matrixWorld);
+		where, origin is the origin of ray casting, and as by each marker detection the matrixworld of electrons(points geometry) is updated
+		we need to update the origin with that transformation matrix.
+		So, this seems to work, except for a couple of issues:
+		
+ISSUE 1: now, there are electrons escaping from the component. I need to fix the collision effect to remove this issue
+
+ISSUE 2: the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
+		I need to fix this problem
+		temp solution: if (!ArFlag) electronSize = 10;
+		
+ISSUE 3: It seems that the electrons are now bouncing off the junction spheres from inside the box! I am confused why this happens!
+		well, it seems that it is becuase of setting the raycaster.intersectobjects(obstacles, true)
+		it sets the recursive flag to true and that causes the observed behavior
+		later, I think I want to set it back to false (i.e., removing it, the default value is false)
+		
+
+*** notes on 4/18/2016
+ISSUE 1: now, there are electrons escaping from the component. I need to fix the collision effect to remove this issue
+		by testing it, it seems that when I rotate the marker 90 degrees, almost all the electrons escape :(
+		
+NEXT STEPS: fix issue 1 
+			make the electron moves in 3D (i.e., add the z component)
+			change ions to 3D too!
+			
+			
+*** notes on 4/19/2016
+To fix the above issues, I decided to keep the electrons and ions in 2D for now (I added the code for 3D velocity, but am not using it for now)
+Because it makes things complicated. Let's first get it run correctly with electrons moving in XY plane then I can extend it to XYZ
+		
+*** notes on 4/20/2016
+1. I fixed the old bouncing code, now I am doing all the calculations in 3D; electrons are initiated in 3D (non-zero z) and their velocities are
+	also in 3D (non-zero vZ), and for mirroring the electron from the obstacles, I am using the built-in functions such as .reflect(), etc.
+	so no manual code for reflection calculations
+	these links became useful in making the above changes:
+	a. Three.js: Convert face normal from local space to world space
+	http://stackoverflow.com/questions/16268482/three-js-convert-face-normal-from-local-space-to-world-space
+	b. How to get a reflection vector? (I did not really use the formula in my code, but it helped)
+	http://math.stackexchange.com/questions/13261/how-to-get-a-reflection-vector
+	
+2. But still the electrons don't bounce off correctly in the AR condition
+
+3. I added the orbit controls back to the code, just to have a better sense of what is going on
+
+4. I changed the container shape from box to cylinder. These are the list of changes that I made in the code:
+	a. boxMesh, boxGeom, and boxMaterial --> container, containerGeometry, and containerMaterial 	
+	b. this.container.rotation.z = this.rotationAngle - Math.PI/2; // I added "-Math.PI/2" (from BoxGeometry)
+	c. startJunction.position.y = - this.l / 2; // I changed this from x to y (from BoxGeometry) --> and the same for endJunction
+	d. pos.y = -this.l/2 + i * d; // I switched the order of x & y (from BoxGeometry)
+	   pos.x = -this.w/2 + j * d;
+	e. electron.x, electron.y, and electron.z: this.w, this.l, this.w with respect (from the box version: this.l, this.w, and this.d)
+
+*** notes on 4/21/2016
+The collision detection and bouncing off code is finally working correctly! Yaaaay!
+Here a few summary notes for this victory!:
+1. I add all the component.container s and the electrons to a markerRoot object, and then apply the AR transformations on the markerRoot object	
+	here are the three lines of code for making the transformations happen:
+	when initiating the scene:    							markerRoot.matrixAutoUpdate = false;
+	then when animating through the AR marker detection:    markerRoot.setJsArMatrix(resultMatrix);
+															markerRoot.matrixWorldNeedsUpdate = true;
+2. for the collision detection code:
+	two items:
+	a. transform the direction of the ray according the electrons world matrix
+	b. transform the origin of ray according the electrons world matrix
+	
+3. bounce back code:
+	a. first, I changed the code: before, it computed the ray vector (electron velocity) in local space; but now, instead, it computes the 
+		obstacle's normal vector in world space:
+		var normalMatrix = new THREE.Matrix3().getNormalMatrix( this.container.matrixWorld ); // the normal matrix (upper left 3x3) of the passed matrix4. The normal matrix is the inverse transpose of the matrix m.
+		var n = obstacle.face.normal;
+		var worldNormal = n.clone().applyMatrix3( normalMatrix ).normalize();
+		if (obstacle.object == this.container) worldNormal.multiplyScalar( -1 ); // reverse the direction of normal for container, as the normal vector for the container is towards outside
+	b. transform the direction of electron velocity according to the electrons world matrix
+	c. calculate the reflected vector
+	d. inverse the transformation applied in (b) to calculate the real direction of bounced electron:
+			var m = new THREE.Matrix4();
+			m = m.getInverse(electrons.matrixWorld)
+			reflection.transformDirection(m);
+			electron.velocity = reflection.multiplyScalar(length);
+
+
+*** notes on 5/11/2016
+I am working on resistor/bulb and battery
+1. battery image --> rotate because cylinder geometry is rotated
+2. I changed the code to add variable counts of ions to the component as a function of the resistance
+3. Issue: problem with collision detection: it seems that order of components being added to the scene matters 
+	and for example for two connected components, it only works correctly if the first component is on the left, otherwise
+	electrons don't collide to the first component (if on right) and will escape the component.
+	OH! WRONG OBSERVATION:
+	actually, this observation is wrong! The order does not matter. The weird thing happens when I add a battery and then
+	if I add another component to the connected components the problem happens! Hard to describe!
+	SOLVED: it seems that the issue was with the piece of code at the beginning of initComponents procedure, where
+	I sorted the components (I added this before for the purpose of using CSG, but it is not necessary anymore), so
+	I commented it and the problem is solved, but I don't understand why!!!
+	
+*** notes on 5/18/2016
+Things that I am going to fix today:
+1. figure out why some electrons stuck in junctions.
+	OBSERVATION: it seems that the electrons get stuck in the start junction, also they move weird in the start junction
+	I compared start and end junctions, and strangely it seems that when I rotate the half sphere for start junction
+	that causes the issue!! I tested rotating the end junction instead and as a result electrons stuck in the end junctions!
+	SOLUTION: not rotate the junctions and instead create two half spheres with different thetaStart (0 and PI/2)
+2. fix the battery related code
+	FIXED: the issue was that I was using the next components world matrix to transform, but instead I should use the 
+	battery's matrix.
+
+*** notes on 6/2/2016
+1. fix the camera canvas size on surface:
+	I keep the height and width of inputscene untouched and then play with the renderer size
+2. ISSUE: In non-AR condition a complete circuit works almost fine, but in AR condition the electrons are not correctly transferred
+	to the other side of battery.
+	notes: I think the issue is with the passFromBattery function and the way it works with matrix transformations
+	I tried transforming the two junction positions by battery world matrix, but it did not work, I should not do this.
+	
+*** notes on 6/4/2016
+1. made the inputscene (the one that camera captures) opaque, just to make it look better!
+	inputPlane.material.opacity = 0.3;
+
+2. still working on the issue with the passFromBattery function for non-AR condition:
+	FIXED: i needed to first transform the electron position with the electrons world matrix, add the push vector to it
+			and then transform electron position back to the local matrix for electrons.
+			
+3. working on ISSUE004: make it work for junctions with more than two connected components
+	plan:
+	a. right now junctions has a filed called "connectedComponentID" which is a number value
+		I have to change that to an array to consider more than one connections
+		a.a. instead of checking (connectedComponentID != -1) that indicates the junction is not connected
+			now, I have to check if the list of connected components is empty or not
+	b. then I have to write code for when electron is moving to a connected components, it looks at the list of connected
+		components and picks one component to move to based on a probablity
+		which is proportional to the current of the connected components
+		i.e., the larger the force, the higher the probability of moving to that component.
+
+*** notes on 6/5/2016
+1. I wrote code for forming a list of currents for each junction when the components are initialized.
+	the list considers the direction of current: whether it's leaving the junction (positive) or coming to the junction (negative)
+
+*** notes on 6/14/2016
+I paused working on the branching effect and instead adding some new features to the electron model interface:
+1. I am adding an ammeter
+
+*** notes on 6/18/2016
+1. I limited the rotation angles to 45 for both theta and phi (editorcontrols-spark.js)
+2. I increased the far property of camera from 1000 to 10,000 which helps with better rendering of the circuit
+	(the objects disapper when they are very very small and no disappearing when rotating!)
+3. I worked on the mechanism of electron moving, removed the limit on max velocity, and added energy loss after each collision
+
+*** notes on 6/19/2016
+1. changed the geometry of resistor to two merged cones!
+2. working on the electrons motion!
+
+*** notes on 6/21/2016
+1. Added a bunch of buttons to control/test the electrons motion
+2. added a "watch an electron" button; first I tried an arrowHelper but for some reason it slows down the rendering
+	so instead, I used the line geometry
+3. 
+
+*** notes on 7/16/2016
+1. working on styling the watch-button
+ 
+*** notes on 7/18/2016
+1. changed the touch events (and also mouse events): 
+	one-fingered touch: pan 
+	two-fingered touch: zoom
+2. I removed sending object to parse for condition = 3 because it's not necessary
+	instead, using pubnub I directly send the json object to the webgl model
+	
+*** notes on 7/21/2016
+1. I worked on sending data for condition 3, it is working fine, but there is an issue with initiating the model,
+	which I could not fix. I cannot figure out why it does not properly initiates the model. 
+	DO IT LATER!
+	ISSUE: weird launchmodel() issue, it does not first send data, but with the button it does!!!!
+2. working on the electrons movement in three.js model.
+
+3. working on the resistor container
+	issue: the current code renders the resistor as a CSG shape with two intersecting cones. for some reason,
+	it seems that adding resistors slows down the movement of electrons.
+	TEMP: I changed the container shape back to regular cylinder
+	Working on the ions instead.
+
+*** notes on 7/25/2016
+1. using the postmessage and communication between window and model iframe, I am now sending data from the webgl model
+	to the circuit side. Information being sent: component ID of the component being clicked. And information about 
+	panning and zooming. I the circuit side, I added a frame that represents the part of the working area that the electron
+	model is showing. The frame pans and gets larger/smaller by touch interactions on the electron model.
+	
+
+*** notes on 7/27/2016
+1. I am now working on the electrons movement code to fix a number of issues.
+
+*** notes on 7/28/2016
+1. working on the electron movement and having strange issues!
+	note: before I had the code subtract the force from velocity if it was bouncing off --> I fixed that
+	no need to do that, it should reflect the electron with the updated velocity, not the old one.
+	
+	ISSUE: electrons get stuck in between obstacles.
+	TEMP SOLUTION: if the electron does not move for two (or more) ticks, change it's length to initial velocity
+	also I can try rotating it for 90 degrees, to redirect it from the trap.
+
+2. I wanted to make a class for component and electron. I changed the component code to use "class" and constructor
+	instead of "function", but then the code gave me errors for not defining variables such as i,j,k etc. I don't know why
+	I get such errors, so I decided to bring it back to the old version. I should ask Mike later.
+	
+3. I changed the electron.js code to make a class representation of electrons --> electronObject.js:
+	Now, I have a class for electron, which is the electron object.
+	The problem is that I can use that class as vetices for the particle system
+	To solve this problem, I created two arrays, one is the electronVertices, which is the particle system, 
+	and the other one is the electronObjects, which holds all the other information about the electrons (velocity, component, etc)
+	This way, at each update run, it updates the elements of the electronObjects array, and after that it sets the particles
+	vertices to the electron.positions.
+	
+Things to fix:
+1. electron movement
+2. fix the frame size/position
+3. Add the counter
+4. Fix the watch-an-electron feature
+5. limit the number of components on webgl model to the ones that are inside the frame (not all the components in the working area)
+6. limit the ions in obstacles to the ones in the neighborhood (Not necessary for now)
+
+MOVE ELECTRON CHECK LATER:
+bounce back reverse normal vector --> correct?
+
+Slowing down issue
+1. When I stretch the wire, it becomes very slow --> test if it is because of more ions or the larger container.
+2. check if changing clone() to copy makes a difference
+
+
+*** notes on 7/31/2016
+1. I set up a frame on the circuit side that maps what part of the working area is being show in the electron model
+	the mapping is working all fine now, with size changing whit the zooming/panning events on the iframe
+2. I started working on condition 4:
+
+	I now have two html files one for running as an iframe 
+	
+	
+LATER: instead of using three.min.js use three.js file and then comment the part that gives warning on
+		"texture is not power of two ..."
+
+*** notes on 8/2/2016
+1. I fixed the issues with adding back the AR condition.
+	I compared my updated code with the stable commit on June 4th (6/4/2016): "DONE: The passFromBattery works for AR condition"
+	And yaaaay, it is working now :)
+
+2. working on freezing the screen
+	--> it is working now
+	I fixed the camera for both AR and non-AR conditions
+	
+3. adding the info window:
+	Firt I tried to rescale the inputscene by playing with the renderer.setSize or renderer.setViewport
+	ISSUE: it interferes with the touch interaction --> displacement for selecting components, etc.
+	I rescaled the inputscene to occupy just a portion of whole window:
+	inputCapture.getContext('2d').drawImage(input, 0, 0, width*0.6, height);
+	This works fine, but the issue that the electron model can render outside of the image size :(
+	I should  fix this later.
+	
+	--> added the voltmeter image, and the help pages
+	ISSUE: the measure values don't show on the window! I cannot figure out why!
+	SOLVED: I figured it out! Silly! I copied the code from dart! in dart it is p.text but in js it is p.innerHTML!!!
+	
+4. working on the size of components and AR tag and the correct mapping
+	it is working quite fine now.
+	
+5. fixed the issue with touch interactions (zoom/pan)
+	to have it working for AR condition, I had to set the camera.position.z, otherwise it does not work
+
+6. I changed the camera setups, right now for both AR and non-AR conditions, it is a perspective camera
+	I don't remember why it was not working with the AR condition, and I had to use the base class for cameras: Camera()
+	But magically it is working fine now!
+	
+7. I fixed the watch-an-electron function,
+	before, I was adding/removing the tracking line/halo to the scene, but to have it working with AR condition
+	I had to change that to markerRoot. So it is working fine now.
+	
+*** notes on 8/6/2016
+1. I added a control panel for zooming and panning
+
+2. I fixed the issue with the annoying blue border from the button styles in the model:
+	For each of the buttons, I needed to add this to the css file:
+	button:focus {outline:0;}
+	link:
+	http://stackoverflow.com/questions/20340138/remove-blue-border-from-css-custom-styled-button-in-chrome
+3. I fixed the issue with textsprite, almost! 
+	I still don't completely understand the sprite object
+
+*** notes on 8/7/2016
+1. Working on a flashing effect to the meter to make the update more visible.
+	Not successful yet!
+
+2. Working on the electrons movement, velocity, force, etc. to make it more scientific
+	Ok! I think it is working better now
+	According to Drude model:
+	a. electrons average velocity is proportional to E * average time between each collision
+	b. after each collision the reflected velocity is in a random direction and the magnitude depends on the 
+		thermal energy of the area.
+		I assumed the same thermal energy for all around the circuit and therefore resetting the velocity to the initial velocity
+	So I don't use any maximum velocity any longer, but after each collision reset the value of velocity back to the initial value
+	and the increase in velocity at each tick is determined by the measure of current.
+	I also reset the velocity after passing the battery --> is this correct?!!
+	
+3. working on electrons getting stuck!
+	Update: it is working better now, 
+	I am now using the electron.reflectedTimes counter to make sure there are not bounced off two obstacles more than twice
+	if they are, rotate them by a small degree (for example 18 degrees)
+	ISSUE: but still some times a couple of electrons get stuck, I observed at the junction with the battery.
+	
+4. updated the tapping on components code:
+	added code so that if the user taps on the non-component area it also unselects the current clicked component.
+
+5. Added a texture for battery (so that it doesn't need to use text sprite):
+	I also added a code to always render the batteries on top:
+	this.container.renderOrder = 1;
+	
+6. fixed the issue with more than one battery:
+	now it passes the electrons from as many batteries as are connected in series :)
+	
+7. added a flashing effect to the text
+	by adding a delay function when receiving the message on dart code.
+	// After a one-second delay, adds a task to the event queue.
+	new Future.delayed(const Duration(seconds:1), () {  // or milliseconds
+		// ...code goes here...
+	});
+	
+*** notes on 8/8/2016
+1. revisited the collide with connected junctions code.
+
+2. solved the issue with connection with more than one components!! Yaaay!
+	the issue was very tricky!
+	in my component.formJunctionCurrents code, where I calculate the list of probabilities,
+	before, when I divided the probabilities with a norm, it could have resulted in a non-integer value,
+	that caused issue with rolling the dice, because the dice rolling code only works if the probabilities are integers
+	so I simply modified this line:
+			var norm = Math.min.apply( Math, junction.outCurrents );
+			junction.probabilities = junction.outCurrents.map(function(a) {
+	    							return (a/norm);
+								});
+	To:
+			var norm = Math.min.apply( Math, junction.outCurrents );
+			junction.probabilities = junction.outCurrents.map(function(a) {
+	    							return (Math.round(a/norm));
+								});
+
+*** notes on 8/14/2016
+working on AR condition!
+1. working on adding rotation to the touch interaction,
+	but for some reason, the touch interaction are different when using AR 
+2. fixed the issue with window resizing, but commenting out everything in the windowResize function!
+
+3. working on adding a hidden button for reloading the page,
+	issue: when the button is hidden it does not fire the onclick function
+	
+4. disabled touch interaction when it is not freezed
+
+*** notes on 8/15/2016
+1. added a hidden button for reloading the page
+	solution for onclick not firing for "hidden" button --> use a button with the background color!
+2. added a flashing effect for the help text in the AR (twoscreen) condition
+	setTimeout(function(){ showValues(c.compType, c.volt, c.current, c.R); }, 100);
+								
+*** notes on 8/16/2016
+1. working on rotate for AR
+
+	
+*** notes on 8/18/2016
+1. trying to add a smoothing algorithm for jitters 
+	also I don't understand the 
+	
+	ok, I am going to try a new library. Until now, for JSARtoolkit, I used this repository:
+	https://github.com/kig/JSARToolKit
+	but now, I am goint to try this:
+	
+2. using new library, studying example: barcode_threejs.html
+
+*** notes on 8/19/2016
+1. reading the introduction document, trying to understand the new jsartoolkit5 library 
+	and artoolkit.three.js
+	
+issue with loading the js files, so I removed the "async" keyword when sourcing the js files in html file. 
+(the original intro_example.html file used "async")
+
+testing with the box example, it all works fine, no issue with rescaling the box
+also markerwidth works --> 1 is the default value, and for example if 2, the size of box is half of the marker. (different than before)
+
+2. trying to find an optimum way to use size of components and the markerwidth
+it seems that with the current setting, where the component size is in the scale of 100s does not work
+because when testing it with the box example, making the markerwidth large, makes the code jittery and iffy!!
+
+Solution: I added a code to the ar tick function, where I scale down for rendering and then again 
+rescale the markerRoot object back to normal size for calculations in updateElectron() function
+
+
+3. added the blurry effect to the video scene (to the plane in artoolkit.three-spark.js)
+
+4. Fixed the issue with continuously updating electrons:
+	made the markerdetectedflag work correctly, 
+	now, the updateElectrons() function is only fired if a marker is detected OR if it is freezed.
+	by adding this event handler:
+	arController.addEventListener('getMarker', function(ev) { ...}
+	
+	--> actually this function is already in the artoolkit.three-spark.js file, so i can modify it there, instead of 
+		adding a new function in ar-spark.js
+	
+5. update the model when the circuit is updated --> done
+	just needed to modify the update() function
+6. to make the click work: this.show --> transform from pointer to mouse: instead of using window.inner dimensions
+	use the modelwidth and modelHeight
+	
+*** notes on 8/20/2016
+1. issue with click event and showing ammeter values, i figured if I remove the markerRootParent object and directily 
+add components and electrons to the markerroot it solves the problem
+BUT this way I cannot rescale the markerroot any longer to play with smaller markerWidth values. 
+For now, I keep it with the new setup...
+
+2. ISSUE: circuit disppears at longer distances & the spriteTExt box is upside down!!
+
+3. reset the camera position to 0 when capturing again:
+  in freezeAR() function: camera.position.set(0, 0, 0);
+  
+4. solve the problem with clicking:
+added matrix scaling to the onmouseclick even handler function:
+
+		markerRoot.scale.set(0.01, 0.01, 0.01);
+		electronVertices.material.size /= 100;
+		markerRoot.updateMatrixWorld();
+		markerRoot.matrixWorldNeedsUpdate = true;
+
+		pointer.set( event.clientX, event.clientY );
+		if (freezeFlag || !ArFlag) scope.show();
+
+		markerRoot.scale.set(1, 1, 1);
+		electronVertices.material.size *= 100;
+		markerRoot.updateMatrixWorld();
+		markerRoot.matrixWorldNeedsUpdate = true;
+
+*** notes on 8/21/2016
+1. I tried modifying the code for updating the circuit.
+	I don't understand: if instead of removing components one by one, i remove markerRoot from scene, it doesn't remove it!
+	So I have to go with the one by one option --> which works pretty fine!
+
+2. I figured how to change the near and far plane of the arcontroller ---> I modified the artoolkit.min js file :)
+
+3. Testing different types of markers in jsartoolkit5
+so far, it seems that the barcode markers are more reliable than pattern markers.
+
+4. working on making the control panel buttons (zoom/pan) continuous by adding onmousedown, onmouseup, and ontouchend events
+
+also trying to remove the "press-and-hold" rectangle that appears when I hold the touch on the screen, it's very annoying
+
+SOLUTION: I changed the setting for touch interaction, using these instructions:
+http://support.intuilab.com/kb/how-to/properly-configure-windows-pc-touch-and-gesture-behaviors
+disabled right click for press-and-hold touch action :)
+why there is a delay for touch? mouse works fine! there is some issue with touchstart
+
+
+ISSUES TO FIX LATER:
+
+TODO001 (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
+		I need to fix this problem
+		temp solution: if (!ArFlag) electronSize = 10;	
+		
+TODO002 (4/17/2016): jittering issue --> use a smoothing algorithm	
+
+TODO003 (5/11/2016): figure out why sorting the components based on graphLabel messed up with code	
+
+TODO004 (5/11/2016): figure out junctions with more than 2 components connected
+
+TODO005 (5/19/2016): make it work with more than one connected battery
+
+TODO006 (6/5/2016): the electrons pass from battery either from + to - or - to + I should fix this later
+					and i might need to consider the direction of current flow to let the electrons go from one side to the other
+					
+TODO007 (6/14/2016): 
+
+* make the watch electron button look nicer
+
+* make the watch electron not pick a random electron
+
+* make the watch electron ray look nicer
+
+* make a halo for the electron that is moving
+
