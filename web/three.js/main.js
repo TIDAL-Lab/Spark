@@ -107,7 +107,6 @@ function init() {
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
-	console.log("init comp.l: ", components.length);
 	initComponents();
 
 	renderer = new THREE.WebGLRenderer();
@@ -161,7 +160,6 @@ function initComponents() {
 	//markerRoot.rotation.z = Math.PI;	
 	//if (ArFlag) markerRoot.matrixAutoUpdate = false;  // not needed any longer with jsartoolkit5 library;
 	scene.add( markerRoot );
-	console.log(scene.children.length);
 }
 
 function doUpdate() {
@@ -180,7 +178,6 @@ function update() {
 		scene.remove(obj);
 	}
 	electronObjects = [];
-	console.log("after update", components.length);
 	
 	if (!ArFlag) initComponents();
 	else updateAR(); // in ar-spark.js file

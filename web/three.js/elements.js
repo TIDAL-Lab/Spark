@@ -464,7 +464,6 @@ function keepMoving() {
 }
 
 function reloadPage() {
-	console.log("reload the page");
 	if (ArFlag) window.location.reload();
 }
 

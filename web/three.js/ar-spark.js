@@ -43,7 +43,6 @@ function JsArInit() {
 			// Testing Pattern marker:
 			arController.loadMarker('markers/spark16v3.pat', function(markerId) {
 				markerLoaded = true;
-				console.log(markerId);
 				markerID = markerId;
 				markerRootParent = arController.createThreeMarker(markerId);			
 				initComponents();

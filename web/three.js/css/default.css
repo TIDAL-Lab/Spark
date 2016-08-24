@@ -70,8 +70,8 @@ button:focus {outline:0;}
 #legend-image {
   width: 150px;
   position: absolute;
-  top: 10px;
-  right: 50px;
+  top: 20px;
+  right: 340px;
 }
 
 #watch-button {
@@ -83,7 +83,7 @@ button:focus {outline:0;}
   position: absolute;
   margin: -60px -120px;
   top: 12%;
-  left: 50%;
+  left: 40%;
   border: none;
   padding: none;
   display: block;
