@@ -330,6 +330,8 @@ function freezeAR() {
 		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
+		zoom("in", "click");
+
 	}
 
 	else {   //unfreeze the scene
