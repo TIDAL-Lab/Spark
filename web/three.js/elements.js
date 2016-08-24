@@ -286,6 +286,7 @@ var halo;
 var lines; // an object that holds the tracking lines as its children
 var randomElectronIndex;
 function watchElectron() {
+	if (!freezeFlag) return;
 	if (!watch) {
 		//change the style of watch-button to be active
 		button = document.querySelector("#watch-button");
@@ -342,6 +343,12 @@ function freezeAR() {
 
 		camera.position.set(0, 0, 0);
 		//arRenderFlag = true;
+
+		// reset the clicked component, if any
+		if (clickedComponent != null) unSelectComponent();
+
+		// reset the watch-an-electron function, if it is active
+		if (watch) watchElectron();
 	}
 
 	freezeFlag = !freezeFlag;
