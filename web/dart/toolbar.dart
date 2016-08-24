@@ -39,11 +39,6 @@ class Toolbar {
     
     ButtonElement button;
     
-//    button = document.querySelector(#sendData-button");
-//    if (button != null) {
-//      button.onClick.listen((evt) => theApp.circuit.sendData());
-//    }
-    
     button = document.querySelector("$id #battery-button");
     if (button != null) {
       CssRect rect = button.borderEdge;

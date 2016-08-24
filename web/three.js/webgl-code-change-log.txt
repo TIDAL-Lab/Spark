@@ -807,7 +807,16 @@ it was related to the parse code in launch.js: a while ago, I uncommented this l
 but apparently this causes some weird malreading of objects from parse! So, I commented it again and the code works!!
 IT was really driving me crazy! :)
 
-2. 
+2. I changed the trash bin image, to a button, so that I can send data to the server, to tackle the issue that 
+sometimes there is issue with sending data to parse.
+
+3. Working on the problem with sprite text and AR camera orientation
+
+4. made the spark marker in the center, not moving, and always on the top.
+	with this scenario, the sent data should be like non-AR condition, with respect to the center (as the marker is at the center)
+
+
+
 ISSUES TO FIX LATER:
 
 TODO001 (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!

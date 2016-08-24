@@ -197,7 +197,6 @@ class Circuit {
     
     
     if (USE_SERVER) {  // send data to parse
-      //print("sending data to parse");
       //print(JSON.encode(myObj));
       // call the "doDeleteParse method on myObj (the code is in sendData.js)
       var sendParse = new JsObject(context['sendParse'],[myObj]); // instantiate a JS "deleteParse" object

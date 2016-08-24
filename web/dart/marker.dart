@@ -33,7 +33,7 @@ class Marker implements Touchable {
    
     img = new ImageElement();
     //setImage("images/markers/marker2.png");
-    setImage("images/markers/56-modified.png");
+    setImage("three.js/markers/spark2.png");
     theApp.addTouchable(this);
   }
   void setImage(String src) {
@@ -69,31 +69,31 @@ class Marker implements Touchable {
   }
  
   bool touchDown(Contact event){
-    dragX = event.touchX;
-    dragY = event.touchY;    
-    //App.repaint();
-    return true;
+//    dragX = event.touchX;
+//    dragY = event.touchY;    
+//    //App.repaint();
+//    return true;
   }
    
   void touchUp(Contact event){
-    /* if the lens is over component launch its model */
-    //findComponent(); 
-    App.repaint();
-    theApp.circuit.sendData();
+//    /* if the lens is over component launch its model */
+//    //findComponent(); 
+//    App.repaint();
+//    theApp.circuit.sendData();
   }
    
   // This gets fired only after a touchDown lands on the touchable object
   void touchDrag(Contact event) {
-    num deltaX = event.touchX - dragX;
-    num deltaY = event.touchY - dragY;
-
-    dragX += deltaX;
-    dragY += deltaY;
-    this.x += deltaX;
-    this.y += deltaY;
-    //this.move(deltaX, deltaY);
-    /* redraw everything */
-    App.repaint(); 
+//    num deltaX = event.touchX - dragX;
+//    num deltaY = event.touchY - dragY;
+//
+//    dragX += deltaX;
+//    dragY += deltaY;
+//    this.x += deltaX;
+//    this.y += deltaY;
+//    //this.move(deltaX, deltaY);
+//    /* redraw everything */
+//    App.repaint(); 
   }
    
   // This gets fired when an unbound touch events slides over an object

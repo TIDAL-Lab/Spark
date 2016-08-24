@@ -97,17 +97,22 @@ class App extends TouchManager {
      setConditions();
      setScreen();
        
-   
+     // set the sendData helper button
+     ButtonElement button = document.querySelector("#sendData-button");
+     if (button != null) {
+       button.onClick.listen((evt) => this.circuit.sendData());
+     }
+     
      // instantiate lens and help objects
      if (SHOW_LENS) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
      
      // instantiate the JsAr tag
-     if (SHOW_MARKER) marker = new Marker(centerX+100, centerY+100);
+     if (SHOW_MARKER) marker = new Marker(centerX, centerY);
        
      // create the first battery
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);    
-     new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage); 
+     new Battery(centerX - 50, centerY-100, centerX + 50, centerY-100, voltage); 
      
      if (condition==3 || condition==4) {
        var helpButtons = document.querySelector("#main-page");
@@ -197,7 +202,7 @@ class App extends TouchManager {
          help.helpSrc ="images/helps-components/";
          model = new Model();  // not really using this
          SHOW_LENS = false;
-         USE_PATTERN = true;
+         USE_PATTERN = false;
          if (!USE_PATTERN) SHOW_MARKER = true; // only one of SHOW_MARKER or USE_PATTERN should be true in this condition.            
          USE_SERVER = true;
          CANVAS_RATIO = 0.75;

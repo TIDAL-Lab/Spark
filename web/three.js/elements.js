@@ -399,7 +399,7 @@ function makeTextSprite( message, message2, scaleFactor, parameters )
 	texture.needsUpdate = true;
 
 	var spriteMaterial = new THREE.SpriteMaterial( 
-		{ map: texture } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
+		{ map: texture, useScreenCoordinates: false, rotation: Math.PI } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
 	var sprite = new THREE.Sprite( spriteMaterial );
 	
 	
