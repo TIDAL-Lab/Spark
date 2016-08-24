@@ -24,7 +24,7 @@ function JsArInit() {
 		scene.add(light);
 
 		// set the scale based on the markerwidth = 1 
-		arScale = 100;
+		arScale = 80;
 		markerID = 56;
 		markerRoot = new THREE.Mesh();
 		// Testing Barcode marker: See artoolkit5/doc/patterns/Matrix code 3x3 (72dpi)/20.png

@@ -821,7 +821,8 @@ Yaaay, it is fixed. I just needed to add 2 rotations:
 4. made the spark marker in the center, not moving, and always on the top.
 	with this scenario, the sent data should be like non-AR condition, with respect to the center (as the marker is at the center)
 
-
+5. fixed watch-an-electron and clicked component, to reset for capturing the video again.
+Also, now it does not allow for watch-an-electron while capturing the video.
 
 ISSUES TO FIX LATER:
 

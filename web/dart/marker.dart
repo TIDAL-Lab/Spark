@@ -52,7 +52,7 @@ class Marker implements Touchable {
     iw = img.width / 6;
     ih = img.height / 6;
 //    ctx.drawImageScaled(img, centerX-markerW/2, centerY-markerH/2, markerW, markerH);
-    ctx.drawImageScaled(img, 0, 0, iw, ih);
+    ctx.drawImageScaled(img, -iw/2, -ih/2, iw, ih);
     ctx.restore();
     }
   
