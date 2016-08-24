@@ -14,6 +14,7 @@
 var velocity = 4;
 //var velocityMax = 20;
 var lossFactor = 0.9;
+var arSlowFactor = 1.2;
 
 function Electron( component ) {
 		this.position = new THREE.Vector3();

@@ -130,16 +130,16 @@ function pan( direction, state ) {
 	if (ArFlag) { sign = -1; scale /= arScale; }
 	switch (direction) {
 		case "up":
-			delta = new THREE.Vector3(0.0, scale, 0.0);
-			break;
-		case "down":
 			delta = new THREE.Vector3(0.0, -scale, 0.0);
 			break;
+		case "down":
+			delta = new THREE.Vector3(0.0, scale, 0.0);
+			break;
 		case "left":
-			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
+			delta = new THREE.Vector3(scale*sign, 0.0, 0.0);
 			break;
 		case "right":
-			delta = new THREE.Vector3(scale*sign, 0.0, 0.0);
+			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
 			break;
 	}
 	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
@@ -332,6 +332,7 @@ function freezeAR() {
 		button.style.backgroundSize = "100%";
 
 		zoom("in", "click");
+		pan("up", "click");
 
 	}
 
