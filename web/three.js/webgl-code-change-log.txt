@@ -811,6 +811,12 @@ IT was really driving me crazy! :)
 sometimes there is issue with sending data to parse.
 
 3. Working on the problem with sprite text and AR camera orientation
+Yaaay, it is fixed. I just needed to add 2 rotations:
+	var spriteMaterial = new THREE.SpriteMaterial( 
+		{ map: texture, useScreenCoordinates: false, rotation: Math.PI } );
+		
+	AND:
+	in sprite.scale.set --> multiply the Y factor by -1 :)
 
 4. made the spark marker in the center, not moving, and always on the top.
 	with this scenario, the sent data should be like non-AR condition, with respect to the center (as the marker is at the center)

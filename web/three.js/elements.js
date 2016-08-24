@@ -397,17 +397,27 @@ function makeTextSprite( message, message2, scaleFactor, parameters )
 	context.fillText( message, borderThickness, fontsize + borderThickness);
 	context.fillText( message2, borderThickness, 2 * fontsize + borderThickness);
 	// canvas contents will be used for a texture
-	var texture = new THREE.Texture(canvas); 
+	var texture = new THREE.Texture(canvas);
+	//texture.flipY = false;
 	texture.needsUpdate = true;
 
 	var spriteMaterial = new THREE.SpriteMaterial( 
 		{ map: texture, useScreenCoordinates: false, rotation: Math.PI } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
 	var sprite = new THREE.Sprite( spriteMaterial );
-	
-	
-	sprite.scale.set(scaleFactor*0.5 * fontsize, scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
+
+
+	sprite.scale.set(scaleFactor*0.5 * fontsize, -scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
 	//sprite.scale.set(100,50,1.0);
 	return sprite;	
+
+	// TEST
+	var textbox = new THREE.Mesh(
+		new THREE.BoxGeometry(30, 10, 1, 1, 1, 1),
+		new THREE.MeshBasicMaterial({map: texture})
+	);
+	//textbox.scale.set(scaleFactor*0.5 * fontsize, scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
+	textbox.scale.set(scaleFactor*0.5, scaleFactor*0.25, scaleFactor*0.75);
+	//return textbox;
 }
 
 // function for drawing rounded rectangles
