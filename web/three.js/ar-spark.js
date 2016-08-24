@@ -41,7 +41,7 @@ function JsArInit() {
 		else {
 			var markerLoaded = false;
 			// Testing Pattern marker:
-			arController.loadMarker('markers/plus16v3.pat', function(markerId) {
+			arController.loadMarker('markers/spark16v3.pat', function(markerId) {
 				markerLoaded = true;
 				console.log(markerId);
 				markerID = markerId;
@@ -116,6 +116,7 @@ if (window.ARController && ARController.getUserMediaThreeScene) {
 
 function updateAR() {
 	scene.remove(markerRootParent);
+	markerRootParent.remove(markerRoot);
 	arRenderFlag = false;
 	initComponents();
 	markerRootParent.add(markerRoot);

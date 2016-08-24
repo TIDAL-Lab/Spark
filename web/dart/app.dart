@@ -197,7 +197,7 @@ class App extends TouchManager {
          help.helpSrc ="images/helps-components/";
          model = new Model();  // not really using this
          SHOW_LENS = false;
-         USE_PATTERN = false;
+         USE_PATTERN = true;
          if (!USE_PATTERN) SHOW_MARKER = true; // only one of SHOW_MARKER or USE_PATTERN should be true in this condition.            
          USE_SERVER = true;
          CANVAS_RATIO = 0.75;
@@ -327,7 +327,8 @@ class App extends TouchManager {
      
      num boxW = deleteBoxImg.width / 6;
      num boxH = deleteBoxImg.height / 6;
-     ctx.drawImageScaled(deleteBoxImg, 5, 5, boxW, boxH);
+     // commented: the image is changed to a button for the purpose of hidden send data behind the curtain!
+     //ctx.drawImageScaled(deleteBoxImg, 5, 5, boxW, boxH);
      
 
      
