@@ -127,7 +127,7 @@
 			//this.setProjectionFarPlane(10000);
 			
 			scene.add(camera);
-			console.log("camera: ", camera.projectionMatrix);
+			//console.log("camera: ", camera.projectionMatrix);
 
 			var self = this;
 

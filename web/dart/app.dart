@@ -304,8 +304,7 @@ class App extends TouchManager {
      /* create the first battery */
      InputElement slider = querySelector("#battery-slider");
      var voltage = double.parse(slider.value);
-     new Battery(centerX - 50, centerY, centerX + 50, centerY, voltage);
-     
+     new Battery(centerX - 50, centerY-100, centerX + 50, centerY-100, voltage);    
      
    }
 
