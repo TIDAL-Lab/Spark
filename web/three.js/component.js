@@ -116,7 +116,7 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 		}
 
 		containerMaterial.transparent = true;
-		containerMaterial.opacity = 0.8;
+		containerMaterial.opacity = 0.6;
 		containerMaterial.depthTest = true;  // this seems to help with showing the electrons always on top
 		containerMaterial.depthWrite = false;
 
