@@ -54,11 +54,12 @@ var components = []; // an array of components
 var electronVertices, electronGeometry, electronMaterial, electronSize;
 var electronObjects = [];
 var raycaster;
+
 //var compositeMesh;
 
 var ticks = 0;
 
-
+var halo;
 var markerRoot;  // the parent object of all the components and electrons for AR transformations
 
 var windowHalfX = window.innerWidth / 2;
@@ -128,6 +129,8 @@ function init() {
 	// CONTROLS
 	//controls = new THREE.OrbitControls( camera, renderer.domElement );
 	controls = new THREE.EditorControls( camera, renderer.domElement );	
+
+	animate();
 	
 }
 
@@ -157,6 +160,12 @@ function initComponents() {
 	}
 
 	markerRoot.add(electronVertices);
+
+	// var geometry = new THREE.CircleGeometry( 10, 16 );
+	// var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
+	// halo = new THREE.Mesh( geometry, material );
+	// halo.material.visible = false;
+	// markerRoot.add(halo);
 	//markerRoot.rotation.z = Math.PI;	
 	//if (ArFlag) markerRoot.matrixAutoUpdate = false;  // not needed any longer with jsartoolkit5 library;
 	scene.add( markerRoot );
@@ -245,13 +254,8 @@ function updateElectrons() {
 			var first = lines.children[0];
 			lines.remove(first);
 		}
-		// var geometry = new THREE.CircleGeometry( 5, 32 );
-		// var material = new THREE.MeshBasicMaterial( { color: orange } );
-		// var circle = new THREE.Mesh( geometry, material );
 		halo.position.set(electron.position.x, electron.position.y, electron.position.z);
-		// scene.add(circle);
-		// halo.position = electron;
-		// halo.needsUpdate = true;
+		halo.material.visible = true;
 	}
 }
 

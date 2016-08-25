@@ -93,7 +93,7 @@ if (twoScreen) {
 }        
 
 function zoom( direction, state ) {
-	console.log("zoom is called");
+	//console.log("zoom is called");
 	var delta;
 	var scale = 20.0;
 	if (ArFlag) scale /= arScale;
@@ -104,7 +104,7 @@ function zoom( direction, state ) {
 		delta = new THREE.Vector3(0.0, 0.0, scale);
 	}
 	camera.position.add(delta);
-	interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	interval = setInterval(function(){ camera.position.add(delta); }, 50);
 	//else {camera.position.add(delta);}	
 	//if (state == "hold") interval = setInterval(function(){ markerRootParent.position.add(delta); }, 100);
 	//else {
@@ -141,7 +141,7 @@ function pan( direction, state ) {
 			break;
 	}
 	camera.position.add(delta);
-	interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	interval = setInterval(function(){ camera.position.add(delta); }, 50);
 
  	var message = [delta.x, delta.y];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
@@ -280,8 +280,10 @@ function flashValues() {
 }
 
 var watch = false;
-var halo;
+
+
 var lines; // an object that holds the tracking lines as its children
+var halo;
 var randomElectronIndex;
 function watchElectron() {
 	if (!freezeFlag) return;
@@ -292,12 +294,11 @@ function watchElectron() {
 		button.style.backgroundSize = "100%";
 		if (electronObjects.length > 0) {
 			// add an object to hold the tracking lines
-			lines = new THREE.Object3D();
 			var geometry = new THREE.CircleGeometry( 10, 16 );
 			var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
 			halo = new THREE.Mesh( geometry, material );
-			halo.material.visible = true;
-
+			halo.material.visible = false;
+			lines = new THREE.Object3D();
 			markerRoot.add(halo);
 			markerRoot.add(lines);
 
@@ -307,6 +308,7 @@ function watchElectron() {
 	}
 	else {
 		if (electronObjects.length > 0) {
+			halo.material.visible = false;
 			markerRoot.remove(lines);
 			markerRoot.remove(halo);
 		}
@@ -333,6 +335,15 @@ function freezeAR() {
 		//pan("up");
 		stopInterval();
 
+		// TEST: calibrate the speed of electrons with/without marker detector slowing down factor
+		//var eVertices = electronVertices.geometry.vertices;
+		// var electronObject;
+		// for ( k = 0; k < electronObjects.length; k++ ) {
+		// 	//var electron = eVertices[k];
+		// 	electronObject = electronObjects[k];
+		// 	electronObject.velocity.multiplyScalar(arSlowFactor);									
+		// }
+
 	}
 
 	else {   //unfreeze the scene
@@ -349,8 +360,6 @@ function freezeAR() {
 
 		// reset the watch-an-electron function, if it is active
 		if (watch) watchElectron();
-
-		doParse("init");
 	}
 
 	freezeFlag = !freezeFlag;
