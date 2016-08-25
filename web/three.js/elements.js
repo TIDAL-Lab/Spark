@@ -16,48 +16,38 @@ image.src = "../images/legend-image.png";
 
 var button = document.querySelector("#plus-button");
 if (button != null) {
-	button.onclick = function() {zoom("in", "click")};
-	button.onmousedown = function() {zoom("in", "hold")};
-	button.onmouseup = function() {stopInterval()};
-	//button.ontouchstart = function() {zoom("in", "click")};
+	//button.onclick = function() {zoom("in", "click")};
+	//button.onmousedown = function() {zoom("in", "hold")};
+	//button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {zoom("in")};
 	button.ontouchend = function() {stopInterval()};
 }
 button = document.querySelector("#minus-button");
 if (button != null) {
-	button.onclick = function() {zoom("out", "click")};
-	button.onmousedown = function() {zoom("out", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {zoom("out")};
 	button.ontouchend = function() {stopInterval()};
 }
 button = document.querySelector("#up-button");
 if (button != null) {
-	button.onclick = function() {pan("up", "click")};
-	button.onmousedown = function() {pan("up", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("up")};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#down-button");
 if (button != null) {
-	button.onclick = function() {pan("down", "click")};
-	button.onmousedown = function() {pan("down", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("down")};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#left-button");
 if (button != null) {
-	button.onclick = function() {pan("left", "click")};
-	button.onmousedown = function() {pan("left", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("left")};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#right-button");
 if (button != null) {
-	button.onclick = function() {pan("right", "click")};
-	button.onmousedown = function() {pan("right", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("right")};
 	button.ontouchend = function() {stopInterval()};
 }
 
@@ -102,7 +92,8 @@ if (twoScreen) {
 
 }        
 
-function zoom( direction, state ) {
+function zoom( direction) {
+	console.log("zoom is called");
 	var delta;
 	var scale = 20.0;
 	if (ArFlag) scale /= arScale;
@@ -112,8 +103,15 @@ function zoom( direction, state ) {
 	else {
 		delta = new THREE.Vector3(0.0, 0.0, scale);
 	}
-	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
-	else {camera.position.add(delta);}	
+	camera.position.add(delta);
+	interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	//else {camera.position.add(delta);}	
+	//if (state == "hold") interval = setInterval(function(){ markerRootParent.position.add(delta); }, 100);
+	//else {
+		//markerRoot.position.add(delta);
+		// markerRoot.rotation.z = Math.PI/2;
+		// markerRoot.matrixWorldNeedsUpdate = true;
+	//}	
 
 	var message = [delta.z];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
@@ -123,7 +121,7 @@ function stopInterval() {
 	clearInterval(interval);
 }
 
-function pan( direction, state ) {
+function pan( direction) {
 	var delta;
 	var sign = 1;
 	var scale = 20.0;
@@ -142,8 +140,8 @@ function pan( direction, state ) {
 			delta = new THREE.Vector3(scale*sign, 0.0, 0.0);
 			break;
 	}
-	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
-	else {camera.position.add(delta);}
+	camera.position.add(delta);
+	interval = setInterval(function(){ camera.position.add(delta); }, 100);
 
  	var message = [delta.x, delta.y];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
@@ -331,7 +329,8 @@ function freezeAR() {
 		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
-		zoom("in", "click");
+		zoom("in");
+		stopInterval();
 
 	}
 
