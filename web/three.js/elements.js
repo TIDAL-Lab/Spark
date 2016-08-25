@@ -349,6 +349,8 @@ function freezeAR() {
 
 		// reset the watch-an-electron function, if it is active
 		if (watch) watchElectron();
+
+		doParse("init");
 	}
 
 	freezeFlag = !freezeFlag;

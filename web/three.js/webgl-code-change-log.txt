@@ -827,7 +827,7 @@ Also, now it does not allow for watch-an-electron while capturing the video.
 *** notes on 8/24/2016
 1. fixed the glitch with control buttons --> now the continuous mode works smoothly.
 
-
+2. instead of a hidden button for reset, I added a reset button to reload the page!
 
 
 
