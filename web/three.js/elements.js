@@ -10,6 +10,8 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 var interval;
+var releaseText = "Tap on a component to learn more about it!";
+var captureText = "Capture the circuit to explore it more!"
 // set the voltmeter image
 var image = document.querySelector("#legend-image");
 image.src = "../images/legend-image.png";
@@ -79,7 +81,7 @@ if (twoScreen) {
 
     // set the help image
     var image = document.querySelector("#help-image");
-	image.src = "../images/helps-components/bg.png";
+	image.src = "../../images/helps-components/bg.png";
 
 	// set the voltmeter image
     var image = document.querySelector("#voltmeter-image");
@@ -88,7 +90,16 @@ if (twoScreen) {
 
 
 	var p = document.querySelector("#description");
-	p.innerHTML = "Tap on a component to see its measures";
+	p.innerHTML = captureText;
+
+	var button = document.querySelector("#watch-button");
+	button.style.display = "none";
+
+	var div = document.querySelector("#legend-box");
+	div.style.display = "none";
+
+	div = document.querySelector("#controls-panel");
+	div.style.display = "none";
 
 }        
 
@@ -159,7 +170,7 @@ function showPageOld(page) {
 
 function showPage(page) {
 	var image = document.querySelector("#help-image");
-	image.src = "../images/helps-components/help" + page.toString() + ".png";
+	image.src = "../../images/helps-components/help" + page.toString() + ".png";
     var div = document.querySelector("#main-page");
     div.style.display = "none";
     
@@ -169,7 +180,7 @@ function showPage(page) {
 
 function back() {
 	var image = document.querySelector("#help-image");
-	image.src = "../images/helps-components/bg.png";
+	image.src = "../../images/helps-components/bg.png";
 
     var button = document.querySelector("#back-button");
     button.style.display = "none";
@@ -251,7 +262,7 @@ function clearValues() {
 
 	back();
 	var p = document.querySelector("#description");
-	p.innerHTML = "Tap on a component above to learn more about it!";
+	p.innerHTML = releaseText;
  
 }
 
@@ -328,12 +339,25 @@ function freezeAR() {
 	if (!freezeFlag) {  // freeze the scene
 
 		//change the style of freeze-button to be active		
-		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
+		button.style.background = "url('../images/buttons/release.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
 		zoom("in");
 		//pan("up");
 		stopInterval();
+
+		var p = document.querySelector("#description");
+		p.innerHTML = releaseText;
+
+		var button = document.querySelector("#watch-button");
+		button.style.display = "block";
+
+		var div = document.querySelector("#legend-box");
+		div.style.display = "block";
+
+		div = document.querySelector("#controls-panel");
+		div.style.display = "block";
+
 
 		// TEST: calibrate the speed of electrons with/without marker detector slowing down factor
 		//var eVertices = electronVertices.geometry.vertices;
@@ -349,7 +373,7 @@ function freezeAR() {
 	else {   //unfreeze the scene
 
 		//change the style of freeze-button to be active
-		button.style.background = "url('../../images/buttons/freeze.png') 0 0 no-repeat"; 
+		button.style.background = "url('../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
 		camera.position.set(0, 0, 0);
@@ -360,6 +384,18 @@ function freezeAR() {
 
 		// reset the watch-an-electron function, if it is active
 		if (watch) watchElectron();
+
+		var p = document.querySelector("#description");
+		p.innerHTML = captureText;
+
+		var button = document.querySelector("#watch-button");
+		button.style.display = "none";
+
+		var div = document.querySelector("#legend-box");
+		div.style.display = "none";
+
+		div = document.querySelector("#controls-panel");
+		div.style.display = "none";
 	}
 
 	freezeFlag = !freezeFlag;

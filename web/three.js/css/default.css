@@ -57,13 +57,13 @@ button:focus {outline:0;}
 #help-image {
 /*  background: url("../../images/helps/bg.png") 0 0 no-repeat;
   background-size: 100%;*/ 
-  height: 400px;
-  width: 450px;
+  height: 440px;
+  width: 456px;
   position: absolute;
   border: none;
   padding: none;
-  bottom: 30px;
-  right: 2px;
+  bottom: 5px;
+  left: 2px;
   display: block;
 }
 
@@ -78,11 +78,11 @@ button:focus {outline:0;}
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
   background: url("../../images/buttons/watch2.png") 0 0 no-repeat;
   background-size: 100%; 
-  height: 60px;
-  width: 240px;
+  height: 70px;
+  width: 280px;
   position: absolute;
-  margin: -60px -120px;
-  top: 12%;
+  margin: -70px -140px;
+  top: 11%;
   left: 40%;
   border: none;
   padding: none;
@@ -106,13 +106,13 @@ button:focus {outline:0;}
 
 #freeze-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  background: url("../../images/buttons/freeze.png") 0 0 no-repeat;
+  background: url("../../images/buttons/capture2.png") 0 0 no-repeat;
   background-size: 100%; 
-  height: 50px;
-  width: 200px;
+  height: 60px;
+  width: 220px;
   position: absolute;
-  margin: -50px -100px;
-  top: 10%;
+  margin: -60px -110px;
+  top: 9.5%;
   left: 10%;
   border: none;
   padding: none;
@@ -381,8 +381,8 @@ button:focus {outline:0;}
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
   background: url("../../images/buttons/restart.png") 0 0 no-repeat;  
   background-size: 100%; 
-  height: 60px;
-  width: 60px;
+  height: 70px;
+  width: 70px;
   position: absolute;
  /* margin: -60px -30px;*/
   bottom: 20px;
