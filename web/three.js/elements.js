@@ -16,38 +16,48 @@ image.src = "../images/legend-image.png";
 
 var button = document.querySelector("#plus-button");
 if (button != null) {
-	//button.onclick = function() {zoom("in", "click")};
-	//button.onmousedown = function() {zoom("in", "hold")};
-	//button.onmouseup = function() {stopInterval()};
-	button.ontouchstart = function() {zoom("in")};
+	button.onclick = function() {zoom("in", "click")};
+	button.onmousedown = function() {zoom("in", "hold")};
+	button.onmouseup = function() {stopInterval()};
+	//button.ontouchstart = function() {zoom("in", "click")};
 	button.ontouchend = function() {stopInterval()};
 }
 button = document.querySelector("#minus-button");
 if (button != null) {
-	button.ontouchstart = function() {zoom("out")};
+	button.onclick = function() {zoom("out", "click")};
+	button.onmousedown = function() {zoom("out", "hold")};
+	button.onmouseup = function() {stopInterval()};
 	button.ontouchend = function() {stopInterval()};
 }
 button = document.querySelector("#up-button");
 if (button != null) {
-	button.ontouchstart = function() {pan("up")};
+	button.onclick = function() {pan("up", "click")};
+	button.onmousedown = function() {pan("up", "hold")};
+	button.onmouseup = function() {stopInterval()};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#down-button");
 if (button != null) {
-	button.ontouchstart = function() {pan("down")};
+	button.onclick = function() {pan("down", "click")};
+	button.onmousedown = function() {pan("down", "hold")};
+	button.onmouseup = function() {stopInterval()};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#left-button");
 if (button != null) {
-	button.ontouchstart = function() {pan("left")};
+	button.onclick = function() {pan("left", "click")};
+	button.onmousedown = function() {pan("left", "hold")};
+	button.onmouseup = function() {stopInterval()};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#right-button");
 if (button != null) {
-	button.ontouchstart = function() {pan("right")};
+	button.onclick = function() {pan("right", "click")};
+	button.onmousedown = function() {pan("right", "hold")};
+	button.onmouseup = function() {stopInterval()};
 	button.ontouchend = function() {stopInterval()};
 }
 
@@ -92,8 +102,7 @@ if (twoScreen) {
 
 }        
 
-function zoom( direction) {
-	console.log("zoom is called");
+function zoom( direction, state ) {
 	var delta;
 	var scale = 20.0;
 	if (ArFlag) scale /= arScale;
@@ -103,15 +112,8 @@ function zoom( direction) {
 	else {
 		delta = new THREE.Vector3(0.0, 0.0, scale);
 	}
-	camera.position.add(delta);
-	interval = setInterval(function(){ camera.position.add(delta); }, 100);
-	//else {camera.position.add(delta);}	
-	//if (state == "hold") interval = setInterval(function(){ markerRootParent.position.add(delta); }, 100);
-	//else {
-		//markerRoot.position.add(delta);
-		// markerRoot.rotation.z = Math.PI/2;
-		// markerRoot.matrixWorldNeedsUpdate = true;
-	//}	
+	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	else {camera.position.add(delta);}	
 
 	var message = [delta.z];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
@@ -121,27 +123,27 @@ function stopInterval() {
 	clearInterval(interval);
 }
 
-function pan( direction) {
+function pan( direction, state ) {
 	var delta;
 	var sign = 1;
 	var scale = 20.0;
 	if (ArFlag) { sign = -1; scale /= arScale; }
 	switch (direction) {
 		case "up":
-			delta = new THREE.Vector3(0.0, scale, 0.0);
-			break;
-		case "down":
 			delta = new THREE.Vector3(0.0, -scale, 0.0);
 			break;
-		case "left":
-			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
+		case "down":
+			delta = new THREE.Vector3(0.0, scale, 0.0);
 			break;
-		case "right":
+		case "left":
 			delta = new THREE.Vector3(scale*sign, 0.0, 0.0);
 			break;
+		case "right":
+			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
+			break;
 	}
-	camera.position.add(delta);
-	interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
+	else {camera.position.add(delta);}
 
  	var message = [delta.x, delta.y];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
@@ -329,8 +331,8 @@ function freezeAR() {
 		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
-		zoom("in");
-		stopInterval();
+		zoom("in", "click");
+		pan("up", "click");
 
 	}
 
@@ -465,4 +467,3 @@ function keepMoving() {
 function reloadPage() {
 	if (ArFlag) window.location.reload();
 }
-
