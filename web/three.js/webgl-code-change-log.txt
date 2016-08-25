@@ -824,6 +824,14 @@ Yaaay, it is fixed. I just needed to add 2 rotations:
 5. fixed watch-an-electron and clicked component, to reset for capturing the video again.
 Also, now it does not allow for watch-an-electron while capturing the video.
 
+*** notes on 8/24/2016
+1. fixed the glitch with control buttons --> now the continuous mode works smoothly.
+
+
+
+
+
+
 ISSUES TO FIX LATER:
 
 TODO001 (4/17/2016): the size attenuation of electrons still exists: I use a fixed size for electrons, and for non-AR condition they are times bigger!
