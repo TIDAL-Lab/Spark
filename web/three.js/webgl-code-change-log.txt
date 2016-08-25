@@ -829,6 +829,11 @@ Also, now it does not allow for watch-an-electron while capturing the video.
 
 2. instead of a hidden button for reset, I added a reset button to reload the page!
 
+3. made some quick changes to fixe the halo. there used to be a flash in the middle, add before
+the code was adding teh halo to the markerroot everytim the watch-an-electron button was clicked, which first added it to the center
+
+
+
 
 
 

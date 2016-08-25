@@ -378,6 +378,7 @@ class Component implements Touchable {
     num ey = end.y;
 
     bool connecting = false; /* to prevent connecting both start and end cps in one drag event */
+      
     if (!start.isConnected) {
       start.makeConnection();
       if (start.isConnected) {
@@ -387,12 +388,13 @@ class Component implements Touchable {
         theApp.circuit.collapseNode(start, start.connections.first);
         this.moveConnectedComponents(deltaX, deltaY);
         connecting = true;
+        App.repaint();
+        return;
         
       }
     }
     if (!end.isConnected) {
       end.makeConnection();
-      //else if (end.connections.isNotEmpty) {
       if ( end.isConnected ) {
         num deltaX = end.x - ex;
         num deltaY = end.y - ey;
@@ -400,10 +402,67 @@ class Component implements Touchable {
         theApp.circuit.collapseNode(end, end.connections.first);
         this.moveConnectedComponents(deltaX, deltaY);
         connecting = true;
+        App.repaint();
+        return;
       }
     }
     App.repaint();
-    if (!connecting) theApp.circuit.sendData();    
+    if (!connecting) theApp.circuit.sendData();
+    
+    // TEST: trying to remove the issue with simultaneously firind sendData() when connecting two end points
+//    num connectingTest = 0;
+//    bool connectingStart = false;
+//    bool connectingEnd = false;
+//    
+//    if (!start.isConnected) {
+//      start.makeConnection();
+//      if (start.isConnected) {
+//        connectingTest += 1;
+//        connectingStart = true;
+//      }
+//    }
+//    if (!end.isConnected) {
+//      end.makeConnection();
+//      if (end.isConnected) {
+//        connectingTest += 1;
+//        connectingEnd = true;
+//      }
+//    }
+//    if (connectingTest == 0) {
+//      App.repaint();
+//      theApp.circuit.sendData();
+//    }
+//    else if (connectingTest == 1) {
+//      if (connectingStart) {
+//        num deltaX = start.x - sx;
+//        num deltaY = start.y - sy;
+//        
+//        theApp.circuit.collapseNode(start, start.connections.first);
+//        this.moveConnectedComponents(deltaX, deltaY);
+//        App.repaint();
+//      }
+//      else { // connectingEnd
+//        num deltaX = end.x - ex;
+//        num deltaY = end.y - ey;
+//        
+//        theApp.circuit.collapseNode(end, end.connections.first);
+//        this.moveConnectedComponents(deltaX, deltaY);
+//        App.repaint();
+//      }
+//    }
+//    else if (connectingTest == 2) {
+//      theApp.circuit.collapseNode(start, start.connections.first);
+//      theApp.circuit.collapseNode(end, end.connections.first);
+//      num deltaX = start.x - sx;
+//      num deltaY = start.y - sy;
+//      this.moveConnectedComponents(deltaX, deltaY);
+//      deltaX = end.x - ex;
+//      deltaY = end.y - ey;
+//      this.moveConnectedComponents(deltaX, deltaY);
+//      App.repaint();
+//      
+//    }
+    
   }
 
   void touchDrag(Contact event) {

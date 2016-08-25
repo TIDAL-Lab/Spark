@@ -69,7 +69,9 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 	this.computeForce = function() {
 		this.force = new THREE.Vector3();
 	  	this.force.x = 0.0; 
-	  	this.force.y = this.direction * this.current; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
+	  	var tempForce = (this.current - 0.331) * 3 + 0.331;
+	  	this.force.y = this.direction * tempForce;
+	  	//this.force.y = this.direction * this.current; // force is in y direction, because the cylinder's axis is initially in y then I rotate it
 	  	//if (this.compType == "Wire") { this.force.y *= 0.2; }
 	  	this.force.z = 0.0;
 
