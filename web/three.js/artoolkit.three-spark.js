@@ -118,7 +118,7 @@
 			var scene = new THREE.Scene();
 			//var camera = new THREE.Camera();
 			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
-			camera.position.z = -2;  // + doesn't work?
+			//camera.position.z = 100;  // + doesn't work?
 			//camera.matrixAutoUpdate = false;
 
 			

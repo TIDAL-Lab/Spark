@@ -12,6 +12,7 @@ function JsArInit() {
 		
 		scene = arScene.scene;
 		camera = arScene.camera;
+		console.log("camera created: ", camera.position);
 		arController = arController;
 		raycaster = new THREE.Raycaster();
 

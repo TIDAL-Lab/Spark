@@ -832,8 +832,17 @@ Also, now it does not allow for watch-an-electron while capturing the video.
 3. made some quick changes to fixe the halo. there used to be a flash in the middle, add before
 the code was adding teh halo to the markerroot everytim the watch-an-electron button was clicked, which first added it to the center
 
+4. I added a temp change to compute force:
+var tempForce = (this.current - 0.331) * 3 + 0.331;
+	  	this.force.y = this.direction * tempForce;
+this helps with making the difference between circuits more visible!
 
+5. adding a slow down scale factor.		
 
+*** notes on 8/27/2016
+1. trying to fix the issue with zooming in/out
+I still don't understand the camera in AR. it's position is set to 0, if i set it to -100, it does not scale the object based on
+the marker size. So, I have to keep the position at 0. But then this causes issues with calculations for zoom in and out.
 
 
 

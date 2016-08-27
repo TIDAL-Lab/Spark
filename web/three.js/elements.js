@@ -115,6 +115,7 @@ function zoom( direction, state ) {
 		delta = new THREE.Vector3(0.0, 0.0, scale);
 	}
 	camera.position.add(delta);
+	console.log("button zoom:", camera.position);
 	interval = setInterval(function(){ camera.position.add(delta); }, 50);
 	//else {camera.position.add(delta);}	
 	//if (state == "hold") interval = setInterval(function(){ markerRootParent.position.add(delta); }, 100);
@@ -342,9 +343,9 @@ function freezeAR() {
 		button.style.background = "url('../images/buttons/release.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
-		zoom("in");
+		//zoom("in");
 		//pan("up");
-		stopInterval();
+		//stopInterval();
 
 		var p = document.querySelector("#description");
 		p.innerHTML = releaseText;
