@@ -67,24 +67,26 @@ var windowHalfY = window.innerHeight / 2;
 
 var clickedComponent = null;   // the component that is tapped on to show information
 
+// set the size of screen divs	
+if (twoScreen) {  //set the size of renderer based on a 4/3 standard video size and the rest of width of screen for the help div
+	modelHeight = window.innerHeight;
+	modelWidth = modelHeight*4/3;
+	var helpWidth = window.innerWidth - modelHeight;
+	//var helpWidth = window.innerWidth - modelWidth;
+	var helpDiv = document.querySelector("#help-window");
+	helpDiv.style.width = helpWidth.toString() + "px";
+	helpDiv.style.height = window.innerHeight.toString() + "px";
+}
+else {  // make the help div invisible
+	var helpDiv = document.querySelector("#help-window");
+	helpDiv.style.display = "none";
+	modelWidth = window.innerWidth;
+	modelHeight = window.innerHeight;
+}
+
 function doInit() {
 	
-	// set the size of screen divs	
-	if (twoScreen) {  //set the size of renderer based on a 4/3 standard video size and the rest of width of screen for the help div
-		modelHeight = window.innerHeight;
-		modelWidth = modelHeight*4/3;
-		//var helpWidth = window.innerWidth - modelHeight;
-		var helpWidth = window.innerWidth - modelWidth;
-		var helpDiv = document.querySelector("#help-window");
-		helpDiv.style.width = helpWidth.toString() + "px";
-		helpDiv.style.height = window.innerHeight.toString() + "px";
-	}
-	else {  // make the help div invisible
-		var helpDiv = document.querySelector("#help-window");
-		helpDiv.style.display = "none";
-		modelWidth = window.innerWidth;
-		modelHeight = window.innerHeight;
-	}
+
 
 	// lodad textures
 	//sphere = new THREE.TextureLoader().load( "textures/ball.png" ); // this works for three.js-r75 (latest revision) 

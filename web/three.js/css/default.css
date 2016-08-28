@@ -62,8 +62,8 @@ button:focus {outline:0;}
   position: absolute;
   border: none;
   padding: none;
-  bottom: 5px;
-  left: 2px;
+  bottom: 0px;
+  left: 1px;
   display: block;
 }
 
@@ -293,8 +293,8 @@ button:focus {outline:0;}
 }
 
 #help-window {
-  border-style: solid;
-  border-color: white;
+/*  border-style: solid;
+  border-color: white;*/
   background-color: #327586;
   position: absolute;
   width: 300px;
@@ -407,6 +407,6 @@ button:focus {outline:0;}
    margin-left: 1px;
    margin-right: 1px;
    font-family: Segoe UI, Helvetica, sans-serif;
-   font-size:30px;
+   font-size:36px;
    display: inline-block;
 }

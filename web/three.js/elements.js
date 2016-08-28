@@ -161,7 +161,7 @@ function pan( direction, state ) {
 
 function showPageOld(page) {
 	var image = document.querySelector("#help-image");
-	image.src = "../images/helps/help" + page.toString() + ".png";
+	image.src = "../../images/helps/help" + page.toString() + ".png";
     var div = document.querySelector("#main-page");
     div.style.display = "none";
     
@@ -172,6 +172,7 @@ function showPageOld(page) {
 function showPage(page) {
 	var image = document.querySelector("#help-image");
 	image.src = "../../images/helps-components/help" + page.toString() + ".png";
+
     var div = document.querySelector("#main-page");
     div.style.display = "none";
     
@@ -340,7 +341,7 @@ function freezeAR() {
 	if (!freezeFlag) {  // freeze the scene
 
 		//change the style of freeze-button to be active		
-		button.style.background = "url('../images/buttons/release.png') 0 0 no-repeat"; 
+		button.style.background = "url('../images/buttons/recapture.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
 		//zoom("in");
