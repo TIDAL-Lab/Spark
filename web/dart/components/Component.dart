@@ -47,6 +47,7 @@ class Component implements Touchable {
 
   bool visited = false; /* for moving connected graphs */
   bool visible = true;
+  bool clicked = false;
   
   RangeInputElement slider; /* control for variables */
   
@@ -86,7 +87,7 @@ class Component implements Touchable {
     //print("this is the angle: $angle");
     slider.style.transformOriginX = "0px";
     slider.style.transformOriginY = "0px";
-    slider.style.transform = "rotate(${angle}deg) translate(10px, 25px)";
+    slider.style.transform = "rotate(${angle}deg) translate(10px, 35px)";
     
     if (this is Battery) {
       slider.min = "2";
@@ -323,8 +324,8 @@ class Component implements Touchable {
     num ty = event.touchY;
     num cx = screenToComponentX(tx, ty);
     num cy = screenToComponentY(tx, ty);
-    num cw = sqrt((start.x - end.x)*(start.x - end.x) + (start.y - end.y)*(start.y - end.y)) - 20;
-    num ch = ih;
+    num cw = sqrt((start.x - end.x)*(start.x - end.x) + (start.y - end.y)*(start.y - end.y)) - 24;
+    num ch = ih/2;
     return (cx.abs() <= cw/2 && cy.abs() <= ch);
   }
 
@@ -360,12 +361,14 @@ class Component implements Touchable {
     /* if the component is clicked, show the generic slider */
     //if (clickX == event.touchX && clickY == event.touchY) {
     if ((clickX - event.touchX).abs()<5 && (clickY - event.touchY).abs()<5) {
-      this.slider = document.querySelector("#generic-slider");
+      //this.clicked = !this.clicked;
       if (this is Battery || this is Resistor) {
+      //if (this.clicked && (this is Battery || this is Resistor)) {
+        this.slider = document.querySelector("#generic-slider");
         this.slider.style.display = "block";
         setSlider();
-        App.repaint(); 
-      } 
+      }      
+      App.repaint();  
       return;
     }
     
