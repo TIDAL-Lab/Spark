@@ -139,7 +139,7 @@ class Circuit {
    */
   void sendData() {
    
-    print("send data");
+    
     //var myObj = new JsArray();
     var myObj = [];
     //findConnectedComponents();
@@ -197,6 +197,7 @@ class Circuit {
     
     
     if (USE_SERVER) {  // send data to parse
+      print("send data");
       //print(JSON.encode(myObj));
       // call the "doDeleteParse method on myObj (the code is in sendData.js)
       var sendParse = new JsObject(context['sendParse'],[myObj]); // instantiate a JS "deleteParse" object

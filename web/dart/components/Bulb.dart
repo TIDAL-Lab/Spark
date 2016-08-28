@@ -93,7 +93,7 @@ class Bulb extends Component  {
     num ty = event.touchY;
     num cx = screenToComponentX(tx, ty);
     num cy = screenToComponentY(tx, ty);
-    num cw = sqrt((start.x - end.x)*(start.x - end.x) + (start.y - end.y)*(start.y - end.y)) - 20;
+    num cw = sqrt((start.x - end.x)*(start.x - end.x) + (start.y - end.y)*(start.y - end.y)) - 24;
     num ch = ih;
     
     num mx = (start.x + end.x) / 2;

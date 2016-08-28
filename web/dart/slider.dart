@@ -26,20 +26,23 @@ void genericSliderTouch(TouchEvent tframe) {
 //    print(value);
   InputElement slider = document.querySelector("#generic-slider");
   Rectangle box = slider.getBoundingClientRect();
-  num left = box.left + window.pageXOffset;
-  num top = box.top + window.pageYOffset;
+//  num left = box.left + window.pageXOffset;
+//  num top = box.top + window.pageYOffset;
+  num left = box.left;
+  num top = box.top;
   num width = box.width;
+  num height = box.height;
   num tx = tframe.changedTouches[0].client.x - left;
   num ty = tframe.changedTouches[0].client.y - top;
   var min = double.parse(slider.min);
   var step = double.parse(slider.step);
-  if (tx < width / 3.0) {
-    slider.value = min.toString();
-  } else if (tx < width * 2 / 3) {
-    slider.value = ( min + step ).toString();
-  } else {
-    slider.value = (min + 2 * step).toString();
-  }
+    if (tx < width / 3.0) {
+      slider.value = min.toString();
+    } else if (tx < width * 2 / 3) {
+      slider.value = ( min + step ).toString();
+    } else {
+      slider.value = (min + 2 * step).toString();
+    }
 //  if (tx < width / 5.0) {
 //    slider.value = min.toString();
 //  } else if (tx < width * 2 / 5) {
