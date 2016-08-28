@@ -16,6 +16,11 @@ var captureText = "Capture the circuit to explore it more!"
 var image = document.querySelector("#legend-image");
 image.src = "../images/legend-image.png";
 
+// set the voltmeter image
+var image = document.querySelector("#voltmeter-image");
+image.src = "../images/buttons/voltmeter3.png";
+
+
 var button = document.querySelector("#plus-button");
 if (button != null) {
 	//button.onclick = function() {zoom("in", "click")};
@@ -63,29 +68,26 @@ if (ArFlag) {
 }
 
 if (twoScreen) {
-	var button = document.querySelector("#page0-button");
-    //button.addEventListener("click", showPage(0));
-    if (button != null) button.style.display = "none";
+	// var button = document.querySelector("#page0-button");
+ //    //button.addEventListener("click", showPage(0));
+ //    if (button != null) button.style.display = "none";
 
-   	button = document.querySelector("#page1-button");
-    if (button != null) button.style.display = "none";
+ //   	button = document.querySelector("#page1-button");
+ //    if (button != null) button.style.display = "none";
 
-    button = document.querySelector("#page2-button");
-    if (button != null) button.style.display = "none";
+ //    button = document.querySelector("#page2-button");
+ //    if (button != null) button.style.display = "none";
 
-    button = document.querySelector("#page3-button");
-    if (button != null) button.style.display = "none";
+ //    button = document.querySelector("#page3-button");
+ //    if (button != null) button.style.display = "none";
 
-    button = document.querySelector("#back-button");
-    if (button != null) button.style.display = "none";
+ //    button = document.querySelector("#back-button");
+ //    if (button != null) button.style.display = "none";
 
     // set the help image
     var image = document.querySelector("#help-image");
 	image.src = "../../images/helps-components/bg.png";
 
-	// set the voltmeter image
-    var image = document.querySelector("#voltmeter-image");
-	image.src = "../images/buttons/voltmeter3.png";
 
 
 
@@ -184,8 +186,8 @@ function back() {
 	var image = document.querySelector("#help-image");
 	image.src = "../../images/helps-components/bg.png";
 
-    var button = document.querySelector("#back-button");
-    button.style.display = "none";
+    // var button = document.querySelector("#back-button");
+    // button.style.display = "none";
     
     var div = document.querySelector("#main-page");
     div.style.display = "block";
@@ -369,12 +371,14 @@ function freezeAR() {
 		// 	electronObject = electronObjects[k];
 		// 	electronObject.velocity.multiplyScalar(arSlowFactor);									
 		// }
+		freezeFlag = !freezeFlag;
 
 	}
 
 	else {   //unfreeze the scene
+		window.location.reload();
 
-		//change the style of freeze-button to be active
+/*		//change the style of freeze-button to be active
 		button.style.background = "url('../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
@@ -397,10 +401,10 @@ function freezeAR() {
 		div.style.display = "none";
 
 		div = document.querySelector("#controls-panel");
-		div.style.display = "none";
+		div.style.display = "none";*/
 	}
 
-	freezeFlag = !freezeFlag;
+	// freezeFlag = !freezeFlag;
 
 }
 
