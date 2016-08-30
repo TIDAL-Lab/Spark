@@ -191,6 +191,27 @@ class ControlPoint implements Touchable {
 
   void touchUp(Contact event) {
     if (SHOW_LENS) theApp.lens.findComponent();
+    
+    /* if the component is over the delete box area, remove it */
+    num boxW = theApp.deleteBoxImg.width / 6;
+    num boxH = theApp.deleteBoxImg.height / 6;
+    if (x < boxW && y < boxH) {
+      /* remove the component */
+      this.myComponent.removeConnectedComponents();
+      Sounds.playSound("crunch");
+      App.repaint();
+      theApp.circuit.sendData();      
+      return;
+    }
+    if (myConjoint.x < boxW && myConjoint.y < boxH) {
+      /* remove the component */
+      this.myComponent.removeConnectedComponents();
+      Sounds.playSound("crunch");
+      App.repaint();
+      theApp.circuit.sendData();      
+      return;
+    }
+    
     dragging = false;
     makeConnection();
     updateCircuit();    

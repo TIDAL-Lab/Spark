@@ -346,8 +346,8 @@ class Component implements Touchable {
     /* if the component is over the delete box area, remove it */
     num mx = min(start.x, end.x);
     num my = min(start.y, end.y);
-    num boxW = theApp.deleteBoxImg.width / 7;
-    num boxH = theApp.deleteBoxImg.height / 7;
+    num boxW = theApp.deleteBoxImg.width / 6;
+    num boxH = theApp.deleteBoxImg.height / 6;
     if (mx < boxW && my < boxH) {
       /* remove the component */
       removeConnectedComponents();
