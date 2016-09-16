@@ -215,20 +215,23 @@ button:focus {outline:0;}
    z-index: 10;
 }
 
+
+
 .secondText {
    outline: none;
    color: black;
    position: absolute;
    text-align: center;
    border: none;
-   width: 270px;
+   width: 220px;
    height: 10px;
-   top: 70px;
-   right: 10px;
+   top: 20px;
+   right: 0px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
-   font-family: kristen ITC, Helvetica, sans-serif;
+   font-family: Segoe UI, Helvetica, sans-serif;
+   font-weight: bold;
    font-size:20px;
    display: inline-block;
 }
@@ -277,11 +280,12 @@ button:focus {outline:0;}
    border: none;
    width: 150px;
    height: 10px;
-   left: 52px;
+   left: 42px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
-   font-family: Comic Sans MS, Helvetica, sans-serif;
+   font-family: Segoe UI, Helvetica, sans-serif;
+   font-weight: bold;
    font-size:18px;
    display: inline-block;
 }
@@ -294,33 +298,34 @@ button:focus {outline:0;}
    border: none;
    width: 150px;
    height: 10px;
-   left: 52px;
+   left: 42px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
-   font-family: Comic Sans MS, Helvetica, sans-serif;
-   font-size:12px;
+   font-family: Segoe UI, Helvetica, sans-serif;
+   font-weight: bold; 
+   font-size:10px;
    display: inline-block;
 }
 
 #comp-type {
-  top: 35px;
+  top: 20px;
 }
 
 #current-value {
-  top: 80px;
+  top: 60px;
 }
 
 #resistance-value {
-  top: 105px;
+  top: 80px;
 }
 
 #voltage-value {
-  top: 130px;
+  top: 100px;
 }
 
 #brightness-factor {
-  top: 140px;
+  top: 120px;
    
 }
 
@@ -338,10 +343,10 @@ button:focus {outline:0;}
 }
 
 #voltmeter-image {
-  width: 200px;
+  width: 180px;
   position: absolute;
-  top: 30px;
-  left: 2px;
+  top: 20px;
+  left: 20px;
 
 }
 

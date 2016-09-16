@@ -84,11 +84,15 @@ if (twoScreen) {
  //    button = document.querySelector("#back-button");
  //    if (button != null) button.style.display = "none";
 
+
+ 	// display reset button
+
     // set the help image
     var image = document.querySelector("#help-image");
 	image.src = "../../images/helps-components/bg.png";
 
-
+	var button = document.querySelector("#reset-button");
+	button.style.display = "block";
 
 
 	var p = document.querySelector("#description");
@@ -301,7 +305,7 @@ var lines; // an object that holds the tracking lines as its children
 var halo;
 var randomElectronIndex;
 function watchElectron() {
-	if (!freezeFlag) return;
+	if (ArFlag && !freezeFlag) return;
 	if (!watch) {
 		//change the style of watch-button to be active
 		button = document.querySelector("#watch-button");
@@ -461,12 +465,20 @@ function makeTextSprite( message, message2, scaleFactor, parameters )
 	//texture.flipY = false;
 	texture.needsUpdate = true;
 
-	var spriteMaterial = new THREE.SpriteMaterial( 
-		{ map: texture, useScreenCoordinates: false, rotation: Math.PI } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
+	if (ArFlag) {
+		var spriteMaterial = new THREE.SpriteMaterial( 
+			{ map: texture, useScreenCoordinates: false, rotation: Math.PI } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
+	}
+	else {
+		var spriteMaterial = new THREE.SpriteMaterial( 
+		{ map: texture, useScreenCoordinates: false} ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
+
+	}
 	var sprite = new THREE.Sprite( spriteMaterial );
 
 
-	sprite.scale.set(scaleFactor*0.5 * fontsize, -scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
+	if (ArFlag) sprite.scale.set(scaleFactor*0.5 * fontsize, -scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
+	else sprite.scale.set(scaleFactor*0.5 * fontsize, scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
 	//sprite.scale.set(100,50,1.0);
 	return sprite;	
 

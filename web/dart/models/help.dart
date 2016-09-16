@@ -31,7 +31,7 @@ class Help {
   Help () {
     img = document.querySelector("#help-image");
     setImage("images/helps-components/bg.png");   
-    
+      
     p = new ParagraphElement();
     p = document.querySelector("#type");
     
@@ -165,7 +165,7 @@ class Help {
   }
   
   void back() {
-    img.src = "images/helps/bg.png";
+    img.src = "images/helps-components/bg.png";
     var button = document.querySelector("#back-button");
     button.style.display = "none";
     

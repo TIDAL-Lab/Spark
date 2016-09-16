@@ -28,7 +28,7 @@ part of SparkProject;
  * 3 --> webgl nonAR: circuit model on the same screen
  * 4 --> webgl AR
  */
-int CONDITION = 4;
+int CONDITION = 3;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
@@ -195,8 +195,10 @@ class App extends TouchManager {
          SHOW_LENS = false;
          SHOW_MARKER = false;
          USE_SERVER = false;
-         CANVAS_RATIO = 0.6;
-         HELP_RATIO = 0.4;
+//         CANVAS_RATIO = 0.6;
+//         HELP_RATIO = 0.4;
+         CANVAS_RATIO = 0.65;
+         HELP_RATIO = 0.3;
          break;
        case 4:
          help.helpSrc ="images/helps-components/";
@@ -240,12 +242,16 @@ class App extends TouchManager {
      button.style.left = "${w2*1.5/5}px";
      button.style.top = "${h2+50}px";
      
+     var ratio;
+     if (condition == 4) ratio = 0.6;
+     else if (condition == 3) ratio = 0.5;
+     
      var img = document.querySelector("#help-image");
-     img.style.width = "${w2*0.6}px";
+     img.style.width = "${w2*ratio}px";
      img.style.height = "${h3}px";
      
      div = document.querySelector("#help-window");
-     div.style.width = "${w2*0.4}px";
+     div.style.width = "${w2*(1-ratio)}px";
      div.style.height = "${h3}px";
      
      // set the working box
