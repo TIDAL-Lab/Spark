@@ -9,55 +9,52 @@
  * Circuit-level and the level that shows interactions between electrons and ions as they move through circuit components.
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
-var zoomInterval;
+var interval;
+var releaseText = "Tap on a component to learn more about it!";
+var captureText = "Capture the circuit to explore it more!"
 // set the voltmeter image
 var image = document.querySelector("#legend-image");
 image.src = "../images/legend-image.png";
 
+// set the voltmeter image
+var image = document.querySelector("#voltmeter-image");
+image.src = "../images/buttons/voltmeter3.png";
+
+
 var button = document.querySelector("#plus-button");
 if (button != null) {
-	button.onclick = function() {zoom("in", "click")};
-	button.onmousedown = function() {zoom("in", "hold")};
-	button.onmouseup = function() {stopInterval()};
-	//button.ontouchstart = function() {zoom("in", "click")};
+	//button.onclick = function() {zoom("in", "click")};
+	//button.onmousedown = function() {zoom("in", "hold")};
+	//button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {zoom("in")};
 	button.ontouchend = function() {stopInterval()};
 }
 button = document.querySelector("#minus-button");
 if (button != null) {
-	button.onclick = function() {zoom("out", "click")};
-	button.onmousedown = function() {zoom("out", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {zoom("out")};
 	button.ontouchend = function() {stopInterval()};
 }
 button = document.querySelector("#up-button");
 if (button != null) {
-	button.onclick = function() {pan("up", "click")};
-	button.onmousedown = function() {pan("up", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("up")};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#down-button");
 if (button != null) {
-	button.onclick = function() {pan("down", "click")};
-	button.onmousedown = function() {pan("down", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("down")};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#left-button");
 if (button != null) {
-	button.onclick = function() {pan("left", "click")};
-	button.onmousedown = function() {pan("left", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("left")};
 	button.ontouchend = function() {stopInterval()};
 }
 
 button = document.querySelector("#right-button");
 if (button != null) {
-	button.onclick = function() {pan("right", "click")};
-	button.onmousedown = function() {pan("right", "hold")};
-	button.onmouseup = function() {stopInterval()};
+	button.ontouchstart = function() {pan("right")};
 	button.ontouchend = function() {stopInterval()};
 }
 
@@ -71,38 +68,45 @@ if (ArFlag) {
 }
 
 if (twoScreen) {
-	var button = document.querySelector("#page0-button");
-    //button.addEventListener("click", showPage(0));
-    if (button != null) button.style.display = "none";
+	// var button = document.querySelector("#page0-button");
+ //    //button.addEventListener("click", showPage(0));
+ //    if (button != null) button.style.display = "none";
 
-   	button = document.querySelector("#page1-button");
-    if (button != null) button.style.display = "none";
+ //   	button = document.querySelector("#page1-button");
+ //    if (button != null) button.style.display = "none";
 
-    button = document.querySelector("#page2-button");
-    if (button != null) button.style.display = "none";
+ //    button = document.querySelector("#page2-button");
+ //    if (button != null) button.style.display = "none";
 
-    button = document.querySelector("#page3-button");
-    if (button != null) button.style.display = "none";
+ //    button = document.querySelector("#page3-button");
+ //    if (button != null) button.style.display = "none";
 
-    button = document.querySelector("#back-button");
-    if (button != null) button.style.display = "none";
+ //    button = document.querySelector("#back-button");
+ //    if (button != null) button.style.display = "none";
 
     // set the help image
     var image = document.querySelector("#help-image");
-	image.src = "../images/helps-components/bg.png";
+	image.src = "../../images/helps-components/bg.png";
 
-	// set the voltmeter image
-    var image = document.querySelector("#voltmeter-image");
-	image.src = "../images/buttons/voltmeter3.png";
 
 
 
 	var p = document.querySelector("#description");
-	p.innerHTML = "Tap on a component to see its measures";
+	p.innerHTML = captureText;
+
+	var button = document.querySelector("#watch-button");
+	button.style.display = "none";
+
+	var div = document.querySelector("#legend-box");
+	div.style.display = "none";
+
+	div = document.querySelector("#controls-panel");
+	div.style.display = "none";
 
 }        
 
 function zoom( direction, state ) {
+	//console.log("zoom is called");
 	var delta;
 	var scale = 20.0;
 	if (ArFlag) scale /= arScale;
@@ -112,8 +116,16 @@ function zoom( direction, state ) {
 	else {
 		delta = new THREE.Vector3(0.0, 0.0, scale);
 	}
-	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
-	else {camera.position.add(delta);}	
+	camera.position.add(delta);
+	console.log("button zoom:", camera.position);
+	interval = setInterval(function(){ camera.position.add(delta); }, 50);
+	//else {camera.position.add(delta);}	
+	//if (state == "hold") interval = setInterval(function(){ markerRootParent.position.add(delta); }, 100);
+	//else {
+		//markerRoot.position.add(delta);
+		// markerRoot.rotation.z = Math.PI/2;
+		// markerRoot.matrixWorldNeedsUpdate = true;
+	//}	
 
 	var message = [delta.z];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
@@ -130,20 +142,20 @@ function pan( direction, state ) {
 	if (ArFlag) { sign = -1; scale /= arScale; }
 	switch (direction) {
 		case "up":
-			delta = new THREE.Vector3(0.0, scale, 0.0);
-			break;
-		case "down":
 			delta = new THREE.Vector3(0.0, -scale, 0.0);
 			break;
-		case "left":
-			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
+		case "down":
+			delta = new THREE.Vector3(0.0, scale, 0.0);
 			break;
-		case "right":
+		case "left":
 			delta = new THREE.Vector3(scale*sign, 0.0, 0.0);
 			break;
+		case "right":
+			delta = new THREE.Vector3(-scale*sign, 0.0, 0.0);
+			break;
 	}
-	if (state == "hold") interval = setInterval(function(){ camera.position.add(delta); }, 100);
-	else {camera.position.add(delta);}
+	camera.position.add(delta);
+	interval = setInterval(function(){ camera.position.add(delta); }, 50);
 
  	var message = [delta.x, delta.y];
 	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
@@ -151,7 +163,7 @@ function pan( direction, state ) {
 
 function showPageOld(page) {
 	var image = document.querySelector("#help-image");
-	image.src = "../images/helps/help" + page.toString() + ".png";
+	image.src = "../../images/helps/help" + page.toString() + ".png";
     var div = document.querySelector("#main-page");
     div.style.display = "none";
     
@@ -161,7 +173,8 @@ function showPageOld(page) {
 
 function showPage(page) {
 	var image = document.querySelector("#help-image");
-	image.src = "../images/helps-components/help" + page.toString() + ".png";
+	image.src = "../../images/helps-components/help" + page.toString() + ".png";
+
     var div = document.querySelector("#main-page");
     div.style.display = "none";
     
@@ -171,10 +184,10 @@ function showPage(page) {
 
 function back() {
 	var image = document.querySelector("#help-image");
-	image.src = "../images/helps-components/bg.png";
+	image.src = "../../images/helps-components/bg.png";
 
-    var button = document.querySelector("#back-button");
-    button.style.display = "none";
+    // var button = document.querySelector("#back-button");
+    // button.style.display = "none";
     
     var div = document.querySelector("#main-page");
     div.style.display = "block";
@@ -253,7 +266,7 @@ function clearValues() {
 
 	back();
 	var p = document.querySelector("#description");
-	p.innerHTML = "Tap on a component above to learn more about it!";
+	p.innerHTML = releaseText;
  
 }
 
@@ -282,10 +295,13 @@ function flashValues() {
 }
 
 var watch = false;
-var halo;
+
+
 var lines; // an object that holds the tracking lines as its children
+var halo;
 var randomElectronIndex;
 function watchElectron() {
+	if (!freezeFlag) return;
 	if (!watch) {
 		//change the style of watch-button to be active
 		button = document.querySelector("#watch-button");
@@ -293,12 +309,11 @@ function watchElectron() {
 		button.style.backgroundSize = "100%";
 		if (electronObjects.length > 0) {
 			// add an object to hold the tracking lines
-			lines = new THREE.Object3D();
 			var geometry = new THREE.CircleGeometry( 10, 16 );
 			var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
 			halo = new THREE.Mesh( geometry, material );
-			halo.material.visible = true;
-
+			halo.material.visible = false;
+			lines = new THREE.Object3D();
 			markerRoot.add(halo);
 			markerRoot.add(lines);
 
@@ -308,6 +323,7 @@ function watchElectron() {
 	}
 	else {
 		if (electronObjects.length > 0) {
+			halo.material.visible = false;
 			markerRoot.remove(lines);
 			markerRoot.remove(halo);
 		}
@@ -327,22 +343,68 @@ function freezeAR() {
 	if (!freezeFlag) {  // freeze the scene
 
 		//change the style of freeze-button to be active		
-		button.style.background = "url('../../images/buttons/capture2.png') 0 0 no-repeat"; 
+		button.style.background = "url('../images/buttons/recapture.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
+
+		//zoom("in");
+		//pan("up");
+		//stopInterval();
+
+		var p = document.querySelector("#description");
+		p.innerHTML = releaseText;
+
+		var button = document.querySelector("#watch-button");
+		button.style.display = "block";
+
+		var div = document.querySelector("#legend-box");
+		div.style.display = "block";
+
+		div = document.querySelector("#controls-panel");
+		div.style.display = "block";
+
+
+		// TEST: calibrate the speed of electrons with/without marker detector slowing down factor
+		//var eVertices = electronVertices.geometry.vertices;
+		// var electronObject;
+		// for ( k = 0; k < electronObjects.length; k++ ) {
+		// 	//var electron = eVertices[k];
+		// 	electronObject = electronObjects[k];
+		// 	electronObject.velocity.multiplyScalar(arSlowFactor);									
+		// }
+		freezeFlag = !freezeFlag;
 
 	}
 
 	else {   //unfreeze the scene
+		window.location.reload();
 
-		//change the style of freeze-button to be active
-		button.style.background = "url('../../images/buttons/freeze.png') 0 0 no-repeat"; 
+/*		//change the style of freeze-button to be active
+		button.style.background = "url('../images/buttons/capture2.png') 0 0 no-repeat"; 
 		button.style.backgroundSize = "100%";
 
 		camera.position.set(0, 0, 0);
 		//arRenderFlag = true;
+
+		// reset the clicked component, if any
+		if (clickedComponent != null) unSelectComponent();
+
+		// reset the watch-an-electron function, if it is active
+		if (watch) watchElectron();
+
+		var p = document.querySelector("#description");
+		p.innerHTML = captureText;
+
+		var button = document.querySelector("#watch-button");
+		button.style.display = "none";
+
+		var div = document.querySelector("#legend-box");
+		div.style.display = "none";
+
+		div = document.querySelector("#controls-panel");
+		div.style.display = "none";*/
 	}
 
-	freezeFlag = !freezeFlag;
+	// freezeFlag = !freezeFlag;
 
 }
 
@@ -395,17 +457,27 @@ function makeTextSprite( message, message2, scaleFactor, parameters )
 	context.fillText( message, borderThickness, fontsize + borderThickness);
 	context.fillText( message2, borderThickness, 2 * fontsize + borderThickness);
 	// canvas contents will be used for a texture
-	var texture = new THREE.Texture(canvas); 
+	var texture = new THREE.Texture(canvas);
+	//texture.flipY = false;
 	texture.needsUpdate = true;
 
 	var spriteMaterial = new THREE.SpriteMaterial( 
-		{ map: texture } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
+		{ map: texture, useScreenCoordinates: false, rotation: Math.PI } ); // I removed: useScreenCoordinates: false, alignment: spriteAlignment
 	var sprite = new THREE.Sprite( spriteMaterial );
-	
-	
-	sprite.scale.set(scaleFactor*0.5 * fontsize, scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
+
+
+	sprite.scale.set(scaleFactor*0.5 * fontsize, -scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
 	//sprite.scale.set(100,50,1.0);
 	return sprite;	
+
+	// TEST
+	var textbox = new THREE.Mesh(
+		new THREE.BoxGeometry(30, 10, 1, 1, 1, 1),
+		new THREE.MeshBasicMaterial({map: texture})
+	);
+	//textbox.scale.set(scaleFactor*0.5 * fontsize, scaleFactor*0.25 * fontsize, scaleFactor*0.75 * fontsize);
+	textbox.scale.set(scaleFactor*0.5, scaleFactor*0.25, scaleFactor*0.75);
+	//return textbox;
 }
 
 // function for drawing rounded rectangles
@@ -445,7 +517,5 @@ function keepMoving() {
 }
 
 function reloadPage() {
-	console.log("reload the page");
 	if (ArFlag) window.location.reload();
 }
-

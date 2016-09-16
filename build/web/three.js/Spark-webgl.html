@@ -14,7 +14,7 @@
   		<!-- <script src="lib/jsartoolkit5-master/build/artoolkit.debug.js"></script> -->
 		<!-- <script src="lib/jsartoolkit5-master/js/artoolkit.api.js"></script> -->
 		<script src="lib/jsartoolkit5-master/examples/js/third_party/three.js/three.min.js"></script>
-		<script src="lib/jsartoolkit5-master/build/artoolkit.min-spark.js"></script>
+		<script src="artoolkit.min-spark.js"></script>
 		<!-- <script src="lib/jsartoolkit5-master/js/artoolkit.three.js"></script> -->
 		<script src="artoolkit.three-spark.js"></script>
 
@@ -63,8 +63,8 @@
 	    <button onclick="updateElectrons()"> next move</button>
 	    <button onclick="displayGrid()"> grid on</button>  -->
 	    <div id = "container">
-		    <button id="watch-button" onclick="watchElectron()"></button>
-		    <button id="freeze-button" onclick="freezeAR()" style="display: none"></button>
+	    	<button id="freeze-button" onclick="freezeAR()" style="display: none"></button>
+		    <button id="watch-button" onclick="watchElectron()"></button>		    
 		    <div id = "legend-box">
 				<img id="legend-image"></img>
 		    </div>
@@ -76,6 +76,7 @@
 		    	<button id = "right-button" class = "control-button"></button>
 		    	<button id = "left-button" class = "control-button"></button>
 		    </div>
+		    <button id="reset-button" onclick="window.location.reload()"></button>
 	    </div>
 	    <div id="help-window">
 	    	<img id="voltmeter-image"></img>
@@ -92,13 +93,14 @@
       		<div id = "main-page">
 		        <p id="type" class="bigText"></p>
 		        <p id="description" class="secondText"></p>
-		        <button id = "page0-button" class = "page-button"></button>
-		        <button id = "page1-button" class = "page-button"></button>
-		        <button id = "page2-button" class = "page-button"></button>
-		        <button id = "page3-button" class = "page-button"></button>
 		        <button id = "reload-button" onclick="reloadPage()"></button>
+<!-- 		        <button id = "page0-button" class = "page-button" style="display: none;"></button>
+		        <button id = "page1-button" class = "page-button" style="display: none;"></button>
+		        <button id = "page2-button" class = "page-button" style="display: none;"></button>
+		        <button id = "page3-button" class = "page-button" style="display: none;"></button> -->
+		        
 		    </div>
-      		<button id = "back-button" style="display: none;"></button>
+      		<!-- <button id = "back-button" style="display: none;"></button> -->
 
 	    </div>
 

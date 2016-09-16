@@ -12,6 +12,7 @@ function JsArInit() {
 		
 		scene = arScene.scene;
 		camera = arScene.camera;
+		console.log("camera created: ", camera.position);
 		arController = arController;
 		raycaster = new THREE.Raycaster();
 
@@ -24,7 +25,7 @@ function JsArInit() {
 		scene.add(light);
 
 		// set the scale based on the markerwidth = 1 
-		arScale = 100;
+		arScale = 80;
 		markerID = 56;
 		markerRoot = new THREE.Mesh();
 		// Testing Barcode marker: See artoolkit5/doc/patterns/Matrix code 3x3 (72dpi)/20.png
@@ -43,7 +44,6 @@ function JsArInit() {
 			// Testing Pattern marker:
 			arController.loadMarker('markers/spark16v3.pat', function(markerId) {
 				markerLoaded = true;
-				console.log(markerId);
 				markerID = markerId;
 				markerRootParent = arController.createThreeMarker(markerId);			
 				initComponents();
@@ -122,72 +122,3 @@ function updateAR() {
 	markerRootParent.add(markerRoot);
 	scene.add(markerRootParent);	
 }
-
-var createBox = function() {
-	// The AR scene.
-	//
-	// The box object is going to be placed on top of the marker in the video.
-	// I'm adding it to the markerRoot object and when the markerRoot moves,
-	// the box and its children move with it.
-	//
-	var box = new THREE.Object3D();
-	var boxWall = new THREE.Mesh(
-		new THREE.BoxGeometry(100, 100, 1, 1, 1, 1),
-		new THREE.MeshBasicMaterial({color: orange})
-	);
-	boxWall.material.transparent = true;
-	boxWall.material.opacity = 0.8;
-	
-	boxWall.position.z = -50;
-	box.add(boxWall);
-
-	boxWall = boxWall.clone();
-	boxWall.position.z = +50;
-	//box.add(boxWall);
-
-	boxWall = boxWall.clone();
-	boxWall.position.z = 0;
-	boxWall.position.x = -50;
-	boxWall.rotation.y = Math.PI/2;
-	box.add(boxWall);
-
-	boxWall = boxWall.clone();
-	boxWall.position.x = +50;
-	box.add(boxWall);
-
-	boxWall = boxWall.clone();
-	boxWall.position.x = 0;
-	boxWall.position.y = -50;
-	boxWall.rotation.y = 0;
-	boxWall.rotation.x = Math.PI/2;
-	box.add(boxWall);
-
-	// Keep track of the box walls to test if the mouse clicks happen on top of them.
-	var walls = box.children.slice();
-
-	// Create a pivot for the lid of the box to make it rotate around its "hinge".
-	var pivot = new THREE.Object3D();
-	pivot.position.y = 50;
-	pivot.position.x = 50;
-
-	// The lid of the box is attached to the pivot and the pivot is attached to the box.
-	boxWall = boxWall.clone();
-	boxWall.position.y = 0;
-	boxWall.position.x = -50;
-	pivot.add(boxWall);
-	box.add(pivot);
-
-	walls.push(boxWall);
-
-	box.position.z = 50;
-	//box.rotation.x = Math.PI/2;
-
-	box.open = false;
-
-	box.tick = function() {
-		// Animate the box lid to open rotation or closed rotation, depending on the value of the open variable.
-		pivot.rotation.z += ((box.open ? -Math.PI/1.5 : 0) - pivot.rotation.z) * 0.1;
-	};
-
-	return {box: box, walls: walls};
-};

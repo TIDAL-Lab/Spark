@@ -19,7 +19,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 // var height = 480;
 
 // Static flags
-var ArFlag = true;
+var ArFlag = false;
 var twoScreen = true;
 var twoD = true; //electron movement is either 2D (z=0) or 3D
 
@@ -54,11 +54,12 @@ var components = []; // an array of components
 var electronVertices, electronGeometry, electronMaterial, electronSize;
 var electronObjects = [];
 var raycaster;
+
 //var compositeMesh;
 
 var ticks = 0;
 
-
+var halo;
 var markerRoot;  // the parent object of all the components and electrons for AR transformations
 
 var windowHalfX = window.innerWidth / 2;
@@ -66,24 +67,26 @@ var windowHalfY = window.innerHeight / 2;
 
 var clickedComponent = null;   // the component that is tapped on to show information
 
+// set the size of screen divs	
+if (twoScreen) {  //set the size of renderer based on a 4/3 standard video size and the rest of width of screen for the help div
+	modelHeight = window.innerHeight;
+	modelWidth = modelHeight*4/3;
+	var helpWidth = window.innerWidth - modelHeight;
+	//var helpWidth = window.innerWidth - modelWidth;
+	var helpDiv = document.querySelector("#help-window");
+	helpDiv.style.width = helpWidth.toString() + "px";
+	helpDiv.style.height = window.innerHeight.toString() + "px";
+}
+else {  // make the help div invisible
+	var helpDiv = document.querySelector("#help-window");
+	helpDiv.style.display = "none";
+	modelWidth = window.innerWidth;
+	modelHeight = window.innerHeight;
+}
+
 function doInit() {
 	
-	// set the size of screen divs	
-	if (twoScreen) {  //set the size of renderer based on a 4/3 standard video size and the rest of width of screen for the help div
-		modelHeight = window.innerHeight;
-		modelWidth = modelHeight*4/3;
-		//var helpWidth = window.innerWidth - modelHeight;
-		var helpWidth = window.innerWidth - modelWidth;
-		var helpDiv = document.querySelector("#help-window");
-		helpDiv.style.width = helpWidth.toString() + "px";
-		helpDiv.style.height = window.innerHeight.toString() + "px";
-	}
-	else {  // make the help div invisible
-		var helpDiv = document.querySelector("#help-window");
-		helpDiv.style.display = "none";
-		modelWidth = window.innerWidth;
-		modelHeight = window.innerHeight;
-	}
+
 
 	// lodad textures
 	//sphere = new THREE.TextureLoader().load( "textures/ball.png" ); // this works for three.js-r75 (latest revision) 
@@ -107,7 +110,6 @@ function init() {
 
 	raycaster = new THREE.Raycaster();
 	scene = new THREE.Scene();
-	console.log("init comp.l: ", components.length);
 	initComponents();
 
 	renderer = new THREE.WebGLRenderer();
@@ -129,6 +131,8 @@ function init() {
 	// CONTROLS
 	//controls = new THREE.OrbitControls( camera, renderer.domElement );
 	controls = new THREE.EditorControls( camera, renderer.domElement );	
+
+	animate();
 	
 }
 
@@ -158,10 +162,15 @@ function initComponents() {
 	}
 
 	markerRoot.add(electronVertices);
+
+	// var geometry = new THREE.CircleGeometry( 10, 16 );
+	// var material = new THREE.MeshBasicMaterial( { color: lightGreen } );
+	// halo = new THREE.Mesh( geometry, material );
+	// halo.material.visible = false;
+	// markerRoot.add(halo);
 	//markerRoot.rotation.z = Math.PI;	
 	//if (ArFlag) markerRoot.matrixAutoUpdate = false;  // not needed any longer with jsartoolkit5 library;
 	scene.add( markerRoot );
-	console.log(scene.children.length);
 }
 
 function doUpdate() {
@@ -180,7 +189,6 @@ function update() {
 		scene.remove(obj);
 	}
 	electronObjects = [];
-	console.log("after update", components.length);
 	
 	if (!ArFlag) initComponents();
 	else updateAR(); // in ar-spark.js file
@@ -248,13 +256,8 @@ function updateElectrons() {
 			var first = lines.children[0];
 			lines.remove(first);
 		}
-		// var geometry = new THREE.CircleGeometry( 5, 32 );
-		// var material = new THREE.MeshBasicMaterial( { color: orange } );
-		// var circle = new THREE.Mesh( geometry, material );
 		halo.position.set(electron.position.x, electron.position.y, electron.position.z);
-		// scene.add(circle);
-		// halo.position = electron;
-		// halo.needsUpdate = true;
+		halo.material.visible = true;
 	}
 }
 

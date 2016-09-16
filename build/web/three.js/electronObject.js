@@ -11,9 +11,11 @@
  */
 
 
-var velocity = 4;
+var velocity = 4; //non-AR was 4, increased to 5 to compensate for the slow down factor
+var arSlowFactor = 0.8; // not using yet
 //var velocityMax = 20;
 var lossFactor = 0.9;
+
 
 function Electron( component ) {
 		this.position = new THREE.Vector3();

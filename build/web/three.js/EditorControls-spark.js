@@ -61,7 +61,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		var distance = object.position.distanceTo( center );
 		//console.log(distance);
 		if (ArFlag) {
-			delta.multiplyScalar( distance * 0.01 );
+			delta.multiplyScalar( 0.01 );
 			delta.y *= -1;
 		}
 		else delta.multiplyScalar( distance * 0.001 );
@@ -76,20 +76,24 @@ THREE.EditorControls = function ( object, domElement ) {
 
 	};
 
-	this.zoom = function ( delta ) {
+	this.zoom = function ( delta, state ) {
 
 		var distance = object.position.distanceTo( center );
 
-		delta.multiplyScalar( distance * 0.001 );
-
-		if ( delta.length() > distance ) return;
-
+		if (!ArFlag) {
+			delta.multiplyScalar( distance * 0.001 );
+			if ( delta.length() > distance ) return;
+		}
+		else { // AR condition
+			if (state == "mouse") delta.multiplyScalar( 0.001 );
+			else delta.multiplyScalar( 0.01 ); //use a different scale for touch delta
+		}
+		
 		delta.applyMatrix3( normalMatrix.getNormalMatrix( object.matrix ) );
 		//if (ArFlag) delta.applyMatrix3( normalMatrix.getNormalMatrix( object.projectionMatrix ) );
 
 		if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
 		object.position.add(delta); 
-		//console.log(object.position);
 		var message = [delta.z];
 		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
 
@@ -335,7 +339,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		} else if ( state === STATE.ZOOM ) {
 
-			scope.zoom( new THREE.Vector3( 0, 0, movementY ) );
+			scope.zoom( new THREE.Vector3( 0, 0, movementY ), "mouse" );
 
 		} else if ( state === STATE.PAN ) {
 
@@ -376,7 +380,7 @@ THREE.EditorControls = function ( object, domElement ) {
 
 		}
 
-		scope.zoom( new THREE.Vector3( 0, 0, delta ) );
+		scope.zoom( new THREE.Vector3( 0, 0, delta ), "mouse" );
 
 	}
 
@@ -487,7 +491,7 @@ THREE.EditorControls = function ( object, domElement ) {
 				touches[ 1 ].set( event.touches[ 1 ].pageX, event.touches[ 1 ].pageY, 0 );
 				//scope.rotate( touches[ 0 ].sub( getClosest( touches[ 0 ], prevTouches ) ).multiplyScalar( - 0.005 ) );
 				distance = touches[ 0 ].distanceTo( touches[ 1 ] );
-				if (freezeFlag || !ArFlag) scope.zoom( new THREE.Vector3( 0, 0, prevDistance - distance ) );
+				if (freezeFlag || !ArFlag) scope.zoom( new THREE.Vector3( 0, 0, prevDistance - distance ), "touch" );
 				prevDistance = distance;
 
 
@@ -496,7 +500,7 @@ THREE.EditorControls = function ( object, domElement ) {
 				offset0.x = -offset0.x;
 				offset1.x = -offset1.x;
 
-				if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
+				//if (freezeFlag || !ArFlag) scope.pan( offset0.add( offset1 ).multiplyScalar( 0.5 ) );
 
 				break;
 

@@ -57,33 +57,33 @@ button:focus {outline:0;}
 #help-image {
 /*  background: url("../../images/helps/bg.png") 0 0 no-repeat;
   background-size: 100%;*/ 
-  height: 400px;
-  width: 450px;
+  height: 440px;
+  width: 456px;
   position: absolute;
   border: none;
   padding: none;
-  bottom: 30px;
-  right: 2px;
+  bottom: 0px;
+  left: 1px;
   display: block;
 }
 
 #legend-image {
   width: 150px;
   position: absolute;
-  top: 10px;
-  right: 50px;
+  top: 20px;
+  right: 340px;
 }
 
 #watch-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
   background: url("../../images/buttons/watch2.png") 0 0 no-repeat;
   background-size: 100%; 
-  height: 60px;
-  width: 240px;
+  height: 70px;
+  width: 280px;
   position: absolute;
-  margin: -60px -120px;
-  top: 12%;
-  left: 50%;
+  margin: -70px -140px;
+  top: 11%;
+  left: 40%;
   border: none;
   padding: none;
   display: block;
@@ -106,13 +106,13 @@ button:focus {outline:0;}
 
 #freeze-button {
   -webkit-transform: rotate(360deg); /* Chrome & Safari */
-  background: url("../../images/buttons/freeze.png") 0 0 no-repeat;
+  background: url("../../images/buttons/capture2.png") 0 0 no-repeat;
   background-size: 100%; 
-  height: 50px;
-  width: 200px;
+  height: 60px;
+  width: 220px;
   position: absolute;
-  margin: -50px -100px;
-  top: 10%;
+  margin: -60px -110px;
+  top: 9.5%;
   left: 10%;
   border: none;
   padding: none;
@@ -249,7 +249,7 @@ button:focus {outline:0;}
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
-   font-family: Comic Sans MS, kristen ITC, Helvetica, sans-serif;
+   font-family: Segoe UI, Helvetica, sans-serif;
    font-size:28px;
    display: inline-block;
 }
@@ -266,7 +266,7 @@ button:focus {outline:0;}
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
-   font-family: Comic Sans MS, kristen ITC, Helvetica, sans-serif;
+   font-family: Segoe UI, Helvetica, sans-serif;
    font-size:20px;
    display: inline-block;
 }
@@ -293,8 +293,8 @@ button:focus {outline:0;}
 }
 
 #help-window {
-  border-style: solid;
-  border-color: white;
+/*  border-style: solid;
+  border-color: white;*/
   background-color: #327586;
   position: absolute;
   width: 300px;
@@ -377,6 +377,20 @@ button:focus {outline:0;}
   left: 150%;
 }
 
+#reset-button {
+  -webkit-transform: rotate(360deg); /* Chrome & Safari */
+  background: url("../../images/buttons/restart.png") 0 0 no-repeat;  
+  background-size: 100%; 
+  height: 70px;
+  width: 70px;
+  position: absolute;
+ /* margin: -60px -30px;*/
+  bottom: 20px;
+  right: 340px;
+  border: none;
+  padding: none;
+  display: block;
+}
 
 
 .secondText {
@@ -392,7 +406,7 @@ button:focus {outline:0;}
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
-   font-family: Comic Sans MS, Helvetica, sans-serif;
-   font-size:30px;
+   font-family: Segoe UI, Helvetica, sans-serif;
+   font-size:36px;
    display: inline-block;
 }

@@ -85,23 +85,23 @@ if (twoScreen) {
  //    if (button != null) button.style.display = "none";
 
     // set the help image
-    var image = document.querySelector("#help-image");
-	image.src = "../../images/helps-components/bg.png";
+ //    var image = document.querySelector("#help-image");
+	// image.src = "../../images/helps-components/bg.png";
 
 
 
 
-	var p = document.querySelector("#description");
-	p.innerHTML = captureText;
+	// var p = document.querySelector("#description");
+	// p.innerHTML = captureText;
 
-	var button = document.querySelector("#watch-button");
-	button.style.display = "none";
+	// var button = document.querySelector("#watch-button");
+	// button.style.display = "none";
 
-	var div = document.querySelector("#legend-box");
-	div.style.display = "none";
+	// var div = document.querySelector("#legend-box");
+	// div.style.display = "none";
 
-	div = document.querySelector("#controls-panel");
-	div.style.display = "none";
+	// div = document.querySelector("#controls-panel");
+	// div.style.display = "none";
 
 }        
 
