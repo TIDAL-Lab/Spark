@@ -171,16 +171,11 @@ class Circuit {
                                           'voltageDrop': c.voltageDrop,
                                           'current': c.current,
                                           'resistance': c.resistance,
-                                          //'startX': (c.start.x -theApp.workingBoxWidth/2),
-                                          //'startY':(theApp.workingBoxHeight/2 - c.start.y),
-                                          //'endX': (c.end.x - theApp.workingBoxWidth/2),
-                                          //'endY': (theApp.workingBoxHeight/2 - c.end.y),
                                           'startX': scaleFactor*(c.start.x -offsetX),
                                           'startY':scaleFactor*(offsetY - c.start.y),
                                           'endX': scaleFactor*(c.end.x - offsetX),
                                           'endY': scaleFactor*(offsetY - c.end.y),
                                           'direction': c.direction,
-                                          'innerWall':1,
                                           'connection': rowArray,
                                           'graphLabel': e.nodes[0].graphLabel
                                           };
@@ -205,7 +200,7 @@ class Circuit {
       //sendParse.callMethod('doUpdateParse');
       
     }
-    else { 
+    else if (theApp.condition != 1){ 
       theApp.webglComponent = null;
       if (theApp.model != null) theApp.help.show();
       var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object

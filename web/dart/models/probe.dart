@@ -42,23 +42,26 @@ void main() {
  
   ParagraphElement p = new ParagraphElement();
   
+  p = document.querySelector("#comp-type");
+  p.text = type;
+  
   p = document.querySelector("#current-value");
   p.text = "Current = ${iFormated}";
-  p.style.top = "200px";
+  //p.style.top = "200px";
   
   p = document.querySelector("#resistance-value");
   p.text = "Resistance = ${rFormated}";
-  p.style.top = "240px";
+  //p.style.top = "240px";
   
   p = document.querySelector("#voltage-value");
   if (type == 'Battery') p.text = "Voltage = ${vFormated}";
   else p.text = "Voltage Drop = ${vFormated}";
-  p.style.top = "280px";
+  //p.style.top = "280px";
   
   if (type == "Bulb") {
     p = document.querySelector("#brightness-factor");
     p.text = "Brightness Factor = ${bFormated}";
-    p.style.top = "320px";
+    //p.style.top = "320px";
   }
  
   

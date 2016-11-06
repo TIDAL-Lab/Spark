@@ -30,7 +30,7 @@ class Help {
   
   Help () {
     img = document.querySelector("#help-image");
-    setImage("images/helps-components/bg.png");   
+    setImage("images/helps-components/help0.png");   
       
     p = new ParagraphElement();
     p = document.querySelector("#type");
@@ -81,13 +81,15 @@ class Help {
     if (theApp.model.component != null) {
       Component c = theApp.model.component;
       String type = c.type;
-      p.text = "This is a " + type;
+      //p.text = "This is a " + type;
       switch (type) {
         case "Battery":
-          p2.text = "Battery produces energy (voltage) for a circuit";
+          //p2.text = "Battery produces energy (voltage) for a circuit";
+          p2.text = "";
           break;
         case "Wire":
-          p2.text = "Wire is a conductive material that electrons can move through easily";
+          //p2.text = "Wire is a conductive material that electrons can move through easily";
+          p2.text ="";
           break;
         case "Bulb":
           p2.text = "Light bulb is a type of a resistor that can emit light";
@@ -165,7 +167,7 @@ class Help {
   }
   
   void back() {
-    img.src = "images/helps-components/bg.png";
+    img.src = "images/helps-components/help0.png";
     var button = document.querySelector("#back-button");
     button.style.display = "none";
     

@@ -28,12 +28,12 @@ part of SparkProject;
  * 3 --> webgl nonAR: circuit model on the same screen
  * 4 --> webgl AR
  */
-int CONDITION = 3;
+int CONDITION = 4;
 bool SHOW_MARKER = false;  // AR Marker
 bool SHOW_LENS = false;   // Magnifying glass object
 bool USE_SERVER = false;
-num CANVAS_RATIO = 0.0;
-num HELP_RATIO = 0.0;
+num CANVAS_RATIO = 0.7;
+num HELP_RATIO = 0.4;
 
 bool USE_PATTERN = false;
 
@@ -72,7 +72,7 @@ class App extends TouchManager {
    App() {
      theApp = this;
      
-     context.callMethod('initPubnub', []);
+     if (condition != 1) context.callMethod('initPubnub', []);
      
      // receiving message from the iframe
      window.onMessage.listen((evt) => receiveMessage(evt));
@@ -95,6 +95,11 @@ class App extends TouchManager {
      deleteBoxImg.onLoad.listen((event) { draw(); });
      
      setConditions();
+     
+     // instantiate lens and help objects
+     if (SHOW_LENS) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
+     
+     
      setScreen();
        
      // set the sendData helper button
@@ -103,8 +108,7 @@ class App extends TouchManager {
        button.onClick.listen((evt) => this.circuit.sendData());
      }
      
-     // instantiate lens and help objects
-     if (SHOW_LENS) lens = new Lens(CANVAS_RATIO*canvas.width*3/4, canvas.height/2);
+
      
      // instantiate the JsAr tag
      if (SHOW_MARKER) marker = new Marker(centerX, centerY);
@@ -245,14 +249,17 @@ class App extends TouchManager {
      var ratio;
      if (condition == 4) ratio = 0.6;
      else if (condition == 3) ratio = 0.5;
+     else if (condition == 1) ratio = 1;
      
      var img = document.querySelector("#help-image");
      img.style.width = "${w2*ratio}px";
      img.style.height = "${h3}px";
-     
+
+       
      div = document.querySelector("#help-window");
      div.style.width = "${w2*(1-ratio)}px";
      div.style.height = "${h3}px";
+
      
      // set the working box
      //set the working box
