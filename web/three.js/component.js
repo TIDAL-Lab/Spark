@@ -113,6 +113,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 				containerMaterial.color.set(lightGray);
 				this.container.renderOrder = 1; 
 			}
+			else if (this.compType == "Bulb") containerMaterial.color.set(yellow);
+			else containerMaterial.color.set(blue2);
 		}
 
 		containerMaterial.transparent = true;
@@ -422,7 +424,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			if (clickedComponent != null) {
 				if (clickedComponent.compType == "Battery") { clickedComponent.container.material.color.set(darkGreen); }
 				else if (clickedComponent.compType == "Wire") { clickedComponent.container.material.color.set(lightGray); }
-				else { clickedComponent.container.material.color.set(gray); }
+				else if (clickedComponent.compType == "Bulb") { clickedComponent.container.material.color.set(yellow); }
+				else { clickedComponent.container.material.color.set(blue2); }
 				clickedComponent.showAmmeter(false);
 			}
 			this.container.material.color.set(darkOrange);
@@ -447,7 +450,9 @@ function unSelectComponent() {
 	if (clickedComponent != null) {
 		if (clickedComponent.compType == "Battery") { clickedComponent.container.material.color.set(darkGreen); }
 		else if (clickedComponent.compType == "Wire") { clickedComponent.container.material.color.set(lightGray); }
-		else { clickedComponent.container.material.color.set(gray); }
+		else if (clickedComponent.compType == "Bulb") { clickedComponent.container.material.color.set(yellow); }
+		else { clickedComponent.container.material.color.set(blue2); }
+				
 		clickedComponent.showAmmeter(false);
 	}
 	clickedComponent = null;

@@ -42,6 +42,8 @@ var backgroundBlue = 0x5C919E;
 var orange = 0xFF9900;
 var darkOrange = 0xFF6600;
 var lightGray = 0xB2B2B2;
+var yellow = 0xffdb4c;
+var blue2 = 0x648cf4;
 
 var container;
 var camera, scene, renderer, controls;
