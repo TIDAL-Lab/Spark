@@ -89,7 +89,7 @@ if (twoScreen) {
 
     // set the help image
     var image = document.querySelector("#help-image");
-	image.src = "../../images/helps-components/bg.png";
+	image.src = "../images/helps-components/bg.png";
 
 	var button = document.querySelector("#reset-button");
 	button.style.display = "block";
@@ -177,7 +177,7 @@ function showPageOld(page) {
 
 function showPage(page) {
 	var image = document.querySelector("#help-image");
-	image.src = "../../images/helps-components/help" + page.toString() + ".png";
+	image.src = "../images/helps-components/help" + page.toString() + ".png";
 
     var div = document.querySelector("#main-page");
     div.style.display = "none";
@@ -188,7 +188,7 @@ function showPage(page) {
 
 function back() {
 	var image = document.querySelector("#help-image");
-	image.src = "../../images/helps-components/bg.png";
+	image.src = "../images/helps-components/bg.png";
 
     // var button = document.querySelector("#back-button");
     // button.style.display = "none";

@@ -99,10 +99,10 @@ function doParse(message){
             compVolt = result.get("voltageDrop");
             current = result.get("current");
             compRes = result.get("resistance");
-            startx = 2 * result.get("startX");
-            starty = 2 * result.get("startY");
-            endx = 2 * result.get("endX");
-            endy = 2 * result.get("endY");
+            startx = 1 * result.get("startX");
+            starty = 1 * result.get("startY");
+            endx = 1 * result.get("endX");
+            endy = 1 * result.get("endY");
             direction = result.get("direction");
             graphLabel = result.get("graphLabel");
             //direction = 1;
