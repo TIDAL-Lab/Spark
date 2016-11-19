@@ -33,7 +33,7 @@ import 'dart:io';
 //import "package:json_object/json_object.dart";
 
 part 'app.dart';
-part 'touch.dart';
+part 'Touch.dart';
 part 'toolbar.dart';
 
 part 'models/model.dart';
@@ -43,7 +43,7 @@ part 'models/webglModel.dart';
 part 'sounds.dart';
 part 'slider.dart';
 part 'models/help.dart';
-part 'lens.dart';
+part 'Lens.dart';
 part 'lensWebgl.dart';
 part 'marker.dart';
 //part 'connectServer.dart';

@@ -68,7 +68,6 @@ var sendParse = function(myObj){
               a_Circuit.set("endX", anObj.endX);
               a_Circuit.set("endY", anObj.endY);
               a_Circuit.set("direction", anObj.direction);
-              a_Circuit.set("innerwall", anObj.innerWall);
               a_Circuit.set("connection", anObj.connection);
               a_Circuit.set("graphLabel", anObj.graphLabel);
               return a_Circuit.save();

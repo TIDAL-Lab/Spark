@@ -34,8 +34,67 @@ button {
 }
 
 #voltmeter-image {
-  width: 300px;
+  width: 280px;
   position: absolute;
-  top: 150px;
-  left: 150px;
+  top: 60px;
+  left: 90px;
 }
+
+.type-text {
+   outline: none;
+   color: lightGreen;
+   position: absolute;
+   text-align: center;
+   border: none;
+   width: 350px;
+   height: 10px;
+   left: 45px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: Segoe UI, Helvetica, sans-serif;
+   font-weight: bold;
+   font-size:22px;
+   display: inline-block;
+}
+
+.value-text {
+   outline: none;
+   color: rgb(255, 255, 255);
+   position: absolute;
+   text-align: center;
+   border: none;
+   width: 350px;
+   height: 10px;
+   left: 45px;
+   border-radius: none;
+   margin-left: 1px;
+   margin-right: 1px;
+   font-family: Segoe UI, Helvetica, sans-serif;
+   font-weight: bold; 
+   font-size:14px;
+   display: inline-block;
+}
+
+#comp-type {
+  top: 60px;
+}
+
+#current-value {
+  top: 110px;
+}
+
+#resistance-value {
+  top: 150px;
+}
+
+#voltage-value {
+  top: 190px;
+}
+
+#brightness-factor {
+  top: 140px;
+   
+}
+
+
