@@ -19,8 +19,8 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 // var height = 480;
 
 // Static flags
-var ArFlag = false;
-var twoScreen = false;
+var ArFlag = true;
+var twoScreen = true;
 var twoD = true; //electron movement is either 2D (z=0) or 3D
 
 // Dynamic FLAGS
@@ -72,10 +72,10 @@ var clickedComponent = null;   // the component that is tapped on to show inform
 // set the size of screen divs	
 if (twoScreen) {  //set the size of renderer based on a 4/3 standard video size and the rest of width of screen for the help div
 	modelHeight = window.innerHeight;
-	//modelWidth = modelHeight*4/3;
-	modelWidth = modelHeight*1.16;
-	//var helpWidth = window.innerWidth - modelHeight;
-	var helpWidth = window.innerWidth - modelWidth;
+	modelWidth = modelHeight*4/3;
+	//modelWidth = modelHeight*1.16;
+	var helpWidth = window.innerWidth - modelHeight;
+	//var helpWidth = window.innerWidth - modelWidth;
 	var helpDiv = document.querySelector("#help-window");
 	helpDiv.style.width = helpWidth.toString() + "px";
 	helpDiv.style.height = window.innerHeight.toString() + "px";
