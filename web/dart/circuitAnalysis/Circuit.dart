@@ -199,8 +199,10 @@ class Circuit {
       sendParse.callMethod('doUpdateParse'); // call its method "doUpdateParse"
       //sendParse.callMethod('doUpdateParse');
       
+      
     }
     else if (theApp.condition != 1){ 
+      
       theApp.webglComponent = null;
       if (theApp.model != null) theApp.help.show();
       var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
@@ -208,7 +210,7 @@ class Circuit {
 //      new Future.delayed(const Duration(milliseconds:100), () {
 //        data.callMethod('doSendData');
 //      });
-
+      
     }
   }
   
