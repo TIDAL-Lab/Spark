@@ -11,7 +11,7 @@
  */
 
 window.addEventListener('message', function(event) {
-	if (event.origin !== 'http://localhost:8080') return;
+	if (event.origin !== '*') return;
 	//console.log(event.data);
 	//event.source.postMessage('hello back Elli Goli', event.origin);
 }, false);

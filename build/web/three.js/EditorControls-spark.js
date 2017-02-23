@@ -70,7 +70,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		object.position.add( delta );
 		center.add( delta );  // what is center for?
 		var message = [delta.x, delta.y];
-		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
+		if (!twoScreen) window.parent.postMessage(message, '*');
 
 		scope.dispatchEvent( changeEvent );
 
@@ -95,7 +95,7 @@ THREE.EditorControls = function ( object, domElement ) {
 		if (ArFlag) delta.multiplyScalar(-1); // with AR it reverses the zooming!
 		object.position.add(delta); 
 		var message = [delta.z];
-		if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');
+		if (!twoScreen) window.parent.postMessage(message, '*');
 
 		// console.log("camera: ", camera.position);
 

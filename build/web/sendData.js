@@ -30,8 +30,8 @@ var sendData = function(myObj){
 
 }
 
-/*
 
+/*
 Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
 var sendParse = function(myObj){
   

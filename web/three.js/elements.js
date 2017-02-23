@@ -132,7 +132,7 @@ function zoom( direction, state ) {
 	//}	
 
 	var message = [delta.z];
-	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
+	if (!twoScreen) window.parent.postMessage(message, '*');	
 }
 
 function stopInterval() {
@@ -162,7 +162,7 @@ function pan( direction, state ) {
 	interval = setInterval(function(){ camera.position.add(delta); }, 50);
 
  	var message = [delta.x, delta.y];
-	if (!twoScreen) window.parent.postMessage(message, 'http://localhost:8080');	
+	if (!twoScreen) window.parent.postMessage(message, '*');	
 }
 
 function showPageOld(page) {

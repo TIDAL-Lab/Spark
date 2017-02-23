@@ -11,7 +11,7 @@
  */
 
  	    window.addEventListener('message', function(event) {
-			if (event.origin !== 'http://localhost:8080') {
+			if (event.origin !== '*') {
 				console.log("this is the error!");
 				return; }
 			console.log('test receive');
@@ -30,7 +30,7 @@
 //  });
 
 // window.addEventListener('message', function(event) {
-// 	//if (event.origin !== 'http://localhost:8080') return;
+// 	//if (event.origin !== '*') return;
 // 	console.log(event.data);  // this prints "hello model iframe"
 // 	event.source.postMessage("hello back", event.origin);
 // }, false);

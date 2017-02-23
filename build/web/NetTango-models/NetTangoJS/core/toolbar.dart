@@ -1,0 +1,66 @@
+/*
+ * NetTango
+ * Northwestern University
+ *
+ * This project was funded in part by the National Science Foundation.
+ * Any opinions, findings and conclusions or recommendations expressed in this
+ * material are those of the author(s) and do not necessarily reflect the views
+ * of the National Science Foundation (NSF).
+ */
+part of NetTango;
+
+
+class Toolbar {
+
+  /* Model that this toolbar controls */  
+  Model model;
+  
+  /* DIV tag id that the toolbar appears in */
+  String id;
+
+   
+  Toolbar(this.model) {
+    
+    id = "div#${model.id}-toolbar";
+    
+    ButtonElement button;
+    
+    button = document.querySelector("$id #play-button");
+    if (button != null) button.onClick.listen((evt) => playPause());
+            
+    button = document.querySelector("$id #fastforward-button");
+    if (button != null) button.onClick.listen((evt) => model.fastForward());
+      
+    button = document.querySelector("$id #stepforward-button");
+    if (button != null) button.onClick.listen((evt) => model.stepForward());
+      
+    button = document.querySelector("$id #restart-button");
+    if (button != null) button.onClick.listen((evt) => model.restart());
+  }
+  
+  
+  void playPause() {
+    if (model.isPaused) {
+      model.play(1);
+    } else {
+      model.pause();
+    }   
+  }
+
+  
+  void update() {
+    Element el = document.querySelector("$id #tick-count");
+    if (el != null) {
+      el.innerHtml = "tick: ${model.ticks}";
+    }
+    ButtonElement button = document.querySelector("$id #play-button");
+    if (button != null) {
+      bool paused = button.style.backgroundImage.contains('images/play.png');
+      if (model.isPaused && !paused) {
+        button.style.backgroundImage = "url('../images/play.png')";
+      } else if (!model.isPaused && paused) {
+        button.style.backgroundImage = "url('../images/pause.png')";
+      }
+    }
+  }
+}

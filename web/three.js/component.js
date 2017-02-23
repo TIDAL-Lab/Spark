@@ -407,8 +407,8 @@ function Component(type, current, res, volt, startX, startY, endX, endY, directi
 			
 			if (!twoScreen) {
 				var receiver = window.parent;
-				//receiver.postMessage(-1, 'http://localhost:8080');
-				receiver.postMessage(this.ID, 'http://localhost:8080');
+				//receiver.postMessage(-1, '*');
+				receiver.postMessage(this.ID, '*');
 				//setTimeout(function(){test(this.ID);}, 0);						
 				//console.log("after calling time out");
 
@@ -457,7 +457,7 @@ function unSelectComponent() {
 	}
 	clickedComponent = null;
 	var receiver = window.parent;
-	if (!twoScreen) receiver.postMessage(-1, 'http://localhost:8080');
+	if (!twoScreen) receiver.postMessage(-1, '*');
 	else { // clear the measures in the voltmeter image
 		clearValues();
 	}

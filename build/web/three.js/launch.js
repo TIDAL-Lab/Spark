@@ -12,15 +12,16 @@
 var myObj;
 
 if (twoScreen) {
-  Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
-  doParse('init'); 
+  //Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
+  //doParse('init'); 
+  doReceive("init");
   }
 else {
   doReceive("init"); 
 }
 
 window.addEventListener('message', function(event) {
-  if (event.origin !== 'http://localhost:8080') return;
+  if (event.origin !== '*') return;
   //console.log(event.data);  // this prints "hello model iframe"
   //event.source.postMessage("hello back", event.origin);
 }, false);
@@ -38,13 +39,15 @@ pubnub.subscribe({
       //console.log(m);
       if (m == "init") {
         console.log("webgl sees the init message");
-        if (twoScreen) doParse('init');
+        //if (twoScreen) doParse('init');
+        if (twoScreen) doReceive('update');
         else doReceive('init');
       }
       else {
         myObj = m;
         //console.log("received object:" + myObj);
-        if (twoScreen) doParse('update');
+        // if (twoScreen) doParse('update');
+        if (twoScreen) doReceive('update');
         else doReceive('update'); 
       }
 
@@ -62,17 +65,17 @@ function doReceive(message){
     for (var i=0; i<myObj.length; i++) {
       var compType = myObj[i]["type"];
       var compVolt = myObj[i]["voltageDrop"];
-          var current = myObj[i]["current"];
-          var compRes = myObj[i]["resistance"];
-          var startx = 2 * myObj[i]["startX"];
-          var starty = 2 * myObj[i]["startY"];
-          var endx = 2 * myObj[i]["endX"];
-          var endy = 2 * myObj[i]["endY"];
-          var direction = myObj[i]["direction"];
-          var graphLabel = myObj[i]["graphLabel"];
-          var connections = myObj[i]["connection"];
-          tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy, direction, connections, graphLabel);
-          components.push(tCircuit);
+      var current = myObj[i]["current"];
+      var compRes = myObj[i]["resistance"];
+      var startx = 2 * myObj[i]["startX"];
+      var starty = 2 * myObj[i]["startY"];
+      var endx = 2 * myObj[i]["endX"];
+      var endy = 2 * myObj[i]["endY"];
+      var direction = myObj[i]["direction"];
+      var graphLabel = myObj[i]["graphLabel"];
+      var connections = myObj[i]["connection"];
+      tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy, direction, connections, graphLabel);
+         components.push(tCircuit);
     }
     updateFlag = false; //sets the boolean to resume rendering the scene
       doUpdate();

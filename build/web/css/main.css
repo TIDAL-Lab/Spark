@@ -223,9 +223,9 @@ button:focus {outline:0;}
    position: absolute;
    text-align: center;
    border: none;
-   width: 320px;
+   width: 240px;
    height: 10px;
-   top: 20px;
+   top: 60px;
    right: 0px;
    border-radius: none;
    margin-left: 1px;
@@ -280,7 +280,7 @@ button:focus {outline:0;}
    border: none;
    width: 150px;
    height: 10px;
-   left: 42px;
+   left: 30px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
@@ -298,7 +298,7 @@ button:focus {outline:0;}
    border: none;
    width: 150px;
    height: 10px;
-   left: 42px;
+   left: 30px;
    border-radius: none;
    margin-left: 1px;
    margin-right: 1px;
@@ -309,23 +309,23 @@ button:focus {outline:0;}
 }
 
 #comp-type {
-  top: 20px;
+  top: 30px;
 }
 
 #current-value {
-  top: 60px;
+  top: 70px;
 }
 
 #resistance-value {
-  top: 80px;
+  top: 90px;
 }
 
 #voltage-value {
-  top: 100px;
+  top: 110px;
 }
 
 #brightness-factor {
-  top: 120px;
+  top: 130px;
    
 }
 
@@ -345,8 +345,8 @@ button:focus {outline:0;}
 #voltmeter-image {
   width: 180px;
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 30px;
+  left: 35px;
 
 }
 
