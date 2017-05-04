@@ -187,22 +187,17 @@ class Circuit {
     //print(JSON.encode(myObj));
     
     
-    //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
-    myObj = new JsObject.jsify(myObj);
-    
-    
     if (USE_SERVER) {  // send data to parse
-      print("send data");
-      //print(JSON.encode(myObj));
-      // call the "doDeleteParse method on myObj (the code is in sendData.js)
-      var sendParse = new JsObject(context['sendParse'],[myObj]); // instantiate a JS "deleteParse" object
-      sendParse.callMethod('doUpdateParse'); // call its method "doUpdateParse"
-      //sendParse.callMethod('doUpdateParse');
-      
-      
-    }
+
+      // old version, using parse
+      //sendDataParse(myObj);
+
+      sendDataWebServer(myObj); 
+   }
     else if (theApp.condition != 1){ 
-      
+      //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
+      myObj = new JsObject.jsify(myObj);
+
       theApp.webglComponent = null;
       if (theApp.model != null) theApp.help.show();
       var data = new JsObject(context['sendData'],[myObj]); // instantiate a JS "data" object
@@ -212,6 +207,39 @@ class Circuit {
 //      });
       
     }
+  }
+
+  void sendDataWebServer(myObj) {
+    String json = JSON.encode(myObj);
+    HttpRequest request = new HttpRequest(); // create a new XHR
+
+    // add an event handler that is called when the request finishes
+    request.onReadyStateChange.listen((_) {
+     if (request.readyState == HttpRequest.DONE &&
+         (request.status == 200 || request.status == 0)) {
+       // data saved OK.
+       print(request.responseText); // output the response from the server
+     }
+   });
+
+   // POST the data to the server
+   var url = "http://127.0.0.1:8000";
+   request.open("POST", url, async: false);
+
+ 
+   request.send(json); // perform the async POST
+  }
+
+  void sendDataParse(myObj) {
+    print("send data");
+    //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
+    myObj = new JsObject.jsify(myObj);
+
+    //print(JSON.encode(myObj));
+    // call the "doDeleteParse method on myObj (the code is in sendData.js)
+    var sendParse = new JsObject(context['sendParse'],[myObj]); // instantiate a JS "deleteParse" object
+    sendParse.callMethod('doUpdateParse'); // call its method "doUpdateParse"
+    //sendParse.callMethod('doUpdateParse');
   }
   
   /** find the connected components in the graph, create the data to be sent to Parse

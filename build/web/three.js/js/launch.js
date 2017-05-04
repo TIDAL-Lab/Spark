@@ -52,7 +52,7 @@ pubnub.subscribe({
 
 function getCircuitJSON(message) {
   //var server = "http://10.102.3.124:8000"
-  var server = "http://10.0.0.103:8000"
+  var server = "http://10.102.2.8:8000"
   var req = new XMLHttpRequest();
   req.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {

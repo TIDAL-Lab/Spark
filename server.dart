@@ -1,22 +1,62 @@
 import 'dart:io';
-import 'package:http_server/http_server.dart';
-import 'package:path/path.dart';
 
-main() async {
-  var pathToBuild = join(dirname(Platform.script.toFilePath()));
-  pathToBuild += Platform.pathSeparator + "..";
+//final HOST = "10.102.3.124";
+final PORT = 8000;
 
-  print(pathToBuild);
 
-  var staticFiles = new VirtualDirectory(pathToBuild);
-  staticFiles.allowDirectoryListing = true;
-  staticFiles.directoryHandler = (dir, request) {
-    var indexUri = new Uri.file(dir.path).resolve('index.html');
-    staticFiles.serveFile(new File(indexUri.toFilePath()), request);
-  };
+String circuitJSON = '{ "circuit" : [ "component1", "component2" ] }';
 
-  var server =
-      await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 4048);
-  print('Listening on port 4048');
-  await server.forEach(staticFiles.serveRequest);
+
+void main() {
+  HttpServer.bind(InternetAddress.ANY_IP_V4, PORT).then((server) {
+
+    server.listen((HttpRequest request) {
+      switch (request.method) {
+        case "GET":
+          handleGet(request);
+          break;
+        case "POST":
+          handlePost(request);
+          break;
+        default:
+          handleGet(request);
+      }
+    });
+
+    // print("Listening for GET and POST on $HOST:$PORT");
+    print("Listening for GET and POST on $PORT");
+  });
 }
+
+
+void handleGet(HttpRequest req) {
+  HttpResponse res = req.response;
+  addCorsHeaders(res);
+  res.headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+  res.write(circuitJSON);
+  res.close();
+}
+
+
+void handlePost(HttpRequest req) {
+  HttpResponse res = req.response;
+
+  addCorsHeaders(res);
+  req.listen((List<int> buffer) {
+    StringBuffer sb = new StringBuffer();
+    for (int i in buffer) sb.writeCharCode(i);
+    print(sb.toString());
+    circuitJSON = sb.toString();
+    
+    res.write('{ "status" : "success" }');
+    res.close();
+  });
+}
+
+
+void addCorsHeaders(HttpResponse res) {
+  res.headers.add("Access-Control-Allow-Origin", "*");
+  res.headers.add("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.headers.add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+}
+
