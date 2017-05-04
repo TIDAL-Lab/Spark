@@ -11,15 +11,8 @@
  */
 var myObj;
 
-if (twoScreen) {
-  //Parse.initialize("fl2zrLOSKAMHwwQecBBlIJW77r9sqp5VKnPhYSiC", "DHlf8YKZTVaXmqvToSXyHZ82vu96asiRmKNufQvF");
-  //doParse('init'); 
-  doReceive("init");
-  }
-else {
-  doReceive("init"); 
-}
-
+getCircuitJSON("init");
+/*
 window.addEventListener('message', function(event) {
   if (event.origin !== '*') return;
   //console.log(event.data);  // this prints "hello model iframe"
@@ -27,6 +20,7 @@ window.addEventListener('message', function(event) {
 }, false);
 
 //listen for streamed messages
+
 var pubnub = PUBNUB.init({
   publish_key: 'demo',
     subscribe_key: 'demo'
@@ -40,23 +34,44 @@ pubnub.subscribe({
       if (m == "init") {
         console.log("webgl sees the init message");
         //if (twoScreen) doParse('init');
-        if (twoScreen) doReceive('update');
+        if (twoScreen) doLoadFromServer('init');
         else doReceive('init');
       }
       else {
         myObj = m;
         //console.log("received object:" + myObj);
         // if (twoScreen) doParse('update');
-        if (twoScreen) doReceive('update');
+        if (twoScreen) doLoadFromServer('update');
         else doReceive('update'); 
       }
 
     }
 });
+*/
+
+
+function getCircuitJSON(message) {
+  //var server = "http://10.102.3.124:8000"
+  var server = "http://10.0.0.103:8000"
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      myObj = JSON.parse(this.responseText);
+      console.log(myObj);
+      doReceive(message);
+    }
+  }
+  req.open("GET", server, true);
+  req.send();
+}
+
+
+
+//setInterval(function(){ getCircuitJSON("update"); }, 1000);
+getCircuitJSON("update");
 
 function doReceive(message){
   if (message == 'init') {
-    
     doInit();
   }
   else {
@@ -67,10 +82,10 @@ function doReceive(message){
       var compVolt = myObj[i]["voltageDrop"];
       var current = myObj[i]["current"];
       var compRes = myObj[i]["resistance"];
-      var startx = 2 * myObj[i]["startX"];
-      var starty = 2 * myObj[i]["startY"];
-      var endx = 2 * myObj[i]["endX"];
-      var endy = 2 * myObj[i]["endY"];
+      var startx = 0.5 * myObj[i]["startX"];
+      var starty = 0.5 * myObj[i]["startY"];
+      var endx = 0.5 * myObj[i]["endX"];
+      var endy = 0.5 * myObj[i]["endY"];
       var direction = myObj[i]["direction"];
       var graphLabel = myObj[i]["graphLabel"];
       var connections = myObj[i]["connection"];
@@ -78,7 +93,7 @@ function doReceive(message){
          components.push(tCircuit);
     }
     updateFlag = false; //sets the boolean to resume rendering the scene
-      doUpdate();
+    doUpdate();
   }
 }
 
