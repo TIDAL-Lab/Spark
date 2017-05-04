@@ -137,11 +137,15 @@ class Circuit {
    * 4. called by controlpoint.touchup method, when components are dragged or wire is extended
    * 5. called by marker.touchup method
    */
+
+  var timeStamp = 0;
   void sendData() {
    
     
     //var myObj = new JsArray();
     var myObj = [];
+    timeStamp++;
+    myObj.add(timeStamp);
     //findConnectedComponents();
     var c, connectionArray, rowArray;
     for (Edge e in this.edges) {
