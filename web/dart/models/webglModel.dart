@@ -5,7 +5,7 @@ class webglModel extends Model {
   IFrameElement frame = document.querySelector("#model-frame");
   
   webglModel() : super() { 
-    frame.src = "../three.js/Spark-webgl.html";    
+    frame.src = "three.js/Spark-webgl.html";    
     theApp.circuit.solve();
     
     // getting the window of the iframe
@@ -32,7 +32,7 @@ class webglModel extends Model {
   
   void resetModel() {
     //launchModel(); 
-    frame.src = "../three.js/Spark-webgl.html";
+    frame.src = "three.js/Spark-webgl.html";
     document.querySelector("#model").style.display = "block";
 //    theApp.help.show();
 //    theApp.circuit.solve();

@@ -1,6 +1,9 @@
-name: CircuitInPieces
+name: SparkProject
 author: Elham Beheshti
 description: This is a code that simulates and analyzes a simple DC circuit
 dependencies:
   browser: any
   js: any
+transformers:
+  - $dart2js:
+     minify: true
