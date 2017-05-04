@@ -10,8 +10,15 @@
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
 var myObj;
+var currentTimeStamp;
 
 getCircuitJSON("init");
+
+setInterval(function(){ getCircuitJSON("update"); }, 2000);
+/*setTimeout(function() {
+  getCircuitJSON("update");
+}, 1000);*/
+
 /*
 window.addEventListener('message', function(event) {
   if (event.origin !== '*') return;
@@ -65,35 +72,37 @@ function getCircuitJSON(message) {
   req.send();
 }
 
-
-
-//setInterval(function(){ getCircuitJSON("update"); }, 1000);
-getCircuitJSON("update");
-
 function doReceive(message){
   if (message == 'init') {
+    currentTimeStamp = 0;
     doInit();
   }
   else {
-    var tCircuit;
-    components = [];
-    for (var i=0; i<myObj.length; i++) {
-      var compType = myObj[i]["type"];
-      var compVolt = myObj[i]["voltageDrop"];
-      var current = myObj[i]["current"];
-      var compRes = myObj[i]["resistance"];
-      var startx = 0.5 * myObj[i]["startX"];
-      var starty = 0.5 * myObj[i]["startY"];
-      var endx = 0.5 * myObj[i]["endX"];
-      var endy = 0.5 * myObj[i]["endY"];
-      var direction = myObj[i]["direction"];
-      var graphLabel = myObj[i]["graphLabel"];
-      var connections = myObj[i]["connection"];
-      tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy, direction, connections, graphLabel);
-         components.push(tCircuit);
+    var receivedTimeStamp = myObj[0];
+    if (currentTimeStamp != receivedTimeStamp) {
+      currentTimeStamp = receivedTimeStamp;
+      var tCircuit;
+      components = [];
+      for (var i=1; i<myObj.length; i++) { //the first item is the time stamp
+        var compType = myObj[i]["type"];
+        var compVolt = myObj[i]["voltageDrop"];
+        var current = myObj[i]["current"];
+        var compRes = myObj[i]["resistance"];
+        var startx = 0.5 * myObj[i]["startX"];
+        var starty = 0.5 * myObj[i]["startY"];
+        var endx = 0.5 * myObj[i]["endX"];
+        var endy = 0.5 * myObj[i]["endY"];
+        var direction = myObj[i]["direction"];
+        var graphLabel = myObj[i]["graphLabel"];
+        var connections = myObj[i]["connection"];
+        tCircuit = new Component(compType, current, compRes, compVolt, startx, starty, endx, endy, direction, connections, graphLabel);
+           components.push(tCircuit);
+      }
+      updateFlag = false; //sets the boolean to resume rendering the scene
+      doUpdate();
+
     }
-    updateFlag = false; //sets the boolean to resume rendering the scene
-    doUpdate();
+
   }
 }
 

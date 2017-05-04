@@ -9,7 +9,7 @@
  * Circuit-level and the level that shows interactions between electrons and ions as they move through circuit components.
  * This project has been conducted in TIDAL lab (Tangible Interaction Design and Learning Lab) at Northwestern University.
  */
-
+console.log("i think it's fixed now");
 if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 // var modelWidth;

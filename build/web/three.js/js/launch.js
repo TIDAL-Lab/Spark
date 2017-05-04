@@ -68,7 +68,7 @@ function getCircuitJSON(message) {
 
 
 //setInterval(function(){ getCircuitJSON("update"); }, 1000);
-getCircuitJSON("update");
+//getCircuitJSON("update");
 
 function doReceive(message){
   if (message == 'init') {
