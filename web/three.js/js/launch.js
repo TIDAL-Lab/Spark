@@ -88,10 +88,10 @@ function doReceive(message){
         var compVolt = myObj[i]["voltageDrop"];
         var current = myObj[i]["current"];
         var compRes = myObj[i]["resistance"];
-        var startx = 0.5 * myObj[i]["startX"];
-        var starty = 0.5 * myObj[i]["startY"];
-        var endx = 0.5 * myObj[i]["endX"];
-        var endy = 0.5 * myObj[i]["endY"];
+        var startx = 2 * myObj[i]["startX"];
+        var starty = 2 * myObj[i]["startY"];
+        var endx = 2 * myObj[i]["endX"];
+        var endy = 2 * myObj[i]["endY"];
         var direction = myObj[i]["direction"];
         var graphLabel = myObj[i]["graphLabel"];
         var connections = myObj[i]["connection"];

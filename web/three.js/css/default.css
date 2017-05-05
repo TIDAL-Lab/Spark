@@ -19,7 +19,7 @@ a {
 
 /* SETTINGS FOR AR CONDITION: COMMENT WHEN NON-AR IS RUNNING*/
 
-/*#legend-image {
+#legend-image {
   width: 150px;
   position: absolute;
   top: 10px;
@@ -109,12 +109,12 @@ a {
   background-size: 100%; 
   top: 85%;
   left: 150%;
-}*/
+}
 
 
 
 /* SETTINGS FOR NON-AR CONDITION: COMMENT WHEN AR IS RUNNING*/
- #legend-image {
+/* #legend-image {
   width: 100px;
   position: absolute;
   top: 10px;
@@ -205,7 +205,7 @@ a {
   background-size: 100%; 
   top: 85%;
   left: 100%;
-}
+}*/
 
 
 /*GENERAL SETTINGS*/
