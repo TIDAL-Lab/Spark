@@ -844,6 +844,12 @@ this helps with making the difference between circuits more visible!
 I still don't understand the camera in AR. it's position is set to 0, if i set it to -100, it does not scale the object based on
 the marker size. So, I have to keep the position at 0. But then this causes issues with calculations for zoom in and out.
 
+*** notes on 5/4/2017
+we changed the server communication from parse + pubnub to using dart web server
+(see the notes in the word.document: data-streaming-notes.doc)
+now in the three.js/js/launch.js I am calling getCircuitJSON("init") and then getCircuitJSON("update"), but this causes issue
+as sometimes the update happens before init is done, and it doesn't work
+so I need to add a delay in between the two executions.
 
 
 ISSUES TO FIX LATER:

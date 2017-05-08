@@ -196,7 +196,7 @@ class Circuit {
       // old version, using parse
       //sendDataParse(myObj);
 
-      sendDataWebServer(myObj); 
+      //sendDataWebServer(myObj); 
    }
     else if (theApp.condition != 1){ 
       //JsObject.jsify() constructor convert a JSON-like Dart object to a JS object
